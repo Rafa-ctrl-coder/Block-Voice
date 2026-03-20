@@ -6,19 +6,32 @@ export async function GET(req: NextRequest) {
   const postcode = req.nextUrl.searchParams.get("postcode");
   if (!postcode) return NextResponse.json({ error: "No postcode" }, { status: 400 });
   const cleaned = postcode.toUpperCase().replace(/\s+/g, "").replace(/^(.+?)(\d[A-Z]{2})$/, "$1 $2");
-  const { data: buildings } = await supabase.from("buildings").select("id,name,total_flats").eq("postcode", cleaned);
+  const { data: buildings } = await supabase.from("buildings").select("id,name,total_flats,development_name").eq("postcode", cleaned);
   if (buildings && buildings.length > 0) {
-    const unique = new Map();
-    for (const b of buildings) {
-      const key = b.name.trim().toLowerCase();
-      if (!unique.has(key)) {
+    const devName = buildings.find(b => b.development_name && b.development_name !== "N/A")?.development_name || null;
+    const displayName = devName || buildings[0].name.trim();
+    let totalFlats = 0;
+    let totalIssues = 0;
+    const buildingIds = [];
+    if (devName) {
+      const { data: devBuildings } = await supabase.from("buildings").select("id,total_flats").eq("development_name", devName);
+      if (devBuildings) {
+        for (const b of devBuildings) {
+          totalFlats += (b.total_flats || 0);
+          buildingIds.push(b.id);
+          const { count } = await supabase.from("issue_reports").select("*", { count: "exact", head: true }).eq("building_id", b.id);
+          totalIssues += (count || 0);
+        }
+      }
+    } else {
+      for (const b of buildings) {
+        totalFlats += (b.total_flats || 0);
+        buildingIds.push(b.id);
         const { count } = await supabase.from("issue_reports").select("*", { count: "exact", head: true }).eq("building_id", b.id);
-        unique.set(key, { id: b.id, name: b.name.trim(), totalFlats: b.total_flats, issues: count || 0 });
+        totalIssues += (count || 0);
       }
     }
-    const buildingInfo = Array.from(unique.values());
-    const totalIssues = buildingInfo.reduce((a, b) => a + b.issues, 0);
-    return NextResponse.json({ found: true, existing: true, buildings: buildingInfo, totalIssues });
+    return NextResponse.json({ found: true, existing: true, displayName, developmentName: devName, hasDevelopment: !!devName, totalFlats, totalIssues, buildingId: buildings[0].id, buildingName: buildings[0].name });
   }
   let apiBuildingName = "";
   let apiTotalFlats = 0;
@@ -32,11 +45,5 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
   }
-  return NextResponse.json({
-    found: false,
-    existing: false,
-    buildings: [],
-    totalIssues: 0,
-    suggested: { name: apiBuildingName, totalFlats: apiTotalFlats, postcode: cleaned }
-  });
+  return NextResponse.json({ found: false, existing: false, displayName: apiBuildingName, developmentName: null, hasDevelopment: false, totalFlats: apiTotalFlats, totalIssues: 0, buildingId: null, buildingName: apiBuildingName });
 }
