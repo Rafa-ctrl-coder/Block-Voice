@@ -247,8 +247,6 @@ export default function SignUp() {
         building_id: buildingId,
         flat_number: form.flatNumber,
         status: "owner",
-        top_issue: "",
-        verification_url: "",
       });
       if (profileError) throw profileError;
 
@@ -527,7 +525,7 @@ export default function SignUp() {
                       setAddressPicked(false);
                       setAddresses([]);
                     }}
-                    placeholder="e.g. SW11 8BW"
+                    placeholder="e.g. SW8 4NR"
                     className="flex-1 bg-[#162d50] rounded-lg px-4 py-2 text-white"
                   />
                   <button

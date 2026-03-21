@@ -95,7 +95,7 @@ export default function Home() {
           <input type="text" value={postcode}
             onChange={e => { setPostcode(e.target.value); reset(); }}
             onKeyDown={e => { if (e.key === "Enter") handleSearch(); }}
-            placeholder="Enter your postcode e.g. SW11 8BW"
+            placeholder="Enter your postcode e.g. SW8 4NR"
             className="flex-1 bg-transparent border-none outline-none px-4 py-3 text-white text-[14px] tracking-wide placeholder:opacity-25" />
           <button onClick={handleSearch} disabled={searching}
             className="font-bold text-[12px] px-5 border-none cursor-pointer whitespace-nowrap text-white disabled:opacity-50"
