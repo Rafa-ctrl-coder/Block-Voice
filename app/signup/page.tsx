@@ -44,8 +44,13 @@ export default function SignUp() {
     lastName: "",
     email: "",
     password: "",
-    buildingName: "",
+    buildingName: "",  // the block/building name (e.g. "Sophora House")
+    developmentName: "", // the parent development (e.g. "Vista, Chelsea Bridge")
     flatNumber: "",
+    street: "",
+    town: "",
+    county: "",
+    status: "owner" as string,
     blockId: "",
   });
 
@@ -138,8 +143,11 @@ export default function SignUp() {
       : "";
     setForm({
       ...form,
-      buildingName: addr.building_name || addr.line_1 || "",
+      buildingName: addr.building_name || addr.line_2 || addr.line_1 || "",
       flatNumber: flat,
+      street: addr.thoroughfare || addr.line_3 || "",
+      town: addr.post_town || "",
+      county: addr.county || "",
     });
     setAddressPicked(true);
   }
@@ -225,12 +233,18 @@ export default function SignUp() {
         if (existingCheck && existingCheck.length > 0) {
           buildingId = existingCheck[0].id;
         } else {
+          // Determine development name
+          const devName = form.developmentName && form.developmentName !== "__no__" && form.developmentName !== "__ask__"
+            ? form.developmentName.trim()
+            : null;
+
           const { data: newBuilding, error: buildingError } = await supabase
             .from("buildings")
             .insert({
               name: form.buildingName.trim(),
               postcode: cleanedPostcode,
               total_flats: addresses.length || 50,
+              development_name: devName || null,
             })
             .select("id")
             .single();
@@ -247,7 +261,7 @@ export default function SignUp() {
         email: form.email,
         building_id: buildingId,
         flat_number: form.flatNumber,
-        status: "owner",
+        status: form.status || "owner",
       });
       if (profileError) throw profileError;
 
@@ -577,18 +591,40 @@ export default function SignUp() {
                     Could not look up this postcode automatically. Please enter your address manually.
                   </p>
                   <div>
-                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Building / Block Name *</label>
-                    <input type="text" value={form.buildingName}
-                      onChange={(e) => updateForm("buildingName", e.target.value)}
-                      placeholder="e.g. Sophora House"
-                      className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm" />
-                  </div>
-                  <div>
                     <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Flat / Apartment Number</label>
                     <input type="text" value={form.flatNumber}
                       onChange={(e) => updateForm("flatNumber", e.target.value)}
                       placeholder="e.g. 12"
                       className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Block Name *</label>
+                    <input type="text" value={form.buildingName}
+                      onChange={(e) => updateForm("buildingName", e.target.value)}
+                      placeholder="e.g. Sophora House, Kings Court"
+                      className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm" />
+                    <p className="text-xs text-[rgba(255,255,255,0.3)] mt-1">The specific building you live in.</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Street</label>
+                    <input type="text" value={form.street}
+                      onChange={(e) => updateForm("street", e.target.value)}
+                      placeholder="e.g. Queenstown Road"
+                      className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Town / City</label>
+                      <input type="text" value={form.town}
+                        onChange={(e) => updateForm("town", e.target.value)}
+                        placeholder="e.g. London"
+                        className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Postcode</label>
+                      <input type="text" value={postcode} disabled
+                        className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-[rgba(255,255,255,0.5)] text-sm" />
+                    </div>
                   </div>
                   <button type="button"
                     onClick={() => { if (form.buildingName.trim()) setAddressPicked(true); }}
@@ -598,23 +634,9 @@ export default function SignUp() {
                 </div>
               )}
 
-              {/* Address picked — show remaining fields */}
+              {/* Address picked — show full structured address */}
               {addressPicked && (
                 <>
-                  <div>
-                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
-                      Building / Block Name
-                    </label>
-                    <input
-                      type="text"
-                      value={form.buildingName}
-                      onChange={(e) => updateForm("buildingName", e.target.value)}
-                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
-                    />
-                    <p className="text-xs text-[rgba(255,255,255,0.3)] mt-1">
-                      Auto-filled from your address.
-                    </p>
-                  </div>
                   <div>
                     <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                       Flat / Apartment Number
@@ -624,9 +646,117 @@ export default function SignUp() {
                       value={form.flatNumber}
                       onChange={(e) => updateForm("flatNumber", e.target.value)}
                       placeholder="e.g. 12"
-                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
+                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
+                      Block Name
+                    </label>
+                    <input
+                      type="text"
+                      value={form.buildingName}
+                      onChange={(e) => updateForm("buildingName", e.target.value)}
+                      placeholder="e.g. Sophora House, Kings Court"
+                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
+                    />
+                    <p className="text-xs text-[rgba(255,255,255,0.3)] mt-1">
+                      The specific building you live in.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
+                      Street
+                    </label>
+                    <input
+                      type="text"
+                      value={form.street}
+                      onChange={(e) => updateForm("street", e.target.value)}
+                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
+                        Town / City
+                      </label>
+                      <input
+                        type="text"
+                        value={form.town}
+                        onChange={(e) => updateForm("town", e.target.value)}
+                        className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
+                        Postcode
+                      </label>
+                      <input
+                        type="text"
+                        value={postcode}
+                        disabled
+                        className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-[rgba(255,255,255,0.5)] text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Development/Estate — ask user since we don't have context */}
+                  {(
+                    <div className="bg-[#0f1f3d] rounded-xl p-4 border border-[#1e3a5f] space-y-3">
+                      <label className="block text-sm text-[rgba(255,255,255,0.55)]">
+                        Is your block part of a larger development or estate?
+                      </label>
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => updateForm("developmentName", "__ask__")}
+                          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${form.developmentName && form.developmentName !== "__no__" ? "bg-[#1ec6a4] text-white" : "bg-[#162d50] text-[rgba(255,255,255,0.55)] hover:bg-[#1e3a5f]"}`}>
+                          Yes
+                        </button>
+                        <button type="button" onClick={() => updateForm("developmentName", "__no__")}
+                          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${form.developmentName === "__no__" ? "bg-[#1ec6a4] text-white" : "bg-[#162d50] text-[rgba(255,255,255,0.55)] hover:bg-[#1e3a5f]"}`}>
+                          No, just one building
+                        </button>
+                      </div>
+                      {form.developmentName === "__ask__" && (
+                        <div>
+                          <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1 mt-2">
+                            Development / Estate Name
+                          </label>
+                          <input
+                            type="text"
+                            value=""
+                            onChange={(e) => updateForm("developmentName", e.target.value || "__ask__")}
+                            placeholder="e.g. Vista, Battersea Power Station"
+                            className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
+                          />
+                          <p className="text-xs text-[rgba(255,255,255,0.3)] mt-1">
+                            This helps us group residents across different blocks.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+
+                  {/* Owner vs Tenant */}
+                  <div>
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
+                      Are you an owner or tenant?
+                    </label>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => updateForm("status", "owner")}
+                        className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${form.status === "owner" ? "bg-[#1ec6a4] text-white" : "bg-[#162d50] text-[rgba(255,255,255,0.55)] hover:bg-[#1e3a5f]"}`}>
+                        Owner
+                      </button>
+                      <button type="button" onClick={() => updateForm("status", "tenant")}
+                        className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${form.status === "tenant" ? "bg-[#1ec6a4] text-white" : "bg-[#162d50] text-[rgba(255,255,255,0.55)] hover:bg-[#1e3a5f]"}`}>
+                        Tenant
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-[rgba(255,255,255,0.3)]">
+                    Auto-filled from your address. Edit if anything looks wrong.
+                  </p>
                 </>
               )}
             </>
