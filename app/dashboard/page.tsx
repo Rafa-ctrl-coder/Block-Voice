@@ -314,14 +314,15 @@ export default function Dashboard() {
         category: newIssue.category,
       }).select("id").single();
 
-      // Send issue alert emails (fire-and-forget)
-      if (inserted?.id) {
-        fetch("/api/email/new-issue", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ issueId: inserted.id, developmentId: dev.id, reporterId: userId }),
-        }).catch(() => {});
-      }
+      // Issue alert emails — disabled for now until we add proper filtering
+      // (e.g. daily digest, category preferences, frequency caps)
+      // if (inserted?.id) {
+      //   fetch("/api/email/new-issue", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({ issueId: inserted.id, developmentId: dev.id, reporterId: userId }),
+      //   }).catch(() => {});
+      // }
 
       setNewIssue({ title: "", description: "", category: "maintenance", block_id: "" });
       setIsAnonymous(false);
