@@ -1,12 +1,16 @@
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY!);
+}
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 interface SendEmailParams {
   to: string;
@@ -18,7 +22,7 @@ interface SendEmailParams {
 
 export async function sendEmail({ to, subject, html, profileId, emailType }: SendEmailParams) {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: "BlockVoice <hello@blockvoice.co.uk>",
       to,
       subject,
@@ -27,7 +31,7 @@ export async function sendEmail({ to, subject, html, profileId, emailType }: Sen
 
     // Log the send attempt
     if (profileId && emailType) {
-      await supabaseAdmin.from("email_log").insert({
+      await getSupabaseAdmin().from("email_log").insert({
         profile_id: profileId,
         email_type: emailType,
         subject,
@@ -45,7 +49,7 @@ export async function sendEmail({ to, subject, html, profileId, emailType }: Sen
     console.error("Email send exception:", err);
 
     if (profileId && emailType) {
-      await supabaseAdmin.from("email_log").insert({
+      await getSupabaseAdmin().from("email_log").insert({
         profile_id: profileId,
         email_type: emailType,
         subject,
