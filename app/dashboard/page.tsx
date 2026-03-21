@@ -470,85 +470,177 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 space-y-6">
 
         {/* ── Development Overview ────────────────────────────────────── */}
         <Card title="Your Development">
-          <h2 className="text-xl md:text-2xl font-extrabold text-white mb-1">{dev.name}</h2>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[rgba(255,255,255,0.55)] mb-4">
-            <span>{dev.postcodes?.[0]}</span>
-            <span className="text-[rgba(255,255,255,0.2)]">·</span>
-            <span>{dev.total_units.toLocaleString()} units</span>
-            {dev.developer && (
-              <>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h2 className="text-xl md:text-2xl font-extrabold text-white mb-1">{dev.name}</h2>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[rgba(255,255,255,0.55)]">
+                <span>{dev.postcodes?.[0]}</span>
                 <span className="text-[rgba(255,255,255,0.2)]">·</span>
-                <span>{dev.developer}</span>
-              </>
+                <span>{dev.total_units.toLocaleString()} units</span>
+                {dev.developer && (
+                  <>
+                    <span className="text-[rgba(255,255,255,0.2)]">·</span>
+                    <span>{dev.developer}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="md:w-80 flex-shrink-0">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-[rgba(255,255,255,0.55)]">{memberCount} of ~{dev.total_units} residents signed up</span>
+                <span className="text-[#1ec6a4] font-semibold">{pct}%</span>
+              </div>
+              <div className="w-full bg-[#0f1f3d] rounded-full h-2.5">
+                <div className="bg-[#1ec6a4] h-2.5 rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%` }} />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* ── Agent + Freeholder — 2 columns on desktop ──────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          {/* Managing Agent */}
+          <Card title="Managing Agent">
+            {agent ? (
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-white">{agent.name}</span>
+                  {link && confidenceBadge(link.agent_confidence)}
+                </div>
+                {link?.agent_source && (
+                  <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">Source: {link.agent_source}</p>
+                )}
+                <ContactDetails phone={agent.phone} email={agent.email} website={agent.website} address={agent.address} />
+
+                {/* Inline rating */}
+                <div className="mt-4 pt-4 border-t border-[#1e3a5f]">
+                  {agentAgg ? (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-xl font-bold ${ratingColor(agentAgg.overall)}`}>{agentAgg.overall.toFixed(1)}</span>
+                        <span className="text-xs text-[rgba(255,255,255,0.3)]">/ 5.0 · {allAgentRatings.length} ratings</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {AGENT_CATS.map(c => (
+                          <div key={c} className="flex items-center gap-2 text-xs">
+                            <span className="w-24 text-[rgba(255,255,255,0.45)]">{AGENT_LABELS[c]}</span>
+                            <div className="flex-1 h-1.5 bg-[#0f1f3d] rounded-full overflow-hidden">
+                              <div className={`h-1.5 rounded-full ${ratingBarColor(agentAgg[c])}`} style={{ width: `${(agentAgg[c] / 5) * 100}%` }} />
+                            </div>
+                            <span className="w-5 text-right font-semibold text-white text-[11px]">{agentAgg[c].toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[rgba(255,255,255,0.3)] mb-2">
+                      {allAgentRatings.length > 0
+                        ? `${allAgentRatings.length} rating${allAgentRatings.length !== 1 ? "s" : ""} — need ${3 - allAgentRatings.length} more to show scores.`
+                        : "No ratings yet — be the first!"}
+                    </p>
+                  )}
+                  <button onClick={() => setShowAgentRating(!showAgentRating)}
+                    className="bg-[#1ec6a4]/10 border border-[#1ec6a4]/25 text-[#1ec6a4] px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#1ec6a4]/20 transition-colors w-full">
+                    {myAgentRating ? "★ Update your rating" : "★ Rate this managing agent"}
+                  </button>
+                  {showAgentRating && (
+                    <div className="mt-3 space-y-2.5">
+                      {AGENT_CATS.map(c => (
+                        <div key={c} className="flex items-center justify-between">
+                          <span className="text-xs text-[rgba(255,255,255,0.55)]">{AGENT_LABELS[c]}</span>
+                          <StarSelector value={agentForm[c] || 0} onChange={v => setAgentForm({ ...agentForm, [c]: v })} />
+                        </div>
+                      ))}
+                      <textarea placeholder="Optional comment..." value={agentComment} onChange={e => setAgentComment(e.target.value)}
+                        rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none" />
+                      <button onClick={submitAgentRating} disabled={submittingRating}
+                        className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-xs font-semibold disabled:opacity-50">
+                        {submittingRating ? "Saving..." : myAgentRating ? "Update Rating" : "Submit Rating"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-[rgba(255,255,255,0.3)] text-sm">No managing agent recorded yet.</p>
             )}
-          </div>
+          </Card>
 
-          {/* Progress bar */}
-          <div className="mb-2">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-[rgba(255,255,255,0.55)]">{memberCount} of ~{dev.total_units} residents signed up</span>
-              <span className="text-[#1ec6a4] font-semibold">{pct}%</span>
-            </div>
-            <div className="w-full bg-[#0f1f3d] rounded-full h-2.5">
-              <div className="bg-[#1ec6a4] h-2.5 rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%` }} />
-            </div>
-          </div>
-        </Card>
-
-        {/* ── Managing Agent ─────────────────────────────────────────── */}
-        <Card title="Managing Agent">
-          {agent ? (
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-white">{agent.name}</span>
-                {link && confidenceBadge(link.agent_confidence)}
-                {agentAgg && (
-                  <span className={`text-sm font-bold ml-auto ${ratingColor(agentAgg.overall)}`}>
-                    {agentAgg.overall.toFixed(1)} / 5.0
-                    <span className="text-[rgba(255,255,255,0.3)] text-xs font-normal ml-1">({allAgentRatings.length} ratings)</span>
-                  </span>
+          {/* Freeholder */}
+          <Card title="Freeholder">
+            {freeholder ? (
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-white">{freeholder.name}</span>
+                  {link && confidenceBadge(link.freeholder_confidence)}
+                </div>
+                {freeholder.parent_company && (
+                  <p className="text-xs text-[rgba(255,255,255,0.3)] mb-1">Part of {freeholder.parent_company}</p>
                 )}
-              </div>
-              {link?.agent_source && (
-                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">Source: {link.agent_source}</p>
-              )}
-              <ContactDetails phone={agent.phone} email={agent.email} website={agent.website} address={agent.address} />
-            </div>
-          ) : (
-            <p className="text-[rgba(255,255,255,0.3)] text-sm">No managing agent recorded yet.</p>
-          )}
-        </Card>
-
-        {/* ── Freeholder ─────────────────────────────────────────────── */}
-        <Card title="Freeholder">
-          {freeholder ? (
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-white">{freeholder.name}</span>
-                {link && confidenceBadge(link.freeholder_confidence)}
-                {fhAgg && (
-                  <span className={`text-sm font-bold ml-auto ${ratingColor(fhAgg.overall)}`}>
-                    {fhAgg.overall.toFixed(1)} / 5.0
-                    <span className="text-[rgba(255,255,255,0.3)] text-xs font-normal ml-1">({allFhRatings.length} ratings)</span>
-                  </span>
+                {link?.freeholder_source && (
+                  <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">Source: {link.freeholder_source}</p>
                 )}
+                <ContactDetails phone={freeholder.phone} email={freeholder.email} address={freeholder.address} />
+
+                {/* Inline rating */}
+                <div className="mt-4 pt-4 border-t border-[#1e3a5f]">
+                  {fhAgg ? (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-xl font-bold ${ratingColor(fhAgg.overall)}`}>{fhAgg.overall.toFixed(1)}</span>
+                        <span className="text-xs text-[rgba(255,255,255,0.3)]">/ 5.0 · {allFhRatings.length} ratings</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {FH_CATS.map(c => (
+                          <div key={c} className="flex items-center gap-2 text-xs">
+                            <span className="w-28 text-[rgba(255,255,255,0.45)]">{FH_LABELS[c]}</span>
+                            <div className="flex-1 h-1.5 bg-[#0f1f3d] rounded-full overflow-hidden">
+                              <div className={`h-1.5 rounded-full ${ratingBarColor(fhAgg[c])}`} style={{ width: `${(fhAgg[c] / 5) * 100}%` }} />
+                            </div>
+                            <span className="w-5 text-right font-semibold text-white text-[11px]">{fhAgg[c].toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[rgba(255,255,255,0.3)] mb-2">
+                      {allFhRatings.length > 0
+                        ? `${allFhRatings.length} rating${allFhRatings.length !== 1 ? "s" : ""} — need ${3 - allFhRatings.length} more to show scores.`
+                        : "No ratings yet — be the first!"}
+                    </p>
+                  )}
+                  <button onClick={() => setShowFhRating(!showFhRating)}
+                    className="bg-[#1ec6a4]/10 border border-[#1ec6a4]/25 text-[#1ec6a4] px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#1ec6a4]/20 transition-colors w-full">
+                    {myFhRating ? "★ Update your rating" : "★ Rate this freeholder"}
+                  </button>
+                  {showFhRating && (
+                    <div className="mt-3 space-y-2.5">
+                      {FH_CATS.map(c => (
+                        <div key={c} className="flex items-center justify-between">
+                          <span className="text-xs text-[rgba(255,255,255,0.55)]">{FH_LABELS[c]}</span>
+                          <StarSelector value={fhForm[c] || 0} onChange={v => setFhForm({ ...fhForm, [c]: v })} />
+                        </div>
+                      ))}
+                      <textarea placeholder="Optional comment..." value={fhComment} onChange={e => setFhComment(e.target.value)}
+                        rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none" />
+                      <button onClick={submitFhRating} disabled={submittingRating}
+                        className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-xs font-semibold disabled:opacity-50">
+                        {submittingRating ? "Saving..." : myFhRating ? "Update Rating" : "Submit Rating"}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              {freeholder.parent_company && (
-                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-1">Part of {freeholder.parent_company}</p>
-              )}
-              {link?.freeholder_source && (
-                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">Source: {link.freeholder_source}</p>
-              )}
-              <ContactDetails phone={freeholder.phone} email={freeholder.email} address={freeholder.address} />
-            </div>
-          ) : (
-            <p className="text-[rgba(255,255,255,0.3)] text-sm">No freeholder recorded yet.</p>
-          )}
-        </Card>
+            ) : (
+              <p className="text-[rgba(255,255,255,0.3)] text-sm">No freeholder recorded yet.</p>
+            )}
+          </Card>
+        </div>
 
         {/* ── Suggest correction ──────────────────────────────────────── */}
         <div className="text-center">
@@ -732,120 +824,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* ── Rate Managing Agent ─────────────────────────────────────── */}
-        <Card title="Rate Your Managing Agent">
-          {agent ? (
-            <div>
-              {agentAgg ? (
-                <div className="mb-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className={`text-2xl font-bold ${ratingColor(agentAgg.overall)}`}>{agentAgg.overall.toFixed(1)}</span>
-                    <span className="text-xs text-[rgba(255,255,255,0.3)]">/ 5.0 from {allAgentRatings.length} ratings</span>
-                  </div>
-                  <div className="space-y-2">
-                    {AGENT_CATS.map(c => (
-                      <div key={c} className="flex items-center gap-2 text-xs">
-                        <span className="w-28 text-[rgba(255,255,255,0.55)]">{AGENT_LABELS[c]}</span>
-                        <div className="flex-1 h-1.5 bg-[#0f1f3d] rounded-full overflow-hidden">
-                          <div className={`h-1.5 rounded-full ${ratingBarColor(agentAgg[c])}`} style={{ width: `${(agentAgg[c] / 5) * 100}%` }} />
-                        </div>
-                        <span className="w-6 text-right font-semibold text-white">{agentAgg[c].toFixed(1)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
-                  {allAgentRatings.length > 0
-                    ? `${allAgentRatings.length} rating${allAgentRatings.length !== 1 ? "s" : ""} so far — need ${3 - allAgentRatings.length} more to show aggregate.`
-                    : "No ratings yet. Be the first to rate your managing agent!"}
-                </p>
-              )}
-
-              <button onClick={() => setShowAgentRating(!showAgentRating)}
-                className="text-xs text-[#1ec6a4] hover:underline">
-                {myAgentRating ? "Update your rating" : "Rate your managing agent"}
-              </button>
-
-              {showAgentRating && (
-                <div className="mt-4 space-y-3 pt-4 border-t border-[#1e3a5f]">
-                  {AGENT_CATS.map(c => (
-                    <div key={c} className="flex items-center justify-between">
-                      <span className="text-sm text-[rgba(255,255,255,0.55)]">{AGENT_LABELS[c]}</span>
-                      <StarSelector value={agentForm[c] || 0} onChange={v => setAgentForm({ ...agentForm, [c]: v })} />
-                    </div>
-                  ))}
-                  <textarea placeholder="Optional comment..." value={agentComment} onChange={e => setAgentComment(e.target.value)}
-                    rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm resize-none" />
-                  <button onClick={submitAgentRating} disabled={submittingRating}
-                    className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
-                    {submittingRating ? "Saving..." : myAgentRating ? "Update Rating" : "Submit Rating"}
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-[rgba(255,255,255,0.3)] text-sm">No managing agent to rate.</p>
-          )}
-        </Card>
-
-        {/* ── Rate Freeholder ────────────────────────────────────────── */}
-        <Card title="Rate Your Freeholder">
-          {freeholder ? (
-            <div>
-              {fhAgg ? (
-                <div className="mb-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className={`text-2xl font-bold ${ratingColor(fhAgg.overall)}`}>{fhAgg.overall.toFixed(1)}</span>
-                    <span className="text-xs text-[rgba(255,255,255,0.3)]">/ 5.0 from {allFhRatings.length} ratings</span>
-                  </div>
-                  <div className="space-y-2">
-                    {FH_CATS.map(c => (
-                      <div key={c} className="flex items-center gap-2 text-xs">
-                        <span className="w-32 text-[rgba(255,255,255,0.55)]">{FH_LABELS[c]}</span>
-                        <div className="flex-1 h-1.5 bg-[#0f1f3d] rounded-full overflow-hidden">
-                          <div className={`h-1.5 rounded-full ${ratingBarColor(fhAgg[c])}`} style={{ width: `${(fhAgg[c] / 5) * 100}%` }} />
-                        </div>
-                        <span className="w-6 text-right font-semibold text-white">{fhAgg[c].toFixed(1)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
-                  {allFhRatings.length > 0
-                    ? `${allFhRatings.length} rating${allFhRatings.length !== 1 ? "s" : ""} so far — need ${3 - allFhRatings.length} more to show aggregate.`
-                    : "No ratings yet. Be the first to rate your freeholder!"}
-                </p>
-              )}
-
-              <button onClick={() => setShowFhRating(!showFhRating)}
-                className="text-xs text-[#1ec6a4] hover:underline">
-                {myFhRating ? "Update your rating" : "Rate your freeholder"}
-              </button>
-
-              {showFhRating && (
-                <div className="mt-4 space-y-3 pt-4 border-t border-[#1e3a5f]">
-                  {FH_CATS.map(c => (
-                    <div key={c} className="flex items-center justify-between">
-                      <span className="text-sm text-[rgba(255,255,255,0.55)]">{FH_LABELS[c]}</span>
-                      <StarSelector value={fhForm[c] || 0} onChange={v => setFhForm({ ...fhForm, [c]: v })} />
-                    </div>
-                  ))}
-                  <textarea placeholder="Optional comment..." value={fhComment} onChange={e => setFhComment(e.target.value)}
-                    rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm resize-none" />
-                  <button onClick={submitFhRating} disabled={submittingRating}
-                    className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
-                    {submittingRating ? "Saving..." : myFhRating ? "Update Rating" : "Submit Rating"}
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-[rgba(255,255,255,0.3)] text-sm">No freeholder to rate.</p>
-          )}
-        </Card>
-
         {/* ── Service Charges (Owner only) ────────────────────────────── */}
         {userStatus === "owner" && (
           <Card title="Service Charges">
@@ -860,7 +838,7 @@ export default function Dashboard() {
         {/* ── Coming Soon ────────────────────────────────────────────── */}
         <div>
           <h2 className="text-lg font-bold mb-4">Coming Soon</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { icon: "📄", title: "AI Document Analysis", desc: "Upload your lease or service charge statement and get plain-English summaries and anomaly flags." },
               { icon: "📊", title: "Managing Agent Scorecard", desc: "Compare your managing agent against others across all developments they manage." },
