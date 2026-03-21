@@ -2,6 +2,22 @@
 -- Creates the full data model per the build specification
 
 -- =============================================================================
+-- DROP PRE-EXISTING TABLES (old schema)
+-- =============================================================================
+DROP TABLE IF EXISTS issue_support CASCADE;
+DROP TABLE IF EXISTS issue_reports CASCADE;
+DROP TABLE IF EXISTS issues CASCADE;
+DROP TABLE IF EXISTS corrections CASCADE;
+DROP TABLE IF EXISTS issue_evidence CASCADE;
+DROP TABLE IF EXISTS issue_supporters CASCADE;
+DROP TABLE IF EXISTS development_links CASCADE;
+DROP TABLE IF EXISTS units CASCADE;
+DROP TABLE IF EXISTS blocks CASCADE;
+DROP TABLE IF EXISTS developments CASCADE;
+DROP TABLE IF EXISTS managing_agents CASCADE;
+DROP TABLE IF EXISTS freeholders CASCADE;
+
+-- =============================================================================
 -- MANAGING AGENTS
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS managing_agents (
