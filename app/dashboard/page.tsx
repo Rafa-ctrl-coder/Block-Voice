@@ -99,6 +99,7 @@ export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [userStatus, setUserStatus] = useState<"owner" | "tenant">("owner");
   const [userBlockId, setUserBlockId] = useState<string | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState("unverified");
 
   // development data
   const [dev, setDev] = useState<Development | null>(null);
@@ -150,7 +151,7 @@ export default function Dashboard() {
       // profile → building → development
       const { data: profile } = await supabase
         .from("profiles")
-        .select("building_id, flat_number, status, first_name, last_name, block_id")
+        .select("building_id, flat_number, status, first_name, last_name, block_id, verification_status")
         .eq("id", user.id)
         .single();
       if (!profile) return;
@@ -158,6 +159,7 @@ export default function Dashboard() {
       setUserName(`${profile.first_name} ${profile.last_name}`);
       setUserStatus(profile.status === "tenant" ? "tenant" : "owner");
       setUserBlockId(profile.block_id || null);
+      setVerificationStatus(profile.verification_status || "unverified");
 
       const { data: building } = await supabase
         .from("buildings")
@@ -303,14 +305,24 @@ export default function Dashboard() {
     if (!newIssue.title.trim() || !dev) return;
     setSubmittingIssue(true);
     try {
-      await supabase.from("issues").insert({
+      const { data: inserted } = await supabase.from("issues").insert({
         development_id: dev.id,
         block_id: newIssue.block_id || null,
         raised_by: userId,
         title: newIssue.title,
         description: newIssue.description || null,
         category: newIssue.category,
-      });
+      }).select("id").single();
+
+      // Send issue alert emails (fire-and-forget)
+      if (inserted?.id) {
+        fetch("/api/email/new-issue", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ issueId: inserted.id, developmentId: dev.id, reporterId: userId }),
+        }).catch(() => {});
+      }
+
       setNewIssue({ title: "", description: "", category: "maintenance", block_id: "" });
       setIsAnonymous(false);
       setShowIssueForm(false);
@@ -493,6 +505,29 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 space-y-6">
+
+        {/* ── Verification Banner ────────────────────────────────────── */}
+        {verificationStatus !== "verified" && (
+          <Link href="/verify"
+            className="flex items-center justify-between bg-[#132847] border border-amber-900/30 rounded-xl px-5 py-3 hover:border-[#1ec6a4]/30 transition-colors">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">{verificationStatus === "pending" ? "⏳" : "🔒"}</span>
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  {verificationStatus === "pending" ? "Verification in progress" : "Verify your identity"}
+                </p>
+                <p className="text-xs text-[rgba(255,255,255,0.4)]">
+                  {verificationStatus === "pending"
+                    ? "We're reviewing your document — usually 1–2 working days."
+                    : "Upload a document to prove your address and unlock all features."}
+                </p>
+              </div>
+            </div>
+            <span className="text-xs text-[#1ec6a4] font-semibold flex-shrink-0">
+              {verificationStatus === "pending" ? "View status →" : "Verify now →"}
+            </span>
+          </Link>
+        )}
 
         {/* ── Development Overview ────────────────────────────────────── */}
         <Card title="Your Development">
