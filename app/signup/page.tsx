@@ -298,11 +298,11 @@ export default function SignUp() {
   const showForm = devData || addressPicked;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white py-12 px-4">
+    <div className="min-h-screen bg-[#0f1f3d] text-white py-12 px-4">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-orange-400 font-bold text-xl mb-4 block">
+          <Link href="/" className="text-[#1ec6a4] font-bold text-xl mb-4 block">
             BlockVoice
           </Link>
           {devData ? (
@@ -310,7 +310,7 @@ export default function SignUp() {
               <h1 className="text-2xl font-bold text-white mb-2">
                 Join {devData.name}
               </h1>
-              <p className="text-gray-400 text-sm">
+              <p className="text-[rgba(255,255,255,0.55)] text-sm">
                 Confirm your details and join your neighbours
               </p>
             </>
@@ -319,7 +319,7 @@ export default function SignUp() {
               <h1 className="text-2xl font-bold text-white mb-2">
                 Create your account
               </h1>
-              <p className="text-gray-400 text-sm">
+              <p className="text-[rgba(255,255,255,0.55)] text-sm">
                 Quick and easy — takes less than a minute.
               </p>
             </>
@@ -327,11 +327,11 @@ export default function SignUp() {
         </div>
 
         {loadingDev && (
-          <p className="text-gray-400 text-center">Loading building details…</p>
+          <p className="text-[rgba(255,255,255,0.55)] text-center">Loading building details…</p>
         )}
 
         {error && (
-          <div className="bg-red-900 text-red-200 p-3 rounded-lg mb-4">
+          <div className="bg-red-900/60 text-red-200 p-3 rounded-lg mb-4">
             {error}
           </div>
         )}
@@ -340,60 +340,60 @@ export default function SignUp() {
           {/* Name */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">
+              <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                 First Name
               </label>
               <input
                 type="text"
                 value={form.firstName}
                 onChange={(e) => updateForm("firstName", e.target.value)}
-                className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+                className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">
+              <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                 Last Name
               </label>
               <input
                 type="text"
                 value={form.lastName}
                 onChange={(e) => updateForm("lastName", e.target.value)}
-                className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+                className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
               />
             </div>
           </div>
 
           {/* Email & Password */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Email</label>
             <input
               type="email"
               value={form.email}
               onChange={(e) => updateForm("email", e.target.value)}
-              className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+              className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">
+            <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
               Password
             </label>
             <input
               type="password"
               value={form.password}
               onChange={(e) => updateForm("password", e.target.value)}
-              className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+              className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
             />
           </div>
 
           {/* Building context — pre-filled from slug */}
           {devData ? (
             <>
-              <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-bold mb-1">
+              <div className="bg-[#132847] rounded-xl p-4 border border-[#1e3a5f]">
+                <p className="text-xs text-[rgba(255,255,255,0.3)] uppercase tracking-wide font-bold mb-1">
                   Development
                 </p>
                 <p className="text-white font-bold">{devData.name}</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-[rgba(255,255,255,0.3)] mt-0.5">
                   {devData.postcodes?.[0]} · {devData.total_units} units
                 </p>
               </div>
@@ -401,13 +401,13 @@ export default function SignUp() {
               {/* Block selector */}
               {devData.blocks.length > 0 && (
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">
+                  <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                     Block
                   </label>
                   <select
                     value={form.blockId}
                     onChange={(e) => updateForm("blockId", e.target.value)}
-                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
                   >
                     <option value="">Select your block…</option>
                     {devData.blocks.map((b) => (
@@ -421,7 +421,7 @@ export default function SignUp() {
 
               {/* Flat number */}
               <div>
-                <label className="block text-sm text-gray-400 mb-1">
+                <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                   Flat / Apartment Number (optional)
                 </label>
                 <input
@@ -429,13 +429,13 @@ export default function SignUp() {
                   value={form.flatNumber}
                   onChange={(e) => updateForm("flatNumber", e.target.value)}
                   placeholder="e.g. 12"
-                  className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+                  className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
                 />
               </div>
 
               {/* Help us keep this accurate */}
-              <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 space-y-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-bold">
+              <div className="bg-[#132847] rounded-xl p-4 border border-[#1e3a5f] space-y-4">
+                <p className="text-xs text-[rgba(255,255,255,0.3)] uppercase tracking-wide font-bold">
                   Help us keep this accurate
                 </p>
 
@@ -443,14 +443,14 @@ export default function SignUp() {
                 <div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-gray-500">Managing Agent</p>
+                      <p className="text-xs text-[rgba(255,255,255,0.3)]">Managing Agent</p>
                       <p className="text-white text-sm font-semibold">
                         {devData.agentName || "Unknown"}
                       </p>
                     </div>
                     <button
                       onClick={() => setCorrectAgent(!correctAgent)}
-                      className="text-xs text-orange-400 hover:underline"
+                      className="text-xs text-[#1ec6a4] hover:underline"
                     >
                       {correctAgent ? "Cancel" : "Correct this"}
                     </button>
@@ -461,7 +461,7 @@ export default function SignUp() {
                       value={agentCorrection}
                       onChange={(e) => setAgentCorrection(e.target.value)}
                       placeholder="Enter the correct managing agent name"
-                      className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white text-sm mt-2"
+                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm mt-2"
                     />
                   )}
                 </div>
@@ -470,14 +470,14 @@ export default function SignUp() {
                 <div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-gray-500">Freeholder</p>
+                      <p className="text-xs text-[rgba(255,255,255,0.3)]">Freeholder</p>
                       <p className="text-white text-sm font-semibold">
                         {devData.freeholderName || "Unknown"}
                       </p>
                     </div>
                     <button
                       onClick={() => setCorrectFreeholder(!correctFreeholder)}
-                      className="text-xs text-orange-400 hover:underline"
+                      className="text-xs text-[#1ec6a4] hover:underline"
                     >
                       {correctFreeholder ? "Cancel" : "Correct this"}
                     </button>
@@ -488,14 +488,14 @@ export default function SignUp() {
                       value={freeholderCorrection}
                       onChange={(e) => setFreeholderCorrection(e.target.value)}
                       placeholder="Enter the correct freeholder name"
-                      className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white text-sm mt-2"
+                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm mt-2"
                     />
                   )}
                 </div>
 
                 {/* Property manager contact */}
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-xs text-[rgba(255,255,255,0.3)] mb-1">
                     Do you have a property manager name or direct email?
                   </label>
                   <input
@@ -503,9 +503,9 @@ export default function SignUp() {
                     value={propertyManagerInfo}
                     onChange={(e) => setPropertyManagerInfo(e.target.value)}
                     placeholder="e.g. John Smith, john@example.com"
-                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white text-sm"
+                    className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
                   />
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-[rgba(255,255,255,0.2)] mt-1">
                     Optional — helps other residents contact the right person
                   </p>
                 </div>
@@ -515,7 +515,7 @@ export default function SignUp() {
             <>
               {/* Postcode lookup — no building context */}
               <div>
-                <label className="block text-sm text-gray-400 mb-1">
+                <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                   Postcode
                 </label>
                 <div className="flex gap-2">
@@ -528,13 +528,13 @@ export default function SignUp() {
                       setAddresses([]);
                     }}
                     placeholder="e.g. SW11 8BW"
-                    className="flex-1 bg-gray-800 rounded-lg px-4 py-2 text-white"
+                    className="flex-1 bg-[#162d50] rounded-lg px-4 py-2 text-white"
                   />
                   <button
                     type="button"
                     onClick={lookupAddress}
                     disabled={searching}
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                    className="bg-[#1ec6a4] hover:bg-[#25d4b0] text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
                   >
                     {searching ? "Searching..." : "Find Address"}
                   </button>
@@ -544,7 +544,7 @@ export default function SignUp() {
               {/* Address dropdown */}
               {addresses.length > 0 && !addressPicked && (
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">
+                  <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                     Select your apartment
                   </label>
                   <select
@@ -552,7 +552,7 @@ export default function SignUp() {
                       if (e.target.value !== "")
                         selectAddress(parseInt(e.target.value));
                     }}
-                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
                   >
                     <option value="">Pick your address...</option>
                     {addresses.map((a, i) => (
@@ -575,21 +575,21 @@ export default function SignUp() {
               {addressPicked && (
                 <>
                   <div>
-                    <label className="block text-sm text-gray-400 mb-1">
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                       Building / Block Name
                     </label>
                     <input
                       type="text"
                       value={form.buildingName}
                       onChange={(e) => updateForm("buildingName", e.target.value)}
-                      className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-[rgba(255,255,255,0.3)] mt-1">
                       Auto-filled from your address.
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-400 mb-1">
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
                       Flat / Apartment Number
                     </label>
                     <input
@@ -597,7 +597,7 @@ export default function SignUp() {
                       value={form.flatNumber}
                       onChange={(e) => updateForm("flatNumber", e.target.value)}
                       placeholder="e.g. 12"
-                      className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+                      className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
                     />
                   </div>
                 </>
@@ -610,7 +610,7 @@ export default function SignUp() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold text-lg disabled:opacity-50"
+              className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-3 rounded-lg font-semibold text-lg disabled:opacity-50"
             >
               {loading
                 ? "Creating account..."
@@ -621,9 +621,9 @@ export default function SignUp() {
           )}
 
           {/* Sign in link */}
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-[rgba(255,255,255,0.3)]">
             Already have an account?{" "}
-            <Link href="/login" className="text-orange-400 hover:underline">
+            <Link href="/login" className="text-[#1ec6a4] hover:underline">
               Sign In
             </Link>
           </p>

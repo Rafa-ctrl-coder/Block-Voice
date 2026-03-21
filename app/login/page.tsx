@@ -37,53 +37,55 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white py-12 px-4">
+    <div className="min-h-screen text-white py-12 px-4" style={{ background: "var(--navy)" }}>
       <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-bold text-orange-400 mb-2">
+        <Link href="/" className="font-extrabold text-[17px] mb-6 block" style={{ color: "var(--teal)" }}>BlockVoice</Link>
+        <h1 className="text-3xl font-bold mb-2" style={{ color: "var(--teal)" }}>
           Welcome Back
         </h1>
-        <p className="text-gray-400 mb-8">Log in to your BlockVoice account.</p>
+        <p className="mb-8" style={{ color: "var(--t2)" }}>Log in to your BlockVoice account.</p>
 
         {error && (
-          <div className="bg-red-900 text-red-200 p-3 rounded-lg mb-4">
+          <div className="bg-red-900/60 text-red-200 p-3 rounded-lg mb-4">
             {error}
           </div>
         )}
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+              className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">
+            <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white"
+              className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white"
             />
           </div>
 
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold text-lg disabled:opacity-50"
+            className="w-full text-white py-3 rounded-lg font-semibold text-lg disabled:opacity-50"
+            style={{ background: "var(--teal)" }}
           >
             {loading ? "Logging in..." : "Log In"}
           </button>
 
-          <p className="text-center text-gray-400">
+          <p className="text-center text-[rgba(255,255,255,0.55)]">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-orange-400 hover:underline">
+            <Link href="/signup" className="text-[#1ec6a4] hover:underline">
               Sign up
             </Link>
           </p>
