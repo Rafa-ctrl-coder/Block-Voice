@@ -432,8 +432,30 @@ export default function Dashboard() {
 
   if (!dev) {
     return (
-      <div className="min-h-screen bg-[#0f1f3d] text-white flex items-center justify-center">
-        <p className="text-[rgba(255,255,255,0.55)]">Could not load your development. Please contact support.</p>
+      <div className="min-h-screen bg-[#0f1f3d] text-white">
+        <nav className="sticky top-0 z-50 flex justify-between items-center px-6 md:px-8 py-3.5 border-b border-[#1e3a5f]" style={{ background: "#0f1f3d" }}>
+          <Link href="/dashboard" className="text-lg font-extrabold text-[#1ec6a4]">BlockVoice</Link>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-[rgba(255,255,255,0.55)]">{userName}</span>
+            <button onClick={handleLogout} className="text-xs text-[rgba(255,255,255,0.3)] hover:text-white">Log out</button>
+          </div>
+        </nav>
+        <div className="max-w-xl mx-auto px-6 py-20 text-center">
+          <span className="text-4xl mb-4 block">🏗️</span>
+          <h1 className="text-2xl font-extrabold text-white mb-3">We&apos;re setting up your building</h1>
+          <p className="text-[rgba(255,255,255,0.55)] mb-6 leading-relaxed">
+            Thanks for signing up! We&apos;re currently sourcing the details for your development — managing agent, freeholder, and building information. We&apos;ll notify you as soon as your dashboard is ready.
+          </p>
+          <div className="bg-[#132847] rounded-xl p-5 border border-[#1e3a5f] text-left mb-6">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-2">What happens next</h3>
+            <ul className="space-y-2 text-sm text-[rgba(255,255,255,0.55)]">
+              <li className="flex gap-2"><span className="text-[#1ec6a4]">✓</span> Your signup has been recorded</li>
+              <li className="flex gap-2"><span className="text-amber-400">◻</span> We&apos;re verifying your development details</li>
+              <li className="flex gap-2"><span className="text-[rgba(255,255,255,0.2)]">◻</span> Your full dashboard will appear once confirmed</li>
+            </ul>
+          </div>
+          <p className="text-xs text-[rgba(255,255,255,0.3)]">This usually takes 1–2 working days. If you think this is an error, email hello@blockvoice.co.uk</p>
+        </div>
       </div>
     );
   }
@@ -491,7 +513,7 @@ export default function Dashboard() {
             </div>
             <div className="md:w-80 flex-shrink-0">
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-[rgba(255,255,255,0.55)]">{memberCount} of ~{dev.total_units} residents signed up</span>
+                <span className="text-[rgba(255,255,255,0.55)]">{memberCount} of ~{dev.total_units} apartments signed up</span>
                 <span className="text-[#1ec6a4] font-semibold">{pct}%</span>
               </div>
               <div className="w-full bg-[#0f1f3d] rounded-full h-2.5">
