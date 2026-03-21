@@ -102,6 +102,7 @@ export default function BuildingPage() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [issues, setIssues] = useState<IssueRow[]>([]);
   const [issueCount, setIssueCount] = useState(0);
+  const [residentCount, setResidentCount] = useState<number | null>(null);
   const [authed, setAuthed] = useState(false);
   const [userDevId, setUserDevId] = useState<string | null>(null);
 
@@ -140,6 +141,13 @@ export default function BuildingPage() {
       return;
     }
     setDev(devData);
+
+    // fetch resident count via server API (bypasses RLS)
+    try {
+      const statsRes = await fetch(`/api/dev-stats?slug=${encodeURIComponent(slug)}`);
+      const stats = await statsRes.json();
+      setResidentCount(stats.residentCount || 0);
+    } catch { /* stays null */ }
 
     // fetch link (agent + freeholder)
     const { data: linkData } = await supabase
@@ -243,7 +251,7 @@ export default function BuildingPage() {
             )}
           </div>
           <p className="text-sm text-[rgba(255,255,255,0.3)] mt-2">
-            ●●● residents joined
+            {residentCount !== null ? `${residentCount} resident${residentCount !== 1 ? "s" : ""} joined` : "●●● residents joined"}
           </p>
         </div>
 

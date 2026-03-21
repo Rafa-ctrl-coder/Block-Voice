@@ -296,6 +296,13 @@ export default function SignUp() {
         }
       }
 
+      // Send welcome email (fire-and-forget — don't block signup)
+      fetch("/api/email/welcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      }).catch(() => {}); // silently ignore email failures
+
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof Error) {

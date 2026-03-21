@@ -99,6 +99,7 @@ export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [userStatus, setUserStatus] = useState<"owner" | "tenant">("owner");
   const [userBlockId, setUserBlockId] = useState<string | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState("unverified");
 
   // development data
   const [dev, setDev] = useState<Development | null>(null);
@@ -126,6 +127,7 @@ export default function Dashboard() {
   const [fhForm, setFhForm] = useState<Record<string, number>>({});
   const [agentComment, setAgentComment] = useState("");
   const [fhComment, setFhComment] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
   const [showAgentRating, setShowAgentRating] = useState(false);
   const [showFhRating, setShowFhRating] = useState(false);
   const [submittingRating, setSubmittingRating] = useState(false);
@@ -150,7 +152,7 @@ export default function Dashboard() {
       // profile → building → development
       const { data: profile } = await supabase
         .from("profiles")
-        .select("building_id, flat_number, status, first_name, last_name, block_id")
+        .select("building_id, flat_number, status, first_name, last_name, block_id, verification_status")
         .eq("id", user.id)
         .single();
       if (!profile) return;
@@ -158,6 +160,7 @@ export default function Dashboard() {
       setUserName(`${profile.first_name} ${profile.last_name}`);
       setUserStatus(profile.status === "tenant" ? "tenant" : "owner");
       setUserBlockId(profile.block_id || null);
+      setVerificationStatus(profile.verification_status || "unverified");
 
       const { data: building } = await supabase
         .from("buildings")
@@ -303,14 +306,25 @@ export default function Dashboard() {
     if (!newIssue.title.trim() || !dev) return;
     setSubmittingIssue(true);
     try {
-      await supabase.from("issues").insert({
+      const { data: inserted } = await supabase.from("issues").insert({
         development_id: dev.id,
         block_id: newIssue.block_id || null,
         raised_by: userId,
         title: newIssue.title,
         description: newIssue.description || null,
         category: newIssue.category,
-      });
+      }).select("id").single();
+
+      // Issue alert emails — disabled for now until we add proper filtering
+      // (e.g. daily digest, category preferences, frequency caps)
+      // if (inserted?.id) {
+      //   fetch("/api/email/new-issue", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({ issueId: inserted.id, developmentId: dev.id, reporterId: userId }),
+      //   }).catch(() => {});
+      // }
+
       setNewIssue({ title: "", description: "", category: "maintenance", block_id: "" });
       setIsAnonymous(false);
       setShowIssueForm(false);
@@ -493,6 +507,29 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 space-y-6">
+
+        {/* ── Verification Banner ────────────────────────────────────── */}
+        {verificationStatus !== "verified" && (
+          <Link href="/verify"
+            className="flex items-center justify-between bg-[#132847] border border-amber-900/30 rounded-xl px-5 py-3 hover:border-[#1ec6a4]/30 transition-colors">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">{verificationStatus === "pending" ? "⏳" : "🔒"}</span>
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  {verificationStatus === "pending" ? "Verification in progress" : "Verify your identity"}
+                </p>
+                <p className="text-xs text-[rgba(255,255,255,0.4)]">
+                  {verificationStatus === "pending"
+                    ? "We're reviewing your document — usually 1–2 working days."
+                    : "Upload a document to prove your address and unlock all features."}
+                </p>
+              </div>
+            </div>
+            <span className="text-xs text-[#1ec6a4] font-semibold flex-shrink-0">
+              {verificationStatus === "pending" ? "View status →" : "Verify now →"}
+            </span>
+          </Link>
+        )}
 
         {/* ── Development Overview ────────────────────────────────────── */}
         <Card title="Your Development">
@@ -845,6 +882,50 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* ── Invite Other Residents ────────────────────────────────── */}
+        {dev && (
+          <Card title="Invite Other Residents">
+            <p className="text-sm text-[rgba(255,255,255,0.55)] mb-4">
+              The more residents who join, the stronger your voice. Share the link below to invite your neighbours.
+            </p>
+            <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
+              {memberCount} resident{memberCount !== 1 ? "s" : ""} have joined {dev.name} so far
+            </p>
+
+            {/* Share link */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex-1 bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2.5 text-xs text-[rgba(255,255,255,0.6)] truncate">
+                blockvoice.co.uk/join/{dev.slug}
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://blockvoice.co.uk/join/${dev.slug}`);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }}
+                className="px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors"
+                style={{ background: linkCopied ? "rgba(34,197,94,0.2)" : "var(--teal-dim)", border: `1px solid ${linkCopied ? "rgba(34,197,94,0.4)" : "var(--teal-border)"}`, color: linkCopied ? "#4ade80" : "#1ec6a4" }}>
+                {linkCopied ? "✓ Copied!" : "Copy Link"}
+              </button>
+            </div>
+
+            {/* Share buttons */}
+            <div className="flex gap-2">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Hey 👋 I've joined BlockVoice for ${dev.name}. It's a free platform where residents can see who manages our building, report issues, and hold our managing agent accountable. Join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 bg-[#25D366]/10 border border-[#25D366]/25 text-[#25D366] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#25D366]/20 transition-colors">
+                <span>💬</span> WhatsApp
+              </a>
+              <a
+                href={`mailto:?subject=${encodeURIComponent(`Join BlockVoice for ${dev.name}`)}&body=${encodeURIComponent(`Hi,\n\nI've joined BlockVoice — a free platform for residents at ${dev.name} to get transparency on our managing agent, report issues, and coordinate action together.\n\nYou can join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
+                className="flex-1 flex items-center justify-center gap-2 bg-[#1ec6a4]/10 border border-[#1ec6a4]/25 text-[#1ec6a4] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#1ec6a4]/20 transition-colors">
+                <span>✉️</span> Email
+              </a>
+            </div>
+          </Card>
+        )}
 
         {/* ── Service Charges (Owner only) ────────────────────────────── */}
         {userStatus === "owner" && (
