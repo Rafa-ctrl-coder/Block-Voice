@@ -127,6 +127,7 @@ export default function Dashboard() {
   const [fhForm, setFhForm] = useState<Record<string, number>>({});
   const [agentComment, setAgentComment] = useState("");
   const [fhComment, setFhComment] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
   const [showAgentRating, setShowAgentRating] = useState(false);
   const [showFhRating, setShowFhRating] = useState(false);
   const [submittingRating, setSubmittingRating] = useState(false);
@@ -881,6 +882,50 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* ── Invite Other Residents ────────────────────────────────── */}
+        {dev && (
+          <Card title="Invite Other Residents">
+            <p className="text-sm text-[rgba(255,255,255,0.55)] mb-4">
+              The more residents who join, the stronger your voice. Share the link below to invite your neighbours.
+            </p>
+            <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
+              {memberCount} resident{memberCount !== 1 ? "s" : ""} have joined {dev.name} so far
+            </p>
+
+            {/* Share link */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex-1 bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2.5 text-xs text-[rgba(255,255,255,0.6)] truncate">
+                blockvoice.co.uk/join/{dev.slug}
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://blockvoice.co.uk/join/${dev.slug}`);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }}
+                className="px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors"
+                style={{ background: linkCopied ? "rgba(34,197,94,0.2)" : "var(--teal-dim)", border: `1px solid ${linkCopied ? "rgba(34,197,94,0.4)" : "var(--teal-border)"}`, color: linkCopied ? "#4ade80" : "#1ec6a4" }}>
+                {linkCopied ? "✓ Copied!" : "Copy Link"}
+              </button>
+            </div>
+
+            {/* Share buttons */}
+            <div className="flex gap-2">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Hey 👋 I've joined BlockVoice for ${dev.name}. It's a free platform where residents can see who manages our building, report issues, and hold our managing agent accountable. Join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 bg-[#25D366]/10 border border-[#25D366]/25 text-[#25D366] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#25D366]/20 transition-colors">
+                <span>💬</span> WhatsApp
+              </a>
+              <a
+                href={`mailto:?subject=${encodeURIComponent(`Join BlockVoice for ${dev.name}`)}&body=${encodeURIComponent(`Hi,\n\nI've joined BlockVoice — a free platform for residents at ${dev.name} to get transparency on our managing agent, report issues, and coordinate action together.\n\nYou can join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
+                className="flex-1 flex items-center justify-center gap-2 bg-[#1ec6a4]/10 border border-[#1ec6a4]/25 text-[#1ec6a4] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#1ec6a4]/20 transition-colors">
+                <span>✉️</span> Email
+              </a>
+            </div>
+          </Card>
+        )}
 
         {/* ── Service Charges (Owner only) ────────────────────────────── */}
         {userStatus === "owner" && (
