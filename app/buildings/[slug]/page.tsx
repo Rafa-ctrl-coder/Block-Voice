@@ -188,8 +188,8 @@ export default function BuildingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <p className="text-gray-400">Loading building details…</p>
+      <div className="min-h-screen bg-[#0f1f3d] text-white flex items-center justify-center">
+        <p className="text-[rgba(255,255,255,0.55)]">Loading building details…</p>
       </div>
     );
   }
@@ -198,16 +198,16 @@ export default function BuildingPage() {
 
   if (!dev) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white">
+      <div className="min-h-screen bg-[#0f1f3d] text-white">
         <Nav />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Building not found</h1>
-          <p className="text-gray-400 mb-6">
+          <p className="text-[rgba(255,255,255,0.55)] mb-6">
             We don't have a listing for this building yet.
           </p>
           <Link
             href="/buildings/new"
-            className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold"
+            className="inline-block bg-[#1ec6a4] hover:bg-[#25d4b0] text-white px-6 py-3 rounded-lg font-semibold"
           >
             Add your building
           </Link>
@@ -222,7 +222,7 @@ export default function BuildingPage() {
   // -- render -----------------------------------------------------------------
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-[#0f1f3d] text-white">
       <Nav />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -231,18 +231,18 @@ export default function BuildingPage() {
           <h1 className="text-2xl md:text-3xl font-extrabold mb-1">
             {dev.name}
           </h1>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[rgba(255,255,255,0.55)]">
             <span>{dev.postcodes?.[0]}</span>
-            <span className="text-gray-600">·</span>
+            <span className="text-[rgba(255,255,255,0.2)]">·</span>
             <span>{dev.total_units.toLocaleString()} units</span>
             {dev.developer && (
               <>
-                <span className="text-gray-600">·</span>
+                <span className="text-[rgba(255,255,255,0.2)]">·</span>
                 <span>{dev.developer}</span>
               </>
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-[rgba(255,255,255,0.3)] mt-2">
             ●●● residents joined
           </p>
         </div>
@@ -256,7 +256,7 @@ export default function BuildingPage() {
                 {link && confidenceBadge(link.agent_confidence)}
               </div>
               {link?.agent_source && (
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
                   Source: {link.agent_source}
                 </p>
               )}
@@ -272,7 +272,7 @@ export default function BuildingPage() {
               )}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">
+            <p className="text-[rgba(255,255,255,0.3)] text-sm">
               No managing agent recorded yet.
             </p>
           )}
@@ -289,12 +289,12 @@ export default function BuildingPage() {
                 {link && confidenceBadge(link.freeholder_confidence)}
               </div>
               {freeholder.parent_company && (
-                <p className="text-xs text-gray-500 mb-1">
+                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-1">
                   Part of {freeholder.parent_company}
                 </p>
               )}
               {link?.freeholder_source && (
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
                   Source: {link.freeholder_source}
                 </p>
               )}
@@ -309,7 +309,7 @@ export default function BuildingPage() {
               )}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">
+            <p className="text-[rgba(255,255,255,0.3)] text-sm">
               No freeholder recorded yet.
             </p>
           )}
@@ -322,10 +322,10 @@ export default function BuildingPage() {
               {blocks.map((b) => (
                 <span
                   key={b.id}
-                  className="bg-gray-800 text-gray-300 text-xs px-3 py-1.5 rounded-lg"
+                  className="bg-[#162d50] text-[rgba(255,255,255,0.7)] text-xs px-3 py-1.5 rounded-lg"
                 >
                   {b.name}
-                  <span className="text-gray-500 ml-1">
+                  <span className="text-[rgba(255,255,255,0.3)] ml-1">
                     · {b.total_units} units
                   </span>
                 </span>
@@ -343,7 +343,7 @@ export default function BuildingPage() {
           }
         >
           {issues.length === 0 ? (
-            <p className="text-gray-500 text-sm">
+            <p className="text-[rgba(255,255,255,0.3)] text-sm">
               No issues have been raised yet.
             </p>
           ) : authed ? (
@@ -352,7 +352,7 @@ export default function BuildingPage() {
               {issues.map((issue) => (
                 <div
                   key={issue.id}
-                  className="bg-[#0a0a1a] border border-[#1a1a2e] rounded-lg p-4"
+                  className="bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg p-4"
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <h4 className="font-semibold text-white text-sm">
@@ -364,11 +364,11 @@ export default function BuildingPage() {
                     {statusBadge(issue.status)}
                   </div>
                   {issue.description && (
-                    <p className="text-gray-400 text-xs mt-1 mb-2">
+                    <p className="text-[rgba(255,255,255,0.55)] text-xs mt-1 mb-2">
                       {issue.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-3 text-xs text-[rgba(255,255,255,0.3)]">
                     <span>
                       {issue.supporter_count}{" "}
                       {issue.supporter_count === 1 ? "resident" : "residents"}
@@ -390,7 +390,7 @@ export default function BuildingPage() {
                     className={`flex items-center gap-2 text-sm ${i >= 2 ? "opacity-40" : ""}`}
                   >
                     <span>{CATEGORY_EMOJI[issue.category] || "📋"}</span>
-                    <span className="text-gray-300">
+                    <span className="text-[rgba(255,255,255,0.7)]">
                       {truncate(issue.title, 60)}
                     </span>
                   </div>
@@ -398,7 +398,7 @@ export default function BuildingPage() {
               </div>
               {issues.length > 2 && (
                 <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-gray-900 to-transparent flex items-end justify-center pb-1">
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-[rgba(255,255,255,0.55)]">
                     Sign up to see all issues and add your voice
                   </span>
                 </div>
@@ -409,9 +409,9 @@ export default function BuildingPage() {
 
         {/* ── Correction link (authed only) ───────────────────────────── */}
         {authed && (
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-[rgba(255,255,255,0.3)]">
             Something wrong?{" "}
-            <button className="text-orange-400 hover:underline">
+            <button className="text-[#1ec6a4] hover:underline">
               Suggest a correction
             </button>
           </p>
@@ -419,14 +419,14 @@ export default function BuildingPage() {
 
         {/* ── CTA (public) ────────────────────────────────────────────── */}
         {!authed && (
-          <div className="bg-gray-900 rounded-xl p-6 text-center border border-gray-800">
+          <div className="bg-[#132847] rounded-xl p-6 text-center border border-[#1e3a5f]">
             <Link
               href={`/signup?building=${slug}`}
-              className="block w-full bg-orange-500 hover:bg-orange-600 text-white py-3.5 rounded-xl font-bold text-base"
+              className="block w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-3.5 rounded-xl font-bold text-base"
             >
               Sign up free to see full details and raise issues
             </Link>
-            <p className="text-xs text-gray-500 mt-3">
+            <p className="text-xs text-[rgba(255,255,255,0.3)] mt-3">
               Join residents at {dev.name} · Free forever · 30 seconds
             </p>
           </div>
@@ -440,20 +440,20 @@ export default function BuildingPage() {
 
 function Nav() {
   return (
-    <nav className="flex justify-between items-center px-6 md:px-8 py-4 border-b border-gray-800">
-      <Link href="/" className="text-xl font-bold text-orange-400">
+    <nav className="flex justify-between items-center px-6 md:px-8 py-4 border-b border-[#1e3a5f]">
+      <Link href="/" className="text-xl font-bold text-[#1ec6a4]">
         BlockVoice
       </Link>
       <div className="flex items-center gap-4">
         <Link
           href="/login"
-          className="text-sm text-gray-400 hover:text-white"
+          className="text-sm text-[rgba(255,255,255,0.55)] hover:text-white"
         >
           Sign In
         </Link>
         <Link
           href="/signup"
-          className="text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-1.5 rounded-lg font-semibold"
+          className="text-sm bg-[#1ec6a4] hover:bg-[#25d4b0] text-white px-4 py-1.5 rounded-lg font-semibold"
         >
           Join Now
         </Link>
@@ -470,8 +470,8 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
-      <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">
+    <div className="bg-[#132847] rounded-xl p-5 border border-[#1e3a5f]">
+      <h3 className="text-xs font-bold uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-3">
         {title}
       </h3>
       {children}
@@ -481,9 +481,9 @@ function Card({
 
 function LockedRow({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-4 py-3 mt-2">
+    <div className="flex items-center gap-2 bg-[#162d50]/50 rounded-lg px-4 py-3 mt-2">
       <svg
-        className="w-4 h-4 text-gray-500 flex-shrink-0"
+        className="w-4 h-4 text-[rgba(255,255,255,0.3)] flex-shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -492,7 +492,7 @@ function LockedRow({ label }: { label: string }) {
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
       </svg>
-      <span className="text-sm text-gray-400">{label}</span>
+      <span className="text-sm text-[rgba(255,255,255,0.55)]">{label}</span>
     </div>
   );
 }
@@ -521,7 +521,7 @@ function ContactDetails({
 
   if (rows.length === 0) {
     return (
-      <p className="text-gray-500 text-sm mt-2">No contact details on file.</p>
+      <p className="text-[rgba(255,255,255,0.3)] text-sm mt-2">No contact details on file.</p>
     );
   }
 
@@ -529,18 +529,18 @@ function ContactDetails({
     <div className="space-y-2 mt-2">
       {rows.map((r) => (
         <div key={r.label} className="flex items-start gap-2 text-sm">
-          <span className="text-gray-500 w-16 flex-shrink-0">{r.label}</span>
+          <span className="text-[rgba(255,255,255,0.3)] w-16 flex-shrink-0">{r.label}</span>
           {r.href ? (
             <a
               href={r.href}
-              className="text-orange-400 hover:underline break-all"
+              className="text-[#1ec6a4] hover:underline break-all"
               target="_blank"
               rel="noopener noreferrer"
             >
               {r.value}
             </a>
           ) : (
-            <span className="text-gray-300 break-all">{r.value}</span>
+            <span className="text-[rgba(255,255,255,0.7)] break-all">{r.value}</span>
           )}
         </div>
       ))}

@@ -335,8 +335,8 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <p className="text-gray-400">Loading your building...</p>
+      <div className="min-h-screen bg-[#0f1f3d] text-white flex items-center justify-center">
+        <p className="text-[rgba(255,255,255,0.55)]">Loading your building...</p>
       </div>
     );
   }
@@ -344,24 +344,24 @@ export default function Dashboard() {
   const pct = totalUnits > 0 ? Math.round((memberCount / totalUnits) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-[#0f1f3d] text-white">
       {/* Nav */}
-      <nav className="flex justify-between items-center px-6 py-4 border-b border-gray-800">
-        <Link href="/" className="text-xl font-bold text-orange-400">
+      <nav className="flex justify-between items-center px-6 py-4 border-b border-[#1e3a5f]">
+        <Link href="/" className="text-xl font-bold text-[#1ec6a4]">
           BlockVoice
         </Link>
         <div className="flex items-center gap-4">
           {devSlug && (
             <Link
               href={`/buildings/${devSlug}`}
-              className="text-sm text-gray-400 hover:text-white"
+              className="text-sm text-[rgba(255,255,255,0.55)] hover:text-white"
             >
               {devName}
             </Link>
           )}
           <button
             onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-white"
+            className="text-sm text-[rgba(255,255,255,0.3)] hover:text-white"
           >
             Log out
           </button>
@@ -370,20 +370,20 @@ export default function Dashboard() {
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Building summary */}
-        <div className="bg-gray-900 rounded-xl p-6 mb-6">
+        <div className="bg-[#132847] rounded-xl p-6 mb-6">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-semibold">{devName}</h2>
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-[rgba(255,255,255,0.55)]">
               {memberCount} of ~{totalUnits} residents joined
             </span>
           </div>
-          <div className="w-full bg-gray-800 rounded-full h-3">
+          <div className="w-full bg-[#162d50] rounded-full h-3">
             <div
-              className="bg-orange-500 h-3 rounded-full transition-all"
+              className="bg-[#1ec6a4] h-3 rounded-full transition-all"
               style={{ width: `${Math.min(pct, 100)}%` }}
             />
           </div>
-          <p className="text-sm text-gray-400 mt-2">
+          <p className="text-sm text-[rgba(255,255,255,0.55)] mt-2">
             {pct}% of your building is on BlockVoice
           </p>
         </div>
@@ -392,18 +392,18 @@ export default function Dashboard() {
         <div className="flex gap-3 mb-6">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold"
+            className="flex-1 bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2.5 rounded-lg text-sm font-semibold"
           >
             {showForm ? "Cancel" : "Raise an Issue"}
           </button>
-          <button className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 py-2.5 rounded-lg text-sm font-semibold">
+          <button className="flex-1 bg-[#162d50] hover:bg-[#1e3a5f] text-[rgba(255,255,255,0.7)] py-2.5 rounded-lg text-sm font-semibold">
             Invite Neighbours
           </button>
         </div>
 
         {/* New issue form */}
         {showForm && (
-          <div className="bg-gray-900 rounded-xl p-6 mb-6 space-y-3">
+          <div className="bg-[#132847] rounded-xl p-6 mb-6 space-y-3">
             <input
               type="text"
               placeholder="Issue title (e.g. Broken lift)"
@@ -411,7 +411,7 @@ export default function Dashboard() {
               onChange={(e) =>
                 setNewIssue({ ...newIssue, title: e.target.value })
               }
-              className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white text-sm"
+              className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
             />
 
             <select
@@ -422,7 +422,7 @@ export default function Dashboard() {
                   category: e.target.value as IssueCategory,
                 })
               }
-              className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white text-sm"
+              className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat.value} value={cat.value}>
@@ -438,7 +438,7 @@ export default function Dashboard() {
                 setNewIssue({ ...newIssue, description: e.target.value })
               }
               rows={3}
-              className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white text-sm resize-none"
+              className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm resize-none"
             />
 
             {blocks.length > 0 && (
@@ -447,7 +447,7 @@ export default function Dashboard() {
                 onChange={(e) =>
                   setNewIssue({ ...newIssue, blockId: e.target.value })
                 }
-                className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white text-sm"
+                className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm"
               >
                 <option value="">Whole development</option>
                 {blocks.map((b) => (
@@ -459,7 +459,7 @@ export default function Dashboard() {
             )}
 
             <div>
-              <label className="text-xs text-gray-400">
+              <label className="text-xs text-[rgba(255,255,255,0.55)]">
                 Upload evidence (optional)
               </label>
               <input
@@ -469,14 +469,14 @@ export default function Dashboard() {
                 onChange={(e) => {
                   if (e.target.files) setPhotos(Array.from(e.target.files));
                 }}
-                className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white text-sm mt-1"
+                className="w-full bg-[#162d50] rounded-lg px-4 py-2 text-white text-sm mt-1"
               />
             </div>
 
             <button
               onClick={handleSubmitIssue}
               disabled={submitting}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+              className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
             >
               {submitting ? "Submitting..." : "Submit Issue"}
             </button>
@@ -489,7 +489,7 @@ export default function Dashboard() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="bg-gray-800 rounded-lg px-3 py-1.5 text-white text-xs"
+              className="bg-[#162d50] rounded-lg px-3 py-1.5 text-white text-xs"
             >
               <option value="">All categories</option>
               {CATEGORIES.map((cat) => (
@@ -501,7 +501,7 @@ export default function Dashboard() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-gray-800 rounded-lg px-3 py-1.5 text-white text-xs"
+              className="bg-[#162d50] rounded-lg px-3 py-1.5 text-white text-xs"
             >
               <option value="">All statuses</option>
               <option value="new">New</option>
@@ -517,14 +517,14 @@ export default function Dashboard() {
         <h2 className="text-xl font-bold mb-4">Building Issues</h2>
 
         {filtered.length === 0 ? (
-          <div className="bg-gray-900 rounded-xl p-8 text-center">
-            <p className="text-gray-400 mb-2">
+          <div className="bg-[#132847] rounded-xl p-8 text-center">
+            <p className="text-[rgba(255,255,255,0.55)] mb-2">
               {issues.length === 0
                 ? "No issues reported yet."
                 : "No issues match your filters."}
             </p>
             {issues.length === 0 && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[rgba(255,255,255,0.3)]">
                 Be the first to report an issue in your building!
               </p>
             )}
@@ -534,7 +534,7 @@ export default function Dashboard() {
             {filtered.map((issue) => (
               <div
                 key={issue.id}
-                className="bg-gray-900 rounded-xl p-5"
+                className="bg-[#132847] rounded-xl p-5"
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -545,7 +545,7 @@ export default function Dashboard() {
                       {issue.title}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded-full">
+                      <span className="text-xs text-[#1ec6a4] bg-[rgba(30,198,164,0.12)] px-2 py-0.5 rounded-full">
                         {CATEGORIES.find((c) => c.value === issue.category)
                           ?.label || issue.category}
                       </span>
@@ -556,14 +556,14 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <span className="text-sm text-gray-400 font-semibold whitespace-nowrap">
+                  <span className="text-sm text-[rgba(255,255,255,0.55)] font-semibold whitespace-nowrap">
                     {issue.support_count}{" "}
                     {issue.support_count === 1 ? "resident" : "residents"}
                   </span>
                 </div>
 
                 {issue.description && (
-                  <p className="text-sm text-gray-400 mb-2">
+                  <p className="text-sm text-[rgba(255,255,255,0.55)] mb-2">
                     {issue.description}
                   </p>
                 )}
@@ -585,7 +585,7 @@ export default function Dashboard() {
                           href={ev.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-orange-400 hover:underline bg-gray-800 px-3 py-2 rounded-lg"
+                          className="text-xs text-[#1ec6a4] hover:underline bg-[#162d50] px-3 py-2 rounded-lg"
                         >
                           📄 {ev.caption || "Document"}
                         </a>
@@ -594,7 +594,7 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
+                <div className="flex justify-between items-center text-xs text-[rgba(255,255,255,0.3)] mb-3">
                   <span>
                     Reported by {issue.raiser_name || "A resident"}
                   </span>
@@ -610,7 +610,7 @@ export default function Dashboard() {
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                     issue.user_supported
                       ? "bg-green-600 text-white"
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                      : "bg-[#162d50] text-[rgba(255,255,255,0.7)] hover:bg-[#1e3a5f]"
                   }`}
                 >
                   {issue.user_supported
@@ -623,8 +623,8 @@ export default function Dashboard() {
         )}
 
         {/* Documents placeholder */}
-        <div className="bg-gray-900 rounded-xl p-6 mt-8 text-center border border-dashed border-gray-700">
-          <p className="text-gray-500 text-sm">
+        <div className="bg-[#132847] rounded-xl p-6 mt-8 text-center border border-dashed border-[#1e3a5f]">
+          <p className="text-[rgba(255,255,255,0.3)] text-sm">
             Coming soon — upload and share service charge statements, insurance
             certificates, and building documents
           </p>

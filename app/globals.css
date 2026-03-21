@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --navy: #0f1f3d;
+  --navy-mid: #132847;
+  --navy-card: #162d50;
+  --navy-card-b: #1e3a5f;
+  --teal: #1ec6a4;
+  --teal-h: #25d4b0;
+  --teal-dim: rgba(30, 198, 164, 0.12);
+  --teal-border: rgba(30, 198, 164, 0.28);
+  --border: rgba(255, 255, 255, 0.08);
+  --t1: #ffffff;
+  --t2: rgba(255, 255, 255, 0.55);
+  --t3: rgba(255, 255, 255, 0.3);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-navy: var(--navy);
+  --color-navy-mid: var(--navy-mid);
+  --color-navy-card: var(--navy-card);
+  --color-navy-card-b: var(--navy-card-b);
+  --color-teal: var(--teal);
+  --color-teal-h: var(--teal-h);
+  --font-sans: system-ui, -apple-system, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--navy);
+  color: var(--t1);
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.65;
 }
