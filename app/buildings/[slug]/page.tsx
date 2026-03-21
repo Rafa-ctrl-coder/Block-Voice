@@ -268,7 +268,7 @@ export default function BuildingPage() {
                   address={agent.address}
                 />
               ) : (
-                <LockedRow label="Sign up to see contact details" />
+                <LockedRow label="Sign up to see contact details" slug={slug} />
               )}
             </div>
           ) : (
@@ -305,7 +305,7 @@ export default function BuildingPage() {
                   address={freeholder.address}
                 />
               ) : (
-                <LockedRow label="Sign up to see contact details" />
+                <LockedRow label="Sign up to see contact details" slug={slug} />
               )}
             </div>
           ) : (
@@ -479,9 +479,12 @@ function Card({
   );
 }
 
-function LockedRow({ label }: { label: string }) {
+function LockedRow({ label, slug }: { label: string; slug: string }) {
   return (
-    <div className="flex items-center gap-2 bg-[#162d50]/50 rounded-lg px-4 py-3 mt-2">
+    <Link
+      href={`/signup?building=${slug}`}
+      className="flex items-center gap-2 bg-[#162d50]/50 hover:bg-[#1e3a5f]/60 rounded-lg px-4 py-3 mt-2 transition-colors cursor-pointer"
+    >
       <svg
         className="w-4 h-4 text-[rgba(255,255,255,0.3)] flex-shrink-0"
         fill="none"
@@ -492,8 +495,8 @@ function LockedRow({ label }: { label: string }) {
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
       </svg>
-      <span className="text-sm text-[rgba(255,255,255,0.55)]">{label}</span>
-    </div>
+      <span className="text-sm text-[#1ec6a4]">{label}</span>
+    </Link>
   );
 }
 
