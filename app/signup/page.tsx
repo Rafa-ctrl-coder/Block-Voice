@@ -25,6 +25,7 @@ export default function SignUp() {
   const [addresses, setAddresses] = useState<any[]>([]);
   const [addressPicked, setAddressPicked] = useState(false);
   const [postcode, setPostcode] = useState("");
+  const [manualMode, setManualMode] = useState(false);
 
   // Building context from ?building=[slug]
   const [devData, setDevData] = useState<DevData | null>(null);
@@ -121,10 +122,10 @@ export default function SignUp() {
       if (apiData.result && apiData.result.length > 0) {
         setAddresses(apiData.result);
       } else {
-        setError("No addresses found for this postcode.");
+        setManualMode(true);
       }
     } catch {
-      setError("Could not look up this postcode.");
+      setManualMode(true);
     } finally {
       setSearching(false);
     }
@@ -566,6 +567,34 @@ export default function SignUp() {
                       </option>
                     ))}
                   </select>
+                </div>
+              )}
+
+              {/* Manual address fallback */}
+              {manualMode && !addressPicked && (
+                <div className="bg-[#162d50] rounded-xl p-4 border border-amber-900/40 space-y-3">
+                  <p className="text-xs text-amber-400">
+                    Could not look up this postcode automatically. Please enter your address manually.
+                  </p>
+                  <div>
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Building / Block Name *</label>
+                    <input type="text" value={form.buildingName}
+                      onChange={(e) => updateForm("buildingName", e.target.value)}
+                      placeholder="e.g. Sophora House"
+                      className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[rgba(255,255,255,0.55)] mb-1">Flat / Apartment Number</label>
+                    <input type="text" value={form.flatNumber}
+                      onChange={(e) => updateForm("flatNumber", e.target.value)}
+                      placeholder="e.g. 12"
+                      className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2 text-white text-sm" />
+                  </div>
+                  <button type="button"
+                    onClick={() => { if (form.buildingName.trim()) setAddressPicked(true); }}
+                    className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-sm font-semibold">
+                    Continue
+                  </button>
                 </div>
               )}
 
