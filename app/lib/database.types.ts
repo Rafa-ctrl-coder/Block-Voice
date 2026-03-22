@@ -147,6 +147,9 @@ export interface ServiceChargeAnnual {
   h1_total: number | null;
   h2_total: number | null;
   adjustment_total: number;
+  is_half_yearly: boolean;
+  has_both_halves: boolean;
+  quarter_count: number;
   created_at: string;
 }
 

@@ -1177,12 +1177,12 @@ function ServiceChargesSection({
   // If has_both_halves → we have the full year, show as Annual
   // If is_half_yearly and NOT has_both_halves → only one half, show as HY
   const latestTotal = latest ? Number(latest.annual_total) : 0;
-  const latestIsHY = latest ? (latest as Record<string, unknown>).is_half_yearly : false;
-  const latestHasBoth = latest ? (latest as Record<string, unknown>).has_both_halves : false;
+  const latestIsHY = latest ? latest.is_half_yearly : false;
+  const latestHasBoth = latest ? latest.has_both_halves : false;
   const latestIsPartial = latestIsHY && !latestHasBoth; // only one half uploaded
 
   // Detect quarterly (quarter_count present and < 4 means partial)
-  const latestQuarters = latest ? (latest as Record<string, unknown>).quarter_count as number || 0 : 0;
+  const latestQuarters = latest ? latest.quarter_count || 0 : 0;
   const isQuarterly = latestQuarters > 0;
 
   // Period label for the latest entry
@@ -1208,9 +1208,9 @@ function ServiceChargesSection({
 
   // Growth: compare like-for-like, annualised
   const earliestTotal = earliest ? Number(earliest.annual_total) : 0;
-  const earliestIsHY = earliest ? (earliest as Record<string, unknown>).is_half_yearly : false;
-  const earliestHasBoth = earliest ? (earliest as Record<string, unknown>).has_both_halves : false;
-  const earliestQuarters = earliest ? (earliest as Record<string, unknown>).quarter_count as number || 0 : 0;
+  const earliestIsHY = earliest ? earliest.is_half_yearly : false;
+  const earliestHasBoth = earliest ? earliest.has_both_halves : false;
+  const earliestQuarters = earliest ? earliest.quarter_count || 0 : 0;
   const earliestIsQuarterly = earliestQuarters > 0;
   const earliestIsPartial = (earliestIsHY && !earliestHasBoth) || (earliestIsQuarterly && earliestQuarters < 4);
   const earliestAnnualised = earliestIsQuarterly
@@ -1226,9 +1226,9 @@ function ServiceChargesSection({
 
   const chartData = sorted.map(a => {
     const total = Number(a.annual_total);
-    const aIsHY = (a as Record<string, unknown>).is_half_yearly;
-    const aHasBoth = (a as Record<string, unknown>).has_both_halves;
-    const aQuarters = (a as Record<string, unknown>).quarter_count as number || 0;
+    const aIsHY = a.is_half_yearly;
+    const aHasBoth = a.has_both_halves;
+    const aQuarters = a.quarter_count || 0;
     const aIsQ = aQuarters > 0;
     const months = aIsQ ? aQuarters * 3 : (aIsHY && !aHasBoth ? 6 : 12);
     const annualised = aIsQ
