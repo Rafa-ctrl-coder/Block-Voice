@@ -350,7 +350,6 @@ export default function BuildingPage() {
             </p>
           </div>
           )}
-          </div>
         </div>
 
         {/* ── Service charge snapshot teaser ──────────────────────────── */}
