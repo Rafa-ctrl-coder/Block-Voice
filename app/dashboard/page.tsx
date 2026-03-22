@@ -99,6 +99,9 @@ export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [userStatus, setUserStatus] = useState<"owner" | "tenant">("owner");
   const [userBlockId, setUserBlockId] = useState<string | null>(null);
+  const [userBuildingId, setUserBuildingId] = useState("");
+  const [userBlockName, setUserBlockName] = useState("");
+  const [userFlat, setUserFlat] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("unverified");
 
   // development data
@@ -160,6 +163,8 @@ export default function Dashboard() {
       setUserName(`${profile.first_name} ${profile.last_name}`);
       setUserStatus(profile.status === "tenant" ? "tenant" : "owner");
       setUserBlockId(profile.block_id || null);
+      setUserBuildingId(profile.building_id || "");
+      setUserFlat(profile.flat_number || "");
       setVerificationStatus(profile.verification_status || "unverified");
 
       const { data: building } = await supabase
@@ -168,6 +173,7 @@ export default function Dashboard() {
         .eq("id", profile.building_id)
         .single();
       if (!building?.development_name) return;
+      setUserBlockName(building.name || "");
 
       // find development by name
       const { data: devData } = await supabase
@@ -929,13 +935,13 @@ export default function Dashboard() {
 
         {/* ── Service Charges (Owner only) ────────────────────────────── */}
         {userStatus === "owner" && (
-          <Card title="Service Charges">
-            <div className="text-center py-6 border border-dashed border-[#1e3a5f] rounded-lg">
-              <span className="text-2xl mb-2 block">💷</span>
-              <p className="text-sm text-[rgba(255,255,255,0.55)] mb-1">Coming soon</p>
-              <p className="text-xs text-[rgba(255,255,255,0.3)]">Upload and compare your service charge statements.</p>
-            </div>
-          </Card>
+          <ServiceChargesSection
+            profileId={userId}
+            buildingId={userBuildingId}
+            postcode={dev?.postcodes?.[0] || ""}
+            buildingName={userBlockName || ""}
+            flatNumber={userFlat || ""}
+          />
         )}
 
         {/* ── Coming Soon ────────────────────────────────────────────── */}
@@ -1011,6 +1017,453 @@ function StarSelector({ value, onChange }: { value: number; onChange: (v: number
           ★
         </button>
       ))}
+    </div>
+  );
+}
+
+// ─── Service Charges Section ───────────────────────────────────────────────
+
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from "recharts";
+import type { ServiceChargeAnnual, PropertySize } from "../lib/database.types";
+
+const SIZE_RANGES = [
+  { label: "400–500", mid: 450 },
+  { label: "500–600", mid: 550 },
+  { label: "600–750", mid: 675 },
+  { label: "750–900", mid: 825 },
+  { label: "900–1,100", mid: 1000 },
+  { label: "1,100–1,300", mid: 1200 },
+  { label: "1,300–1,500", mid: 1400 },
+  { label: "1,500+", mid: 1750 },
+];
+
+function ServiceChargesSection({
+  profileId, buildingId, postcode, buildingName, flatNumber,
+}: {
+  profileId: string; buildingId: string; postcode: string; buildingName: string; flatNumber: string;
+}) {
+  const [annuals, setAnnuals] = useState<ServiceChargeAnnual[]>([]);
+  const [propSize, setPropSize] = useState<PropertySize | null>(null);
+  const [epcEstimate, setEpcEstimate] = useState<{ sqft: number; sqm: number } | null>(null);
+  const [sizeInput, setSizeInput] = useState("");
+  const [showSizeEditor, setShowSizeEditor] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [scLoading, setScLoading] = useState(true);
+
+  useEffect(() => {
+    if (profileId && buildingId) loadServiceCharges();
+  }, [profileId, buildingId]);
+
+  async function loadServiceCharges() {
+    setScLoading(true);
+    const [{ data: annualData }, { data: sizeData }] = await Promise.all([
+      supabase.from("service_charge_annuals").select("*").eq("profile_id", profileId).eq("building_id", buildingId).order("year"),
+      supabase.from("property_sizes").select("*").eq("profile_id", profileId).eq("building_id", buildingId).single(),
+    ]);
+    if (annualData) setAnnuals(annualData as ServiceChargeAnnual[]);
+    if (sizeData) setPropSize(sizeData as PropertySize);
+    setScLoading(false);
+  }
+
+  const [uploadProgress, setUploadProgress] = useState("");
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (files.length > 10) {
+      setUploadError("Maximum 10 documents at a time.");
+      return;
+    }
+
+    // Validate all files first
+    for (const file of Array.from(files)) {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (!["pdf", "jpg", "jpeg", "png"].includes(ext || "")) {
+        setUploadError(`${file.name}: Only PDF, JPG, or PNG files are supported.`);
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError(`${file.name}: File must be under 10MB.`);
+        return;
+      }
+    }
+
+    setUploading(true);
+    setUploadError("");
+    const totalFiles = files.length;
+    let processed = 0;
+    let errors: string[] = [];
+
+    for (const file of Array.from(files)) {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      const filePath = `${profileId}/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+
+      setUploadProgress(`Uploading ${processed + 1} of ${totalFiles}...`);
+      const { error: upErr } = await supabase.storage.from("service-charges").upload(filePath, file);
+      if (upErr) {
+        errors.push(`${file.name}: upload failed`);
+        processed++;
+        continue;
+      }
+
+      setUploadProgress(`Analysing ${processed + 1} of ${totalFiles}...`);
+      try {
+        const res = await fetch("/api/service-charges/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documentUrl: filePath, profileId, buildingId }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errors.push(`${file.name}: ${data.error || "extraction failed"}`);
+        }
+      } catch {
+        errors.push(`${file.name}: extraction failed`);
+      }
+      processed++;
+    }
+
+    setUploading(false);
+    setUploadProgress("");
+
+    if (errors.length > 0) {
+      setUploadError(errors.join(". "));
+    }
+
+    // Reload data
+    await loadServiceCharges();
+
+    // If no property size yet, trigger EPC lookup
+    if (!propSize) {
+      setExtracting(true);
+      try {
+        const epcRes = await fetch(`/api/property-size?postcode=${encodeURIComponent(postcode)}&building=${encodeURIComponent(buildingName)}&flat=${encodeURIComponent(flatNumber)}`);
+        const epcData = await epcRes.json();
+        if (epcData.found) {
+          setEpcEstimate({ sqft: epcData.sqft, sqm: epcData.sqm });
+          setSizeInput(String(epcData.sqft));
+        }
+      } catch { /* EPC lookup is optional */ }
+      setExtracting(false);
+      setShowSizeEditor(true);
+    }
+
+    // Reset file input so same files can be re-selected
+    e.target.value = "";
+  }
+
+  async function confirmSize(sqft: number, source: "epc" | "user_range" | "user_exact") {
+    const sqm = Math.round(sqft / 10.764);
+    const { data } = await supabase.from("property_sizes").upsert(
+      { profile_id: profileId, building_id: buildingId, sqft, sqm, source, confirmed: true, updated_at: new Date().toISOString() },
+      { onConflict: "profile_id,building_id" }
+    ).select().single();
+    if (data) setPropSize(data as PropertySize);
+    setShowSizeEditor(false);
+  }
+
+  // ─── computed values ───────────────────────────────────────────────────
+  const sorted = [...annuals].sort((a, b) => a.year.localeCompare(b.year));
+  const sqft = propSize?.sqft || 0;
+  const latest = sorted.length > 0 ? sorted[sorted.length - 1] : null;
+  const earliest = sorted.length > 1 ? sorted[0] : null;
+
+  // Detect billing type per record
+  // If has_both_halves → we have the full year, show as Annual
+  // If is_half_yearly and NOT has_both_halves → only one half, show as HY
+  const latestTotal = latest ? Number(latest.annual_total) : 0;
+  const latestIsHY = latest ? (latest as Record<string, unknown>).is_half_yearly : false;
+  const latestHasBoth = latest ? (latest as Record<string, unknown>).has_both_halves : false;
+  const latestIsPartial = latestIsHY && !latestHasBoth; // only one half uploaded
+
+  // Detect quarterly (quarter_count present and < 4 means partial)
+  const latestQuarters = latest ? (latest as Record<string, unknown>).quarter_count as number || 0 : 0;
+  const isQuarterly = latestQuarters > 0;
+
+  // Period label for the latest entry
+  const periodLabel = isQuarterly
+    ? (latestQuarters < 4 ? "Quarterly" : "Annual")
+    : (latestIsPartial ? "Half Year" : "Annual");
+  const periodLabelShort = isQuarterly
+    ? (latestQuarters < 4 ? `Q${latestQuarters}` : "FY")
+    : (latestIsPartial ? "HY" : "FY");
+
+  // Monthly: divide by actual months covered
+  const latestMonths = isQuarterly
+    ? latestQuarters * 3
+    : (latestIsPartial ? 6 : 12);
+  const monthly = latestTotal / latestMonths;
+
+  // For per-sqft, always annualise
+  const annualisedTotal = isQuarterly
+    ? (latestQuarters < 4 ? (latestTotal / latestQuarters) * 4 : latestTotal)
+    : (latestIsPartial ? latestTotal * 2 : latestTotal);
+  const perSqft = sqft > 0 ? annualisedTotal / sqft : 0;
+  const perSqftMonth = perSqft / 12;
+
+  // Growth: compare like-for-like, annualised
+  const earliestTotal = earliest ? Number(earliest.annual_total) : 0;
+  const earliestIsHY = earliest ? (earliest as Record<string, unknown>).is_half_yearly : false;
+  const earliestHasBoth = earliest ? (earliest as Record<string, unknown>).has_both_halves : false;
+  const earliestQuarters = earliest ? (earliest as Record<string, unknown>).quarter_count as number || 0 : 0;
+  const earliestIsQuarterly = earliestQuarters > 0;
+  const earliestIsPartial = (earliestIsHY && !earliestHasBoth) || (earliestIsQuarterly && earliestQuarters < 4);
+  const earliestAnnualised = earliestIsQuarterly
+    ? (earliestQuarters < 4 ? (earliestTotal / earliestQuarters) * 4 : earliestTotal)
+    : (earliestIsPartial ? earliestTotal * 2 : earliestTotal);
+
+  const growthPct = earliest && latest && earliestAnnualised > 0
+    ? ((annualisedTotal - earliestAnnualised) / earliestAnnualised) * 100
+    : 0;
+  const earliestMonths = earliestIsQuarterly ? earliestQuarters * 3 : (earliestIsPartial ? 6 : 12);
+  const earliestMonthly = earliestTotal / earliestMonths;
+  const monthlyIncrease = earliest && latest ? monthly - earliestMonthly : 0;
+
+  const chartData = sorted.map(a => {
+    const total = Number(a.annual_total);
+    const aIsHY = (a as Record<string, unknown>).is_half_yearly;
+    const aHasBoth = (a as Record<string, unknown>).has_both_halves;
+    const aQuarters = (a as Record<string, unknown>).quarter_count as number || 0;
+    const aIsQ = aQuarters > 0;
+    const months = aIsQ ? aQuarters * 3 : (aIsHY && !aHasBoth ? 6 : 12);
+    const annualised = aIsQ
+      ? (aQuarters < 4 ? (total / aQuarters) * 4 : total)
+      : (aIsHY && !aHasBoth ? total * 2 : total);
+    return {
+      year: a.year,
+      annual: total,
+      monthly: total / months,
+      perSqft: sqft > 0 ? annualised / sqft : 0,
+      label: aIsQ ? (aQuarters < 4 ? `Q${aQuarters}` : "FY") : (aIsHY && !aHasBoth ? "HY" : "FY"),
+    };
+  });
+
+  const fmt = (n: number) => n.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const fmt2 = (n: number) => n.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // ─── render ────────────────────────────────────────────────────────────
+
+  if (scLoading) return <Card title="Service Charges"><p className="text-sm text-[rgba(255,255,255,0.3)]">Loading...</p></Card>;
+
+  // Empty state — no data yet
+  if (annuals.length === 0 && !extracting) {
+    return (
+      <Card title="Service Charges">
+        <div className="text-center py-8 border border-dashed border-[#1e3a5f] rounded-lg">
+          <span className="text-3xl mb-3 block">💷</span>
+          <p className="text-sm text-white font-semibold mb-1">Upload your service charge demand</p>
+          <p className="text-xs text-[rgba(255,255,255,0.4)] mb-4 max-w-xs mx-auto">
+            See how your charges compare and track growth over time.
+          </p>
+          <label className="inline-block cursor-pointer px-5 py-2.5 bg-[#1ec6a4] text-white text-sm font-bold rounded-lg hover:bg-[#25d4b0] transition-colors">
+            Upload your service charge
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} multiple />
+          </label>
+          <p className="text-[10px] text-[rgba(255,255,255,0.25)] mt-2">Takes 30 seconds. We extract the data automatically.</p>
+          {(uploading || uploadProgress) && <p className="text-sm text-[#1ec6a4] mt-3">{uploadProgress || "Uploading..."}</p>}
+          {extracting && <p className="text-sm text-[#1ec6a4] mt-3">Analysing your document...</p>}
+          {uploadError && <p className="text-sm text-red-400 mt-3">{uploadError}</p>}
+        </div>
+      </Card>
+    );
+  }
+
+  if (extracting) {
+    return (
+      <Card title="Service Charges">
+        <div className="text-center py-10">
+          <p className="text-lg text-[#1ec6a4] font-semibold animate-pulse">Analysing your documents...</p>
+          <p className="text-xs text-[rgba(255,255,255,0.3)] mt-2">This usually takes 10–20 seconds per document.</p>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card title="Service Charges">
+        {/* Property size bar */}
+        {propSize && !showSizeEditor ? (
+          <div className="flex items-center justify-between bg-[#0f1f3d] rounded-lg px-4 py-2.5 mb-4">
+            <span className="text-sm text-[rgba(255,255,255,0.7)]">
+              ✅ Property size: <strong className="text-white">{fmt(propSize.sqft)} sqft</strong>
+              <span className="text-[rgba(255,255,255,0.3)]"> ({propSize.sqm || Math.round(propSize.sqft / 10.764)} sqm)</span>
+            </span>
+            <button onClick={() => setShowSizeEditor(true)} className="text-xs text-[#1ec6a4] hover:underline">Adjust</button>
+          </div>
+        ) : (showSizeEditor || (!propSize && annuals.length > 0)) ? (
+          <div className="bg-[#0f1f3d] rounded-xl p-5 mb-4 border border-[#1e3a5f]">
+            <h4 className="font-bold text-white text-sm mb-1">📐 Have we got your property size right?</h4>
+            {epcEstimate ? (
+              <p className="text-xs text-[rgba(255,255,255,0.4)] mb-3">
+                We estimated <strong className="text-white">{fmt(epcEstimate.sqft)} sqft</strong> from public records.
+                This affects your price per sqft calculation.
+              </p>
+            ) : (
+              <p className="text-xs text-[rgba(255,255,255,0.4)] mb-3">
+                We couldn&apos;t find your size automatically. Select your approximate size or enter exact.
+              </p>
+            )}
+            <p className="text-xs text-[rgba(255,255,255,0.3)] mb-2">Select your approximate size:</p>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {SIZE_RANGES.map(r => (
+                <button key={r.label} onClick={() => { setSizeInput(String(r.mid)); }}
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    sizeInput === String(r.mid)
+                      ? "bg-[#1ec6a4] border-[#1ec6a4] text-white font-bold"
+                      : "bg-[#132847] border-[#1e3a5f] text-[rgba(255,255,255,0.5)] hover:border-[#1ec6a4]"
+                  }`}>
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[rgba(255,255,255,0.3)]">Or enter exact:</span>
+              <input type="number" value={sizeInput} onChange={e => setSizeInput(e.target.value)}
+                className="w-24 bg-[#132847] border border-[#1e3a5f] rounded-lg px-3 py-1.5 text-white text-sm outline-none" />
+              <span className="text-xs text-[rgba(255,255,255,0.3)]">sqft</span>
+            </div>
+            {sizeInput && (
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-sm text-[rgba(255,255,255,0.5)]">
+                  Using: <strong className="text-white">{fmt(parseInt(sizeInput))} sqft</strong>
+                  <span className="text-[rgba(255,255,255,0.3)]"> ({Math.round(parseInt(sizeInput) / 10.764)} sqm)</span>
+                </span>
+                <button onClick={() => confirmSize(parseInt(sizeInput), SIZE_RANGES.some(r => String(r.mid) === sizeInput) ? "user_range" : "user_exact")}
+                  className="px-4 py-1.5 bg-[#1ec6a4] text-white text-sm font-bold rounded-lg hover:bg-[#25d4b0]">
+                  Confirm
+                </button>
+              </div>
+            )}
+          </div>
+        ) : null}
+
+        {/* Key stats */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
+            <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">{periodLabel} Service Charge</p>
+            <p className="text-2xl font-extrabold text-white">£{fmt(latestTotal)}</p>
+            <p className="text-[10px] text-[rgba(255,255,255,0.3)]">{latest?.year} {periodLabelShort}{latestIsPartial ? " (one half)" : ""}</p>
+          </div>
+          <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
+            <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">Monthly Cost</p>
+            <p className="text-2xl font-extrabold text-white">£{fmt(monthly)}</p>
+            <p className="text-[10px] text-[rgba(255,255,255,0.3)]">per month (from {periodLabelShort})</p>
+          </div>
+          <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
+            <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">Per Square Foot</p>
+            <p className="text-2xl font-extrabold text-white">{sqft > 0 ? `£${fmt2(perSqft)}` : "—"}</p>
+            <p className="text-[10px] text-[rgba(255,255,255,0.3)]">{sqft > 0 ? `£${fmt2(perSqftMonth)}/sqft/month` : "Set property size above"}</p>
+          </div>
+        </div>
+
+        {/* Growth stats */}
+        {sorted.length > 1 && (
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
+              <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">
+                {sorted.length > 2 ? "3-Year" : "Year-on-Year"} Growth
+              </p>
+              <p className={`text-2xl font-extrabold ${growthPct > 10 ? "text-red-400" : growthPct > 5 ? "text-amber-400" : "text-[#1ec6a4]"}`}>
+                {growthPct >= 0 ? "+" : ""}{fmt2(growthPct)}%
+              </p>
+              <p className="text-[10px] text-[rgba(255,255,255,0.3)]">{earliest?.year} → {latest?.year}</p>
+            </div>
+            <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
+              <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">Monthly Increase</p>
+              <p className={`text-2xl font-extrabold ${monthlyIncrease > 100 ? "text-red-400" : monthlyIncrease > 50 ? "text-amber-400" : "text-[#1ec6a4]"}`}>
+                {monthlyIncrease >= 0 ? "+" : ""}£{fmt(monthlyIncrease)}
+              </p>
+              <p className="text-[10px] text-[rgba(255,255,255,0.3)]">
+                £{fmt(Number(earliest!.annual_total) / 12)}/mo → £{fmt(Number(latest!.annual_total) / 12)}/mo
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Charts */}
+        {chartData.length > 0 && (
+          <div className="space-y-6">
+            {/* Annual bar chart */}
+            <div>
+              <p className="text-xs font-semibold text-[rgba(255,255,255,0.4)] mb-3">Service Charge by Period</p>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `£${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 12 }}
+                    formatter={(v) => [`£${fmt(Number(v))}`, "Annual"]} />
+                  <Bar dataKey="annual" fill="#1ec6a4" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Per sqft line chart */}
+            {sqft > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-[rgba(255,255,255,0.4)] mb-3">Price Per Square Foot — Annualised</p>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `£${v.toFixed(0)}`} />
+                    <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 12 }}
+                      formatter={(v) => [`£${fmt2(Number(v))}/sqft`, "Per sqft"]} />
+                    <Line type="monotone" dataKey="perSqft" stroke="#1ec6a4" strokeWidth={2} dot={{ fill: "#1ec6a4", r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Monthly bar chart */}
+            <div>
+              <p className="text-xs font-semibold text-[rgba(255,255,255,0.4)] mb-3">Monthly Service Charge</p>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `£${v.toFixed(0)}`} />
+                  <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 12 }}
+                    formatter={(v) => [`£${fmt(Number(v))}`, "Monthly"]} />
+                  <Bar dataKey="monthly" fill="rgba(30,198,164,0.6)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Key insights */}
+        {sorted.length > 1 && (
+          <div className="mt-5 bg-[#0f1f3d] rounded-lg p-4 border border-[#1e3a5f]">
+            <p className="text-[10px] uppercase font-bold tracking-wide text-[#1ec6a4] mb-1">Key Insights</p>
+            <p className="text-xs text-[rgba(255,255,255,0.5)] leading-relaxed">
+              Your {latestIsPartial ? "half-yearly" : "annual"} service charge has grown from £{fmt(Number(earliest!.annual_total))} to £{fmt(latestTotal)} over{" "}
+              {sorted.length > 2 ? `${sorted.length} periods` : "the last period"} — a {fmt2(Math.abs(growthPct))}%{" "}
+              {growthPct >= 0 ? "increase" : "decrease"}. That means you are now paying £{fmt(Math.abs(monthlyIncrease))}{" "}
+              {monthlyIncrease >= 0 ? "more" : "less"} per month than you were in {earliest!.year}.
+              {sqft > 0 && ` At ${fmt(sqft)} sqft, your current rate is £${fmt2(perSqft)} per square foot per year (£${fmt2(perSqftMonth)}/sqft/month).`}
+            </p>
+          </div>
+        )}
+
+        {/* Upload more */}
+        <div className="mt-4 text-center">
+          <p className="text-xs text-[rgba(255,255,255,0.3)] mb-2">Upload another year&apos;s service charge to extend your trend.</p>
+          <label className="inline-block cursor-pointer px-4 py-2 bg-[#132847] text-[#1ec6a4] text-xs font-bold rounded-lg border border-[#1e3a5f] hover:border-[#1ec6a4] transition-colors">
+            Upload another year
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} multiple />
+          </label>
+          {(uploading || uploadProgress) && <p className="text-sm text-[#1ec6a4] mt-2">{uploadProgress || "Uploading..."}</p>}
+          {extracting && <p className="text-sm text-[#1ec6a4] mt-2">Analysing...</p>}
+          {uploadError && <p className="text-sm text-red-400 mt-2">{uploadError}</p>}
+        </div>
+      </Card>
     </div>
   );
 }
