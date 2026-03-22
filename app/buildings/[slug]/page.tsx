@@ -106,6 +106,8 @@ export default function BuildingPage() {
   const [authed, setAuthed] = useState(false);
   const [userDevId, setUserDevId] = useState<string | null>(null);
   const [scStats, setScStats] = useState<{ hasData: boolean; avgPerSqft?: number; avgMonthly?: number; lastYoYPct?: number | null; trend?: string } | null>(null);
+  const [agentRating, setAgentRating] = useState<{ score: number; count: number } | null>(null);
+  const [fhRating, setFhRating] = useState<{ score: number; count: number } | null>(null);
 
   useEffect(() => {
     if (slug) loadPage();
@@ -163,7 +165,37 @@ export default function BuildingPage() {
       .select("*, managing_agents(*), freeholders(*)")
       .eq("development_id", devData.id)
       .single();
-    if (linkData) setLink(linkData as LinkRow);
+    if (linkData) {
+      setLink(linkData as LinkRow);
+
+      // fetch aggregate ratings for agent and freeholder
+      if (linkData.managing_agent_id) {
+        const { data: agentRatings } = await supabase
+          .from("agent_ratings")
+          .select("responsiveness, communication, value_for_money, maintenance, transparency")
+          .eq("development_id", devData.id);
+        if (agentRatings && agentRatings.length >= 3) {
+          const avg = agentRatings.reduce((sum, r) => {
+            const s = (r.responsiveness + r.communication + r.value_for_money + r.maintenance + r.transparency) / 5;
+            return sum + s;
+          }, 0) / agentRatings.length;
+          setAgentRating({ score: Math.round(avg * 10) / 10, count: agentRatings.length });
+        }
+      }
+      if (linkData.freeholder_id) {
+        const { data: fhRatings } = await supabase
+          .from("freeholder_ratings")
+          .select("building_investment, leaseholder_relations, transparency, accountability")
+          .eq("development_id", devData.id);
+        if (fhRatings && fhRatings.length >= 3) {
+          const avg = fhRatings.reduce((sum, r) => {
+            const s = (r.building_investment + r.leaseholder_relations + r.transparency + r.accountability) / 4;
+            return sum + s;
+          }, 0) / fhRatings.length;
+          setFhRating({ score: Math.round(avg * 10) / 10, count: fhRatings.length });
+        }
+      }
+    }
 
     // fetch blocks
     const { data: blockData } = await supabase
@@ -279,6 +311,45 @@ export default function BuildingPage() {
                 <span className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{t}</span>
               </div>
             ))}
+          </div>
+
+          {/* Teaser ratings */}
+          {(agentRating || fhRating) && (
+          <div className="mt-3 pt-3 border-t border-[#1e3a5f]">
+            <p className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Resident ratings</p>
+            <div className="grid grid-cols-2 gap-2">
+              {agent && (
+              <div className="rounded-lg p-3" style={{ background: "#0f1f3d", border: "1px solid #1e3a5f" }}>
+                <div className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{agent.name}</div>
+                {agentRating ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-lg font-black ${agentRating.score >= 4 ? "text-green-400" : agentRating.score >= 2.5 ? "text-amber-400" : "text-red-400"}`}>{agentRating.score.toFixed(1)}</span>
+                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>/ 5.0 · {agentRating.count} ratings</span>
+                  </div>
+                ) : (
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Not enough ratings yet</span>
+                )}
+              </div>
+              )}
+              {freeholder && (
+              <div className="rounded-lg p-3" style={{ background: "#0f1f3d", border: "1px solid #1e3a5f" }}>
+                <div className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{freeholder.name}</div>
+                {fhRating ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-lg font-black ${fhRating.score >= 4 ? "text-green-400" : fhRating.score >= 2.5 ? "text-amber-400" : "text-red-400"}`}>{fhRating.score.toFixed(1)}</span>
+                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>/ 5.0 · {fhRating.count} ratings</span>
+                  </div>
+                ) : (
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Not enough ratings yet</span>
+                )}
+              </div>
+              )}
+            </div>
+            <p className="text-[10px] mt-2" style={{ color: teal }}>
+              <Link href={`/signup?building=${slug}`} className="hover:underline">Sign up to see full ratings and add yours →</Link>
+            </p>
+          </div>
+          )}
           </div>
         </div>
 
