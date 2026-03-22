@@ -324,7 +324,7 @@ export default function BuildingPage() {
                 {agentRating ? (
                   <div className="flex items-center gap-1.5">
                     <span className={`text-lg font-black ${agentRating.score >= 4 ? "text-green-400" : agentRating.score >= 2.5 ? "text-amber-400" : "text-red-400"}`}>{agentRating.score.toFixed(1)}</span>
-                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>/ 5.0 · {agentRating.count} ratings</span>
+                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>/ 5.0</span>
                   </div>
                 ) : (
                   <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Not enough ratings yet</span>
@@ -337,7 +337,7 @@ export default function BuildingPage() {
                 {fhRating ? (
                   <div className="flex items-center gap-1.5">
                     <span className={`text-lg font-black ${fhRating.score >= 4 ? "text-green-400" : fhRating.score >= 2.5 ? "text-amber-400" : "text-red-400"}`}>{fhRating.score.toFixed(1)}</span>
-                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>/ 5.0 · {fhRating.count} ratings</span>
+                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>/ 5.0</span>
                   </div>
                 ) : (
                   <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Not enough ratings yet</span>
