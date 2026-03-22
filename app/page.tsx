@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface Candidate { slug: string; name: string; totalUnits: number }
 interface Address { line_1: string; line_2: string; building_name: string; sub_building_name: string; thoroughfare: string; post_town: string }
+interface ScStats { hasData: boolean; avgPerSqft?: number; avgMonthly?: number; lastYoYPct?: number | null; trend?: string }
 
 export default function Home() {
   const router = useRouter();
@@ -16,6 +17,11 @@ export default function Home() {
   const [matching, setMatching] = useState(false);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [noMatch, setNoMatch] = useState(false);
+  const [scStats, setScStats] = useState<ScStats | null>(null);
+
+  useEffect(() => {
+    fetch("/api/sc-stats").then(r => r.json()).then(setScStats).catch(() => {});
+  }, []);
 
   function reset() { setAddresses([]); setShowAddresses(false); setCandidates([]); setNoMatch(false); setError(""); }
 
@@ -152,139 +158,102 @@ export default function Home() {
         )}
       </section>
 
-      {/* INFO STRIP */}
-      <div className="flex items-center flex-wrap gap-3 justify-center px-[6%] py-4"
-        style={{ background: "var(--navy-mid)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
-        <span className="text-[11px] font-semibold whitespace-nowrap" style={{ color: "var(--t3)" }}>What you&apos;ll see instantly</span>
-        <div className="flex flex-wrap gap-[6px] justify-center">
-          {["Managing agent", "Freeholder details", "Contact information", "Building performance score", "Your documents"].map(c => (
-            <span key={c} className="text-[10px] font-semibold px-[10px] py-[3px] rounded-full whitespace-nowrap"
-              style={{ background: "var(--teal-dim)", border: "1px solid var(--teal-border)", color: teal }}>{c}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* FEATURES */}
-      <section className="px-[6%] py-[72px]">
-        <p className="text-[10px] uppercase font-semibold mb-2.5 tracking-[1.8px]" style={{ color: teal }}>What BlockVoice does</p>
-        <h2 className="font-extrabold leading-[1.12] mb-2.5 tracking-[-0.5px]" style={{ fontSize: "clamp(22px, 2.8vw, 34px)" }}>
-          Your building, managed<br />like it should be
-        </h2>
-        <p className="max-w-[480px] mb-10 leading-relaxed" style={{ color: "var(--t2)", fontSize: "15px" }}>
-          A central dashboard for everything related to your leasehold property — from who&apos;s responsible to what you&apos;re owed.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {[
-            { icon: "🏢", title: "Building transparency", desc: "Instantly see your managing agent, freeholder, and their contact details. Know who's responsible for what — and how to reach them directly.", tag: "Live now" },
-            { icon: "📄", title: "Your documents, explained", desc: "Upload your lease, service charge statements, and notices. AI breaks down what they mean in plain English so you're never left guessing." },
-            { icon: "💷", title: "Service charge analysis", desc: "See exactly what you're paying for, whether it's reasonable, and how your costs compare to similar buildings and managing agents." },
-            { icon: "📊", title: "Building performance tracking", desc: "Track how your building and managing agent are rated over time — maintenance response, communication, value for money, and more." },
-            { icon: "⚡", title: "AI-assisted issue raising", desc: "When something isn't right, BlockVoice helps you raise it correctly — drafting formal communications and guiding you through the right legal channels." },
-            { icon: "🔔", title: "Alerts & updates", desc: "Get notified about works planned for your building, changes to your management, or anything that affects your service charge." },
-          ].map(f => (
-            <div key={f.title} className="rounded-xl p-[22px] transition-colors hover:border-[rgba(30,198,164,0.25)]"
-              style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
-              <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[16px] mb-3.5"
-                style={{ background: "var(--teal-dim)", border: "1px solid var(--teal-border)" }}>{f.icon}</div>
-              <h3 className="text-[13px] font-bold text-white mb-1.5">{f.title}</h3>
-              <p className="text-[12px] leading-relaxed" style={{ color: "var(--t2)" }}>{f.desc}</p>
-              {f.tag && (
-                <span className="inline-block mt-2 text-[9px] uppercase font-bold px-2 py-[2px] rounded-full tracking-[0.8px]"
-                  style={{ background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }}>{f.tag}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* BENCHMARKING */}
-      <section className="px-[6%] py-[72px]" style={{ background: "var(--navy-mid)" }}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center max-w-[920px]">
-          <div>
-            <p className="text-[10px] uppercase font-semibold mb-2.5 tracking-[1.8px]" style={{ color: teal }}>Benchmarking</p>
-            <h2 className="font-extrabold leading-[1.12] mb-2.5 tracking-[-0.5px]" style={{ fontSize: "clamp(22px, 2.8vw, 34px)" }}>
-              See how your building really compares
-            </h2>
-            <p className="max-w-[400px] leading-relaxed" style={{ color: "var(--t2)", fontSize: "15px" }}>
-              Most leaseholders have no idea if their service charges are reasonable or if their managing agent is any good. BlockVoice benchmarks your building against thousands of others so you have real data — not just a hunch.
-            </p>
-          </div>
-          <div className="rounded-[12px] p-5" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
-            <p className="text-[12px] font-semibold mb-4" style={{ color: "var(--t2)" }}>Managing agent performance — your area</p>
-            {[
-              { name: "Your building", you: true, width: "62%", score: "6.2", color: teal },
-              { name: "Avg. SW11", width: "71%", score: "7.1", color: "rgba(255,255,255,0.2)" },
-              { name: "Top 10%", width: "91%", score: "9.1", color: "#4ade80" },
-              { name: "Bottom 10%", width: "31%", score: "3.1", color: "#f87171" },
-            ].map(row => (
-              <div key={row.name} className="flex items-center gap-2.5 mb-2.5 last:mb-0">
-                <span className={"text-[11px] w-[85px] flex-shrink-0 " + (row.you ? "text-white font-semibold" : "")} style={{ color: row.you ? undefined : "var(--t2)" }}>
-                  {row.name}
-                  {row.you && <span className="ml-1 text-[8px] font-bold uppercase px-1.5 py-0.5 rounded tracking-[0.8px]"
-                    style={{ background: "var(--teal-dim)", color: teal }}>you</span>}
-                </span>
-                <div className="flex-1 h-[7px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                  <div className="h-[7px] rounded-full" style={{ width: row.width, background: row.color }} />
+      {/* SERVICE CHARGE BETA BANNER */}
+      <div className="px-[6%] py-8">
+        <div className="max-w-[720px] mx-auto rounded-[14px] p-6"
+          style={{ background: "linear-gradient(135deg, rgba(30,198,164,0.1) 0%, rgba(30,198,164,0.02) 100%)", border: "1px solid rgba(30,198,164,0.25)" }}>
+          <div className="flex gap-4">
+            <div className="flex-shrink-0 w-11 h-11 rounded-[10px] flex items-center justify-center text-xl"
+              style={{ background: "rgba(30,198,164,0.15)" }}>📊</div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-[17px] font-bold text-white">Service charge analysis is live</span>
+                <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
+              </div>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
+                Upload your service charge and instantly see your cost per sqft, how it&apos;s changing year on year, and how your building compares to others in Battersea.
+              </p>
+              {scStats?.hasData && (
+              <div className="flex items-center gap-6 mb-5">
+                <div>
+                  <div className="text-2xl font-extrabold" style={{ color: teal }}>£{scStats.avgPerSqft?.toFixed(2)}</div>
+                  <div className="text-[10px]" style={{ color: "var(--t3)" }}>avg per sqft / year</div>
                 </div>
-                <span className="text-[11px] font-bold text-white w-6 text-right flex-shrink-0">{row.score}</span>
+                <div className="w-px h-10" style={{ background: "var(--border)" }} />
+                {scStats.lastYoYPct != null && (
+                <>
+                <div>
+                  <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>+{scStats.lastYoYPct.toFixed(1)}%</div>
+                  <div className="text-[10px]" style={{ color: "var(--t3)" }}>last year&apos;s increase</div>
+                </div>
+                <div className="w-px h-10" style={{ background: "var(--border)" }} />
+                <div className="text-[13px] leading-snug" style={{ color: "var(--t2)" }}>
+                  Charges in Battersea<br/>are <strong className={scStats.trend === "accelerating" ? "text-red-400" : "text-amber-400"}>{scStats.trend || "changing"}</strong>
+                </div>
+                </>
+                )}
               </div>
-            ))}
+              )}
+              <Link href="/signup" className="inline-block font-bold text-[14px] px-7 py-3 rounded-[10px] text-white" style={{ background: teal }}>
+                Join free to analyse your charges
+              </Link>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* DOCUMENT INTELLIGENCE */}
-      <section className="px-[6%] py-[72px]" style={{ background: "var(--navy)" }}>
-        <p className="text-[10px] uppercase font-semibold mb-2.5 tracking-[1.8px]" style={{ color: teal }}>Document intelligence</p>
-        <h2 className="font-extrabold leading-[1.12] mb-2.5 tracking-[-0.5px]" style={{ fontSize: "clamp(22px, 2.8vw, 34px)" }}>
-          Your paperwork, finally decoded
-        </h2>
-        <p className="max-w-[480px] mb-10 leading-relaxed" style={{ color: "var(--t2)", fontSize: "15px" }}>
-          Upload any document related to your building and BlockVoice tells you what it means, what your rights are, and what to watch out for.
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* HOW IT WORKS */}
+      <section className="px-[6%] py-10">
+        <h2 className="text-xl font-bold text-white text-center mb-5">How it works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-[720px] mx-auto">
           {[
-            { type: "Service charge", bg: "rgba(79,142,247,0.12)", color: "#7eb3fa", border: "rgba(79,142,247,0.25)", name: "2024-25 statement", insight: "Management fee is 18% above the average for comparable buildings in your postcode." },
-            { type: "Lease", bg: "rgba(167,139,250,0.12)", color: "#c4b5fd", border: "rgba(167,139,250,0.25)", name: "Your lease agreement", insight: "83 years remaining. Ground rent review clause in section 7 may require attention." },
-            { type: "Notice", bg: "rgba(251,191,36,0.12)", color: "#fcd34d", border: "rgba(251,191,36,0.25)", name: "Section 20 consultation", insight: "You have 30 days to respond. Works estimated at £3,200 per unit — you can challenge this." },
-            { type: "Certificate", bg: "rgba(52,211,153,0.12)", color: "#6ee7b7", border: "rgba(52,211,153,0.25)", name: "Buildings insurance", insight: "Reinstatement value appears in line with market rates. Policy renewal due April 2025." },
-          ].map(doc => (
-            <div key={doc.name} className="rounded-xl p-5 flex flex-col gap-2"
-              style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
-              <span className="inline-block w-fit text-[9px] uppercase font-bold px-2 py-[2px] rounded-full tracking-[1px]"
-                style={{ background: doc.bg, color: doc.color, border: `1px solid ${doc.border}` }}>{doc.type}</span>
-              <span className="text-[13px] font-bold text-white">{doc.name}</span>
-              <div className="pt-1.5" style={{ borderTop: "1px solid var(--border)" }}>
-                <p className="text-[9px] uppercase font-bold mb-[2px] tracking-[0.5px]" style={{ color: teal }}>AI insight</p>
-                <p className="text-[11px] leading-relaxed" style={{ color: "var(--t2)" }}>{doc.insight}</p>
-              </div>
+            { step: "1", title: "Find your building", desc: "Enter your postcode and we'll match you to your development." },
+            { step: "2", title: "Sign up in 30 seconds", desc: "Tell us your apartment and whether you're an owner or tenant." },
+            { step: "3", title: "See everything", desc: "Your managing agent, freeholder, issues, and service charge analysis." },
+          ].map(s => (
+            <div key={s.step} className="rounded-xl p-[18px]" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-[13px] mb-2.5 text-[#0f1f3d]" style={{ background: teal }}>{s.step}</div>
+              <h3 className="text-[14px] font-bold text-white mb-1">{s.title}</h3>
+              <p className="text-[12px] leading-relaxed" style={{ color: "var(--t2)" }}>{s.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* COMING SOON STRIP */}
-      <div className="px-[6%] py-14 text-center"
-        style={{ background: "var(--navy-mid)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
-        <p className="max-w-[520px] mx-auto leading-[1.7]" style={{ color: "var(--t2)", fontSize: "15px" }}>
-          This is just the beginning. <strong className="text-white font-semibold">Document analysis, service charge benchmarking, AI-assisted issue raising, managing agent ratings</strong> and more are all in development — sign up now to be first in line.
-        </p>
-      </div>
+      {/* WHAT YOU'LL SEE */}
+      <section className="px-[6%] py-10">
+        <h2 className="text-xl font-bold text-white text-center mb-4">What you&apos;ll see instantly</h2>
+        <div className="flex flex-wrap gap-2 justify-center max-w-[640px] mx-auto">
+          {["Managing agent details", "Freeholder information", "Contact numbers & email", "Building performance score", "Report & vote on issues", "Invite your neighbours"].map(t => (
+            <span key={t} className="text-[12px] py-[7px] px-4 rounded-full"
+              style={{ border: "1px solid rgba(30,198,164,0.4)", color: teal, background: "rgba(30,198,164,0.04)" }}>{t}</span>
+          ))}
+          <span className="text-[12px] py-[7px] px-4 rounded-full font-bold"
+            style={{ border: "1px solid #fbbf24", color: "#fbbf24", background: "rgba(251,191,36,0.06)" }}>📊 Service charge analysis — BETA</span>
+        </div>
+      </section>
 
-      {/* CTA */}
-      <section className="px-[6%] py-20 text-center">
-        <h2 className="font-extrabold leading-[1.12] mb-2.5 tracking-[-0.5px]" style={{ fontSize: "clamp(22px, 2.8vw, 34px)" }}>
-          Finally understand your building.
-        </h2>
-        <p className="max-w-[480px] mx-auto mb-8 leading-relaxed" style={{ color: "var(--t2)", fontSize: "15px" }}>
-          Join residents already using BlockVoice to get clarity on who manages their building, what they&apos;re paying, and what their rights are.
+      {/* THIS IS JUST THE BEGINNING */}
+      <section className="px-[6%] py-10 text-center">
+        <h2 className="text-xl font-bold text-white mb-2">This is just the beginning</h2>
+        <p className="text-[13px] max-w-[480px] mx-auto mb-5 leading-relaxed" style={{ color: "var(--t2)" }}>
+          We&apos;re building tools to help leaseholders understand their buildings, hold agents accountable, and make better decisions together.
         </p>
-        <Link href="/signup" className="inline-block font-bold text-[14px] px-9 py-[13px] rounded-[10px] text-white" style={{ background: teal }}>
-          Find my building — it&apos;s free
-        </Link>
-        <p className="mt-2.5 text-[11px]" style={{ color: "var(--t3)" }}>No card required. Takes under 2 minutes.</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-[640px] mx-auto">
+          {[
+            { icon: "📄", title: "AI Document Analysis" },
+            { icon: "📊", title: "Agent Scorecard" },
+            { icon: "⚖️", title: "AI Complaints" },
+            { icon: "🔍", title: "Charge Comparison" },
+          ].map(item => (
+            <div key={item.title} className="rounded-[10px] p-3.5 text-center opacity-60"
+              style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+              <div className="text-xl mb-1">{item.icon}</div>
+              <div className="text-[11px] font-semibold text-white">{item.title}</div>
+              <span className="inline-block mt-1.5 text-[8px] font-bold uppercase px-1.5 py-0.5 rounded" style={{ background: "#334155", color: "var(--t3)" }}>Soon</span>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* FOOTER */}

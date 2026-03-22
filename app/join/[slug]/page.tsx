@@ -20,6 +20,7 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
   const [issueCount, setIssueCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [scStats, setScStats] = useState<{ hasData: boolean; avgPerSqft?: number; avgMonthly?: number; lastYoYPct?: number | null; trend?: string } | null>(null);
 
   useEffect(() => {
     loadDev();
@@ -65,6 +66,13 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
       setIssueCount(stats.issueCount || 0);
     } catch { /* counts stay at 0 */ }
 
+    // Fetch SC stats for this development
+    try {
+      const scRes = await fetch(`/api/sc-stats?slug=${encodeURIComponent(slug)}`);
+      const sc = await scRes.json();
+      setScStats(sc);
+    } catch { /* no SC data */ }
+
     setLoading(false);
   }
 
@@ -105,75 +113,117 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden px-[6%] pt-16 pb-14 text-center">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[240px] pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(30,198,164,0.06) 0%, transparent 70%)" }} />
+      <div className="max-w-[640px] mx-auto px-4 py-8">
 
-        <p className="inline-block text-[11px] font-semibold uppercase tracking-[1.2px] mb-4" style={{ color: teal }}>
-          You&apos;ve been invited
-        </p>
-
-        <h1 className="font-extrabold text-white leading-[1.08] mb-4 tracking-[-1.5px]"
-          style={{ fontSize: "clamp(28px, 4vw, 48px)" }}>
-          Join {dev?.name}
-          <br /><span style={{ color: teal }}>on BlockVoice</span>
-        </h1>
-
-        <p className="mx-auto mb-10 max-w-[480px] leading-relaxed" style={{ color: "var(--t2)", fontSize: "15px" }}>
-          A fellow resident has invited you to BlockVoice — the free platform that gives you full transparency on who manages your building and how well they&apos;re doing it.
-        </p>
-
-        {/* Stats */}
-        <div className="flex justify-center gap-6 mb-10">
-          {[
-            { value: residentCount, label: "Residents joined" },
-            { value: issueCount, label: "Issues reported" },
-            { value: dev?.total_units || 0, label: "Units in development" },
-          ].map(s => (
-            <div key={s.label} className="text-center">
-              <div className="text-2xl font-extrabold text-white">{s.value}</div>
-              <div className="text-[11px]" style={{ color: "var(--t3)" }}>{s.label}</div>
+        {/* Development header */}
+        <div className="text-center mb-7">
+          <div className="text-[10px] uppercase tracking-[2px] font-bold mb-1" style={{ color: teal }}>Join your neighbours on BlockVoice</div>
+          <h1 className="text-[30px] font-extrabold text-white mb-1.5">{dev?.name}</h1>
+          <p className="text-sm" style={{ color: "var(--t3)" }}>{postcode} · {dev?.total_units} units</p>
+          <div className="flex justify-center gap-4 mt-3.5">
+            <div className="rounded-lg px-4 py-2" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+              <span className="text-lg font-extrabold" style={{ color: teal }}>{residentCount}</span>
+              <span className="text-xs ml-1.5" style={{ color: "var(--t2)" }}>residents joined</span>
             </div>
-          ))}
-        </div>
-
-        {/* Development info cards */}
-        <div className="max-w-[520px] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10 text-left">
-          {agent && (
-            <div className="rounded-xl p-4" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
-              <p className="text-[10px] uppercase font-bold tracking-wide mb-1" style={{ color: "var(--t3)" }}>Managing Agent</p>
-              <p className="font-semibold text-white text-sm">{agent}</p>
+            <div className="rounded-lg px-4 py-2" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+              <span className="text-lg font-extrabold text-white">{issueCount}</span>
+              <span className="text-xs ml-1.5" style={{ color: "var(--t2)" }}>issues reported</span>
             </div>
-          )}
-          {freeholder && (
-            <div className="rounded-xl p-4" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
-              <p className="text-[10px] uppercase font-bold tracking-wide mb-1" style={{ color: "var(--t3)" }}>Freeholder</p>
-              <p className="font-semibold text-white text-sm">{freeholder}</p>
-            </div>
-          )}
+          </div>
         </div>
 
         {/* What you'll see */}
-        <div className="max-w-[520px] mx-auto mb-10">
-          <p className="text-[11px] uppercase font-semibold tracking-wide mb-3" style={{ color: "var(--t3)" }}>
-            What you&apos;ll see when you join
-          </p>
-          <div className="flex flex-wrap gap-[6px] justify-center">
-            {["Managing agent details", "Freeholder info", "Contact information", "Building performance score", "Issue tracker", "Your documents"].map(tag => (
-              <span key={tag} className="text-[10px] font-semibold px-[10px] py-[3px] rounded-full whitespace-nowrap"
-                style={{ background: "var(--teal-dim)", border: "1px solid var(--teal-border)", color: teal }}>{tag}</span>
+        <div className="rounded-xl p-5 mb-4" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+          <h3 className="text-sm font-bold text-white mb-2.5">When you join, you&apos;ll see</h3>
+          <div className="grid grid-cols-2 gap-1">
+            {[
+              agent ? `Managing agent: ${agent}` : "Managing agent details",
+              freeholder ? `Freeholder: ${freeholder}` : "Freeholder details",
+              "Agent rating & reviews",
+              "All reported issues",
+              "Your block details",
+              "Invite & share tools",
+            ].map(t => (
+              <div key={t} className="flex items-center gap-1.5 py-1.5">
+                <span className="text-xs" style={{ color: teal }}>✓</span>
+                <span className="text-xs" style={{ color: "var(--t2)" }}>{t}</span>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* CTA */}
-        <Link href={`/signup?postcode=${encodeURIComponent(postcode)}`}
-          className="inline-block font-bold text-[15px] px-10 py-[14px] rounded-[10px] text-white" style={{ background: teal }}>
-          Join {dev?.name} — It&apos;s Free
-        </Link>
-        <p className="mt-2.5 text-[11px]" style={{ color: "var(--t3)" }}>No card required. Takes under 30 seconds.</p>
-      </section>
+        {/* Service charge snapshot teaser */}
+        {scStats?.hasData && (
+        <div className="rounded-[14px] p-5 mb-4" style={{ background: "var(--navy-card)", border: "1px solid rgba(30,198,164,0.15)" }}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[11px] font-bold text-white uppercase tracking-[1.5px]">Service charges at {dev?.name}</span>
+            <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
+          </div>
+          <p className="text-xs leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
+            Residents at {dev?.name} are already tracking their service charges on BlockVoice. Here&apos;s what they&apos;re seeing.
+          </p>
+
+          {/* 3 stat cards */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="rounded-[10px] p-3.5 text-center" style={{ background: "var(--navy)", border: "1px solid var(--navy-card-b)" }}>
+              <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Current rate</div>
+              <div className="text-2xl font-extrabold" style={{ color: teal }}>£{scStats.avgPerSqft?.toFixed(2)}</div>
+              <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>per sqft / year</div>
+            </div>
+            <div className="rounded-[10px] p-3.5 text-center" style={{ background: "var(--navy)", border: "1px solid var(--navy-card-b)" }}>
+              <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Monthly cost</div>
+              <div className="text-2xl font-extrabold text-white">£{scStats.avgMonthly?.toLocaleString()}</div>
+              <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>per apartment</div>
+            </div>
+            {scStats.lastYoYPct != null && (
+            <div className="rounded-[10px] p-3.5 text-center" style={{ background: scStats.lastYoYPct > 5 ? "rgba(248,113,113,0.06)" : "var(--navy)", border: `1px solid ${scStats.lastYoYPct > 5 ? "rgba(248,113,113,0.15)" : "var(--navy-card-b)"}` }}>
+              <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Last year</div>
+              <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>+{scStats.lastYoYPct.toFixed(1)}%</div>
+              <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>year on year</div>
+            </div>
+            )}
+          </div>
+
+          {/* Blurred YoY chart teaser */}
+          <div className="relative overflow-hidden rounded-[10px] mb-4" style={{ background: "var(--navy)", border: "1px solid var(--navy-card-b)" }}>
+            <div className="flex items-end justify-center gap-6 h-20 px-8 pt-5 pb-3.5" style={{ filter: "blur(5px)", opacity: 0.4 }}>
+              {[{ h: 22, c: "#fbbf24", y: "2023/24" }, { h: 42, c: "#f87171", y: "2024/25" }, { h: 62, c: "#f87171", y: "2025/26" }].map(b => (
+                <div key={b.y} className="text-center">
+                  <div className="w-[70px] mx-auto rounded-t" style={{ height: b.h, background: b.c }} />
+                  <div className="text-[9px] mt-1" style={{ color: "var(--t3)" }}>{b.y}</div>
+                </div>
+              ))}
+            </div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+              <div className="text-[13px] font-bold text-white mb-0.5">
+                {scStats.trend === "accelerating" ? "Year-by-year growth is accelerating" : "See how your charges are trending"}
+              </div>
+              <div className="text-[11px]" style={{ color: "var(--t2)" }}>Sign up to see the full breakdown</div>
+            </div>
+          </div>
+
+          <Link href={`/signup?postcode=${encodeURIComponent(postcode)}`}
+            className="block w-full py-3.5 rounded-[10px] font-bold text-[15px] text-center text-white" style={{ background: teal }}>
+            Join {dev?.name} on BlockVoice — free
+          </Link>
+          <p className="text-[11px] text-center mt-2 leading-relaxed" style={{ color: "var(--t3)" }}>
+            Add your latest service charge invoice to help BlockVoice build more accurate data to share with fellow residents.
+          </p>
+        </div>
+        )}
+
+        {/* Quick signup hint */}
+        <div className="rounded-xl p-5 mb-5 text-center" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+          <h3 className="text-[15px] font-bold text-white mb-1.5">Join in 30 seconds</h3>
+          <p className="text-xs mb-3.5" style={{ color: "var(--t2)" }}>Tell us your apartment number and whether you&apos;re an owner or tenant. That&apos;s it.</p>
+          <Link href={`/signup?postcode=${encodeURIComponent(postcode)}`}
+            className="inline-block font-bold text-[14px] px-8 py-3 rounded-[10px] text-white" style={{ background: teal }}>
+            Sign up now
+          </Link>
+        </div>
+
+        <div className="text-center py-5 text-[11px]" style={{ color: "#334155" }}>BlockVoice — Everything about your building. In one place.</div>
+      </div>
 
       {/* Footer */}
       <footer className="flex justify-between items-center flex-wrap gap-2.5 px-[6%] py-5"
