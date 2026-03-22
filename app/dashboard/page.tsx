@@ -131,6 +131,12 @@ export default function Dashboard() {
   const [agentComment, setAgentComment] = useState("");
   const [fhComment, setFhComment] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [showAgentDetails, setShowAgentDetails] = useState(false);
+  const [showFhDetails, setShowFhDetails] = useState(false);
   const [showAgentRating, setShowAgentRating] = useState(false);
   const [showFhRating, setShowFhRating] = useState(false);
   const [submittingRating, setSubmittingRating] = useState(false);
@@ -537,208 +543,239 @@ export default function Dashboard() {
           </Link>
         )}
 
-        {/* ── Development Overview ────────────────────────────────────── */}
+        {/* ── Development Overview (compact + action bar) ──────────── */}
         <Card title="Your Development">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl md:text-2xl font-extrabold text-white mb-1">{dev.name}</h2>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-[rgba(255,255,255,0.55)]">
-                <span>{dev.postcodes?.[0]}</span>
-                <span className="text-[rgba(255,255,255,0.2)]">·</span>
-                <span>{dev.total_units.toLocaleString()} units</span>
-                {dev.developer && (
-                  <>
-                    <span className="text-[rgba(255,255,255,0.2)]">·</span>
-                    <span>{dev.developer}</span>
-                  </>
-                )}
-              </div>
+              <h2 className="text-lg font-extrabold text-white">{dev.name}</h2>
+              <span className="text-[11px] text-[rgba(255,255,255,0.45)]">{dev.postcodes?.[0]} · {dev.total_units.toLocaleString()} units{blocks.length > 0 ? ` · ${blocks.length} blocks` : ""}{dev.developer ? ` · ${dev.developer}` : ""}</span>
             </div>
-            <div className="md:w-80 flex-shrink-0">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-[rgba(255,255,255,0.55)]">{memberCount} of ~{dev.total_units} apartments signed up</span>
-                <span className="text-[#1ec6a4] font-semibold">{pct}%</span>
-              </div>
-              <div className="w-full bg-[#0f1f3d] rounded-full h-2.5">
-                <div className="bg-[#1ec6a4] h-2.5 rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%` }} />
-              </div>
+            <div className="text-right">
+              <span className="text-xs text-[rgba(255,255,255,0.5)]">{memberCount} of ~{dev.total_units} signed up</span>
+              <div className="text-sm font-extrabold text-[#1ec6a4]">{pct}%</div>
             </div>
           </div>
+          <div className="mt-2 bg-[#0f1f3d] rounded h-1 overflow-hidden">
+            <div className="bg-[#1ec6a4] h-1 rounded transition-all" style={{ width: `${Math.max(Math.min(pct, 100), 0.5)}%` }} />
+          </div>
+          {/* Action bar */}
+          <div className="flex gap-2 mt-3 pt-3 border-t border-[#1e3a5f]">
+            <button onClick={() => setInviteOpen(!inviteOpen)}
+              className="flex-1 flex items-center justify-center gap-1.5 bg-[#1ec6a4] text-[#0f1f3d] border-none rounded-lg py-2.5 font-bold text-xs cursor-pointer">
+              👥 Invite your neighbours
+            </button>
+            <button onClick={() => setFeedbackOpen(!feedbackOpen)}
+              className="flex-1 flex items-center justify-center gap-1.5 bg-[#334155] text-white border border-[#1e3a5f] rounded-lg py-2.5 font-bold text-xs cursor-pointer">
+              💬 Send us feedback
+            </button>
+          </div>
         </Card>
+
+        {/* Invite expanded */}
+        {inviteOpen && dev && (
+          <Card title="">
+            <div className="text-[9px] text-[rgba(255,255,255,0.3)] uppercase tracking-wider mb-2">Invite other residents</div>
+            <div className="flex gap-1.5 mb-2">
+              <input readOnly value={`blockvoice.co.uk/join/${dev.slug}`}
+                className="flex-1 bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs" />
+              <button onClick={() => { navigator.clipboard.writeText(`https://blockvoice.co.uk/join/${dev.slug}`); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
+                className="bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-[11px] font-semibold cursor-pointer">
+                {linkCopied ? "✓ Copied!" : "Copy"}
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              <a href={`https://wa.me/?text=${encodeURIComponent(`Hey 👋 I've joined BlockVoice for ${dev.name}. Join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1.5 bg-[#25D366] text-white border-none rounded-lg py-2 font-bold text-xs">
+                💬 WhatsApp
+              </a>
+              <a href={`mailto:?subject=${encodeURIComponent(`Join BlockVoice for ${dev.name}`)}&body=${encodeURIComponent(`Join BlockVoice for ${dev.name}: https://blockvoice.co.uk/join/${dev.slug}`)}`}
+                className="flex items-center justify-center gap-1.5 bg-[#334155] text-white border-none rounded-lg py-2 font-bold text-xs">
+                ✉️ Email
+              </a>
+            </div>
+          </Card>
+        )}
+
+        {/* Feedback expanded */}
+        {feedbackOpen && (
+          <Card title="">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-sm font-bold text-white">We&apos;d love your feedback</h3>
+              <button onClick={() => setFeedbackOpen(false)} className="text-[rgba(255,255,255,0.3)] text-lg cursor-pointer bg-transparent border-none">×</button>
+            </div>
+            <p className="text-[11px] text-[rgba(255,255,255,0.4)] mb-2">Tell us what&apos;s working, what&apos;s not, and what you&apos;d like to see next.</p>
+            <textarea value={feedbackText} onChange={e => setFeedbackText(e.target.value)}
+              placeholder="What would make BlockVoice more useful?"
+              rows={3} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none mb-2" />
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-[rgba(255,255,255,0.2)]">Sent to hello@blockvoice.co.uk</span>
+              <button onClick={async () => {
+                await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, message: feedbackText }) });
+                setFeedbackText(""); setFeedbackOpen(false); setFeedbackSent(true); setTimeout(() => setFeedbackSent(false), 3000);
+              }} className="bg-[#1ec6a4] text-[#0f1f3d] border-none rounded-lg px-5 py-2 font-bold text-xs cursor-pointer">Send</button>
+            </div>
+          </Card>
+        )}
+        {feedbackSent && <p className="text-xs text-green-400 text-center">Thanks! Your feedback has been sent.</p>}
+
+        {/* ── Service Charges (moved up — highest value section) ──────── */}
+        {userStatus === "owner" && (
+          <ServiceChargesSection
+            profileId={userId}
+            buildingId={userBuildingId}
+            postcode={dev?.postcodes?.[0] || ""}
+            buildingName={userBlockName || ""}
+            flatNumber={userFlat || ""}
+          />
+        )}
 
         {/* ── Agent + Freeholder — 2 columns on desktop ──────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-          {/* Managing Agent */}
+          {/* Managing Agent (compact) */}
           <Card title="Managing Agent">
             {agent ? (
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-white">{agent.name}</span>
+                  <span className="text-[15px] font-bold text-white">{agent.name}</span>
                   {link && confidenceBadge(link.agent_confidence)}
                 </div>
-                {link?.agent_source && (
-                  <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">Source: {link.agent_source}</p>
-                )}
-                <ContactDetails phone={agent.phone} email={agent.email} website={agent.website} address={agent.address} />
-
-                {/* Inline rating */}
-                <div className="mt-4 pt-4 border-t border-[#1e3a5f]">
+                {agent.phone && <div className="text-[11px] text-[rgba(255,255,255,0.5)]">{agent.phone}</div>}
+                {/* Overall score */}
+                <div className="flex items-center gap-2 mt-2">
                   {agentAgg ? (
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-xl font-bold ${ratingColor(agentAgg.overall)}`}>{agentAgg.overall.toFixed(1)}</span>
-                        <span className="text-xs text-[rgba(255,255,255,0.3)]">/ 5.0 · {allAgentRatings.length} ratings</span>
-                      </div>
-                      <div className="space-y-1.5">
-                        {AGENT_CATS.map(c => (
-                          <div key={c} className="flex items-center gap-2 text-xs">
-                            <span className="w-24 text-[rgba(255,255,255,0.45)]">{AGENT_LABELS[c]}</span>
-                            <div className="flex-1 h-1.5 bg-[#0f1f3d] rounded-full overflow-hidden">
-                              <div className={`h-1.5 rounded-full ${ratingBarColor(agentAgg[c])}`} style={{ width: `${(agentAgg[c] / 5) * 100}%` }} />
-                            </div>
-                            <span className="w-5 text-right font-semibold text-white text-[11px]">{agentAgg[c].toFixed(1)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <>
+                      <span className={`text-lg font-black ${ratingColor(agentAgg.overall)}`}>{agentAgg.overall.toFixed(1)}</span>
+                      <span className="text-[11px] text-[rgba(255,255,255,0.3)]">/ 5.0 · {allAgentRatings.length} ratings</span>
+                    </>
                   ) : (
-                    <p className="text-xs text-[rgba(255,255,255,0.3)] mb-2">
+                    <span className="text-[11px] text-[rgba(255,255,255,0.3)]">
                       {allAgentRatings.length > 0
-                        ? `${allAgentRatings.length} rating${allAgentRatings.length !== 1 ? "s" : ""} — need ${3 - allAgentRatings.length} more to show scores.`
+                        ? `${allAgentRatings.length} rating${allAgentRatings.length !== 1 ? "s" : ""} — need ${3 - allAgentRatings.length} more to show.`
                         : "No ratings yet — be the first!"}
-                    </p>
-                  )}
-                  <button onClick={() => setShowAgentRating(!showAgentRating)}
-                    className="bg-[#1ec6a4]/10 border border-[#1ec6a4]/25 text-[#1ec6a4] px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#1ec6a4]/20 transition-colors w-full">
-                    {myAgentRating ? "★ Update your rating" : "★ Rate this managing agent"}
-                  </button>
-                  {showAgentRating && (
-                    <div className="mt-3 space-y-2.5">
-                      {AGENT_CATS.map(c => (
-                        <div key={c} className="flex items-center justify-between">
-                          <span className="text-xs text-[rgba(255,255,255,0.55)]">{AGENT_LABELS[c]}</span>
-                          <StarSelector value={agentForm[c] || 0} onChange={v => setAgentForm({ ...agentForm, [c]: v })} />
-                        </div>
-                      ))}
-                      <textarea placeholder="Optional comment..." value={agentComment} onChange={e => setAgentComment(e.target.value)}
-                        rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none" />
-                      <button onClick={submitAgentRating} disabled={submittingRating}
-                        className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-xs font-semibold disabled:opacity-50">
-                        {submittingRating ? "Saving..." : myAgentRating ? "Update Rating" : "Submit Rating"}
-                      </button>
-                    </div>
+                    </span>
                   )}
                 </div>
+                {/* Collapsible full ratings */}
+                {agentAgg && (
+                  <button onClick={() => setShowAgentDetails(!showAgentDetails)} className="text-[10px] text-[#1ec6a4] bg-transparent border-none cursor-pointer mt-1 p-0">
+                    {showAgentDetails ? "Hide ratings" : "See full ratings"}
+                  </button>
+                )}
+                {showAgentDetails && agentAgg && (
+                  <div className="mt-2 pt-2 border-t border-[#1e3a5f]">
+                    {AGENT_CATS.map(c => (
+                      <div key={c} className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] text-[rgba(255,255,255,0.35)]">{AGENT_LABELS[c]}</span>
+                        <div className="flex items-center gap-1">
+                          <div className="w-[50px] h-[3px] bg-[#0f1f3d] rounded overflow-hidden">
+                            <div className={`h-full ${ratingBarColor(agentAgg[c])}`} style={{ width: `${(agentAgg[c] / 5) * 100}%` }} />
+                          </div>
+                          <span className={`text-[10px] font-bold ${ratingColor(agentAgg[c])}`}>{agentAgg[c].toFixed(1)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button onClick={() => setShowAgentRating(!showAgentRating)}
+                  className="mt-2 w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg py-1.5 text-[11px] font-semibold text-[#1ec6a4] cursor-pointer">
+                  {myAgentRating ? "★ Update your rating" : "★ Rate this managing agent"}
+                </button>
+                {showAgentRating && (
+                  <div className="mt-3 space-y-2.5">
+                    {AGENT_CATS.map(c => (
+                      <div key={c} className="flex items-center justify-between">
+                        <span className="text-xs text-[rgba(255,255,255,0.55)]">{AGENT_LABELS[c]}</span>
+                        <StarSelector value={agentForm[c] || 0} onChange={v => setAgentForm({ ...agentForm, [c]: v })} />
+                      </div>
+                    ))}
+                    <textarea placeholder="Optional comment..." value={agentComment} onChange={e => setAgentComment(e.target.value)}
+                      rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none" />
+                    <button onClick={submitAgentRating} disabled={submittingRating}
+                      className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-xs font-semibold disabled:opacity-50">
+                      {submittingRating ? "Saving..." : myAgentRating ? "Update Rating" : "Submit Rating"}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-[rgba(255,255,255,0.3)] text-sm">No managing agent recorded yet.</p>
             )}
           </Card>
 
-          {/* Freeholder */}
+          {/* Freeholder (compact) */}
           <Card title="Freeholder">
             {freeholder ? (
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-white">{freeholder.name}</span>
+                  <span className="text-[15px] font-bold text-white">{freeholder.name}</span>
                   {link && confidenceBadge(link.freeholder_confidence)}
                 </div>
                 {freeholder.parent_company && (
-                  <p className="text-xs text-[rgba(255,255,255,0.3)] mb-1">Part of {freeholder.parent_company}</p>
+                  <div className="text-[11px] text-[rgba(255,255,255,0.5)]">{freeholder.parent_company}</div>
                 )}
-                {link?.freeholder_source && (
-                  <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">Source: {link.freeholder_source}</p>
-                )}
-                <ContactDetails phone={freeholder.phone} email={freeholder.email} address={freeholder.address} />
-
-                {/* Inline rating */}
-                <div className="mt-4 pt-4 border-t border-[#1e3a5f]">
+                {/* Overall score */}
+                <div className="flex items-center gap-2 mt-2">
                   {fhAgg ? (
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-xl font-bold ${ratingColor(fhAgg.overall)}`}>{fhAgg.overall.toFixed(1)}</span>
-                        <span className="text-xs text-[rgba(255,255,255,0.3)]">/ 5.0 · {allFhRatings.length} ratings</span>
-                      </div>
-                      <div className="space-y-1.5">
-                        {FH_CATS.map(c => (
-                          <div key={c} className="flex items-center gap-2 text-xs">
-                            <span className="w-28 text-[rgba(255,255,255,0.45)]">{FH_LABELS[c]}</span>
-                            <div className="flex-1 h-1.5 bg-[#0f1f3d] rounded-full overflow-hidden">
-                              <div className={`h-1.5 rounded-full ${ratingBarColor(fhAgg[c])}`} style={{ width: `${(fhAgg[c] / 5) * 100}%` }} />
-                            </div>
-                            <span className="w-5 text-right font-semibold text-white text-[11px]">{fhAgg[c].toFixed(1)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <>
+                      <span className={`text-lg font-black ${ratingColor(fhAgg.overall)}`}>{fhAgg.overall.toFixed(1)}</span>
+                      <span className="text-[11px] text-[rgba(255,255,255,0.3)]">/ 5.0 · {allFhRatings.length} ratings</span>
+                    </>
                   ) : (
-                    <p className="text-xs text-[rgba(255,255,255,0.3)] mb-2">
+                    <span className="text-[11px] text-[rgba(255,255,255,0.3)]">
                       {allFhRatings.length > 0
-                        ? `${allFhRatings.length} rating${allFhRatings.length !== 1 ? "s" : ""} — need ${3 - allFhRatings.length} more to show scores.`
+                        ? `${allFhRatings.length} rating${allFhRatings.length !== 1 ? "s" : ""} — need ${3 - allFhRatings.length} more to show.`
                         : "No ratings yet — be the first!"}
-                    </p>
-                  )}
-                  <button onClick={() => setShowFhRating(!showFhRating)}
-                    className="bg-[#1ec6a4]/10 border border-[#1ec6a4]/25 text-[#1ec6a4] px-4 py-2 rounded-lg text-xs font-semibold hover:bg-[#1ec6a4]/20 transition-colors w-full">
-                    {myFhRating ? "★ Update your rating" : "★ Rate this freeholder"}
-                  </button>
-                  {showFhRating && (
-                    <div className="mt-3 space-y-2.5">
-                      {FH_CATS.map(c => (
-                        <div key={c} className="flex items-center justify-between">
-                          <span className="text-xs text-[rgba(255,255,255,0.55)]">{FH_LABELS[c]}</span>
-                          <StarSelector value={fhForm[c] || 0} onChange={v => setFhForm({ ...fhForm, [c]: v })} />
-                        </div>
-                      ))}
-                      <textarea placeholder="Optional comment..." value={fhComment} onChange={e => setFhComment(e.target.value)}
-                        rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none" />
-                      <button onClick={submitFhRating} disabled={submittingRating}
-                        className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-xs font-semibold disabled:opacity-50">
-                        {submittingRating ? "Saving..." : myFhRating ? "Update Rating" : "Submit Rating"}
-                      </button>
-                    </div>
+                    </span>
                   )}
                 </div>
+                {fhAgg && (
+                  <button onClick={() => setShowFhDetails(!showFhDetails)} className="text-[10px] text-[#1ec6a4] bg-transparent border-none cursor-pointer mt-1 p-0">
+                    {showFhDetails ? "Hide ratings" : "See full ratings"}
+                  </button>
+                )}
+                {showFhDetails && fhAgg && (
+                  <div className="mt-2 pt-2 border-t border-[#1e3a5f]">
+                    {FH_CATS.map(c => (
+                      <div key={c} className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] text-[rgba(255,255,255,0.35)]">{FH_LABELS[c]}</span>
+                        <div className="flex items-center gap-1">
+                          <div className="w-[50px] h-[3px] bg-[#0f1f3d] rounded overflow-hidden">
+                            <div className={`h-full ${ratingBarColor(fhAgg[c])}`} style={{ width: `${(fhAgg[c] / 5) * 100}%` }} />
+                          </div>
+                          <span className={`text-[10px] font-bold ${ratingColor(fhAgg[c])}`}>{fhAgg[c].toFixed(1)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button onClick={() => setShowFhRating(!showFhRating)}
+                  className="mt-2 w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg py-1.5 text-[11px] font-semibold text-[#1ec6a4] cursor-pointer">
+                  {myFhRating ? "★ Update your rating" : "★ Rate this freeholder"}
+                </button>
+                {showFhRating && (
+                  <div className="mt-3 space-y-2.5">
+                    {FH_CATS.map(c => (
+                      <div key={c} className="flex items-center justify-between">
+                        <span className="text-xs text-[rgba(255,255,255,0.55)]">{FH_LABELS[c]}</span>
+                        <StarSelector value={fhForm[c] || 0} onChange={v => setFhForm({ ...fhForm, [c]: v })} />
+                      </div>
+                    ))}
+                    <textarea placeholder="Optional comment..." value={fhComment} onChange={e => setFhComment(e.target.value)}
+                      rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none" />
+                    <button onClick={submitFhRating} disabled={submittingRating}
+                      className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-xs font-semibold disabled:opacity-50">
+                      {submittingRating ? "Saving..." : myFhRating ? "Update Rating" : "Submit Rating"}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-[rgba(255,255,255,0.3)] text-sm">No freeholder recorded yet.</p>
             )}
           </Card>
         </div>
-
-        {/* ── Suggest correction ──────────────────────────────────────── */}
-        <div className="text-center">
-          <button onClick={() => setShowCorrection(!showCorrection)} className="text-xs text-[#1ec6a4] hover:underline">
-            Something wrong? Suggest a correction
-          </button>
-          {corrSuccess && <p className="text-xs text-green-400 mt-1">Thanks! We&apos;ll review your correction.</p>}
-        </div>
-
-        {showCorrection && (
-          <Card title="Suggest a Correction">
-            <div className="space-y-3">
-              <select value={corrField} onChange={e => setCorrField(e.target.value)}
-                className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2.5 text-white text-sm">
-                <option value="">What needs correcting?</option>
-                {CORRECTION_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
-              </select>
-              {corrField && (
-                <>
-                  {getCurrentValue(corrField) && (
-                    <p className="text-xs text-[rgba(255,255,255,0.3)]">Currently: {getCurrentValue(corrField)}</p>
-                  )}
-                  <input type="text" value={corrValue} onChange={e => setCorrValue(e.target.value)}
-                    placeholder="What should it be?" className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2.5 text-white text-sm" />
-                  <button onClick={submitCorrection} disabled={submittingCorr}
-                    className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
-                    {submittingCorr ? "Submitting..." : "Submit Correction"}
-                  </button>
-                </>
-              )}
-            </div>
-          </Card>
-        )}
 
         {/* ── Blocks Grid ────────────────────────────────────────────── */}
         {blocks.length > 0 && (
@@ -889,60 +926,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* ── Invite Other Residents ────────────────────────────────── */}
-        {dev && (
-          <Card title="Invite Other Residents">
-            <p className="text-sm text-[rgba(255,255,255,0.55)] mb-4">
-              The more residents who join, the stronger your voice. Share the link below to invite your neighbours.
-            </p>
-            <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
-              {memberCount} resident{memberCount !== 1 ? "s" : ""} have joined {dev.name} so far
-            </p>
-
-            {/* Share link */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex-1 bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2.5 text-xs text-[rgba(255,255,255,0.6)] truncate">
-                blockvoice.co.uk/join/{dev.slug}
-              </div>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(`https://blockvoice.co.uk/join/${dev.slug}`);
-                  setLinkCopied(true);
-                  setTimeout(() => setLinkCopied(false), 2000);
-                }}
-                className="px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors"
-                style={{ background: linkCopied ? "rgba(34,197,94,0.2)" : "var(--teal-dim)", border: `1px solid ${linkCopied ? "rgba(34,197,94,0.4)" : "var(--teal-border)"}`, color: linkCopied ? "#4ade80" : "#1ec6a4" }}>
-                {linkCopied ? "✓ Copied!" : "Copy Link"}
-              </button>
-            </div>
-
-            {/* Share buttons */}
-            <div className="flex gap-2">
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Hey 👋 I've joined BlockVoice for ${dev.name}. It's a free platform where residents can see who manages our building, report issues, and hold our managing agent accountable. Join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 bg-[#25D366]/10 border border-[#25D366]/25 text-[#25D366] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#25D366]/20 transition-colors">
-                <span>💬</span> WhatsApp
-              </a>
-              <a
-                href={`mailto:?subject=${encodeURIComponent(`Join BlockVoice for ${dev.name}`)}&body=${encodeURIComponent(`Hi,\n\nI've joined BlockVoice — a free platform for residents at ${dev.name} to get transparency on our managing agent, report issues, and coordinate action together.\n\nYou can join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#1ec6a4]/10 border border-[#1ec6a4]/25 text-[#1ec6a4] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#1ec6a4]/20 transition-colors">
-                <span>✉️</span> Email
-              </a>
-            </div>
-          </Card>
-        )}
-
-        {/* ── Service Charges (Owner only) ────────────────────────────── */}
-        {userStatus === "owner" && (
-          <ServiceChargesSection
-            profileId={userId}
-            buildingId={userBuildingId}
-            postcode={dev?.postcodes?.[0] || ""}
-            buildingName={userBlockName || ""}
-            flatNumber={userFlat || ""}
-          />
-        )}
+        {/* (Invite section moved into overview card action bar above) */}
 
         {/* ── Coming Soon ────────────────────────────────────────────── */}
         <div>
@@ -966,6 +950,40 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* ── Suggest correction (bottom) ──────────────────────────────── */}
+        <div className="text-center">
+          <button onClick={() => setShowCorrection(!showCorrection)} className="text-[11px] text-[rgba(255,255,255,0.3)] hover:underline bg-transparent border-none cursor-pointer">
+            Something wrong? Suggest a correction
+          </button>
+          {corrSuccess && <p className="text-xs text-green-400 mt-1">Thanks! We&apos;ll review your correction.</p>}
+        </div>
+        {showCorrection && (
+          <Card title="Suggest a Correction">
+            <div className="space-y-3">
+              <select value={corrField} onChange={e => setCorrField(e.target.value)}
+                className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2.5 text-white text-sm">
+                <option value="">What needs correcting?</option>
+                {CORRECTION_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+              </select>
+              {corrField && (
+                <>
+                  {getCurrentValue(corrField) && (
+                    <p className="text-xs text-[rgba(255,255,255,0.3)]">Currently: {getCurrentValue(corrField)}</p>
+                  )}
+                  <input type="text" value={corrValue} onChange={e => setCorrValue(e.target.value)}
+                    placeholder="What should it be?" className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2.5 text-white text-sm" />
+                  <button onClick={submitCorrection} disabled={submittingCorr}
+                    className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
+                    {submittingCorr ? "Submitting..." : "Submit Correction"}
+                  </button>
+                </>
+              )}
+            </div>
+          </Card>
+        )}
+
+        <div className="text-center py-3 text-[#334155] text-[10px]">BlockVoice — Everything about your building. In one place.</div>
+
       </div>
     </div>
   );
@@ -973,10 +991,15 @@ export default function Dashboard() {
 
 // ─── sub-components ─────────────────────────────────────────────────────────
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, badge, children }: { title: string; badge?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="bg-[#132847] rounded-xl p-5 border border-[#1e3a5f]">
-      <h3 className="text-xs font-bold uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-3">{title}</h3>
+      {title && (
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="text-xs font-bold uppercase tracking-wide text-[rgba(255,255,255,0.3)]">{title}</h3>
+          {badge}
+        </div>
+      )}
       {children}
     </div>
   );
@@ -1248,17 +1271,17 @@ function ServiceChargesSection({
 
   // ─── render ────────────────────────────────────────────────────────────
 
-  if (scLoading) return <Card title="Service Charges"><p className="text-sm text-[rgba(255,255,255,0.3)]">Loading...</p></Card>;
+  if (scLoading) return <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}><p className="text-sm text-[rgba(255,255,255,0.3)]">Loading...</p></Card>;
 
   // Empty state — no data yet
   if (annuals.length === 0 && !extracting) {
     return (
-      <Card title="Service Charges">
+      <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}>
         <div className="text-center py-8 border border-dashed border-[#1e3a5f] rounded-lg">
           <span className="text-3xl mb-3 block">💷</span>
-          <p className="text-sm text-white font-semibold mb-1">Upload your service charge demand</p>
-          <p className="text-xs text-[rgba(255,255,255,0.4)] mb-4 max-w-xs mx-auto">
-            See how your charges compare and track growth over time.
+          <p className="text-sm text-white font-semibold mb-1">Upload your service charge documents</p>
+          <p className="text-xs text-[rgba(255,255,255,0.4)] mb-4 max-w-sm mx-auto leading-relaxed">
+            Upload your service charge documents and our AI will work out how to allocate them across periods and track your costs.
           </p>
           <label className="inline-block cursor-pointer px-5 py-2.5 bg-[#1ec6a4] text-white text-sm font-bold rounded-lg hover:bg-[#25d4b0] transition-colors">
             Upload your service charge
@@ -1275,7 +1298,7 @@ function ServiceChargesSection({
 
   if (extracting) {
     return (
-      <Card title="Service Charges">
+      <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}>
         <div className="text-center py-10">
           <p className="text-lg text-[#1ec6a4] font-semibold animate-pulse">Analysing your documents...</p>
           <p className="text-xs text-[rgba(255,255,255,0.3)] mt-2">This usually takes 10–20 seconds per document.</p>
@@ -1286,7 +1309,7 @@ function ServiceChargesSection({
 
   return (
     <div className="space-y-4">
-      <Card title="Service Charges">
+      <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}>
         {/* Property size bar */}
         {propSize && !showSizeEditor ? (
           <div className="flex items-center justify-between bg-[#0f1f3d] rounded-lg px-4 py-2.5 mb-4">
