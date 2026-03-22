@@ -139,7 +139,7 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
             {[
               agent ? `Managing agent: ${agent}` : "Managing agent details",
               freeholder ? `Freeholder: ${freeholder}` : "Freeholder details",
-              "Agent rating & reviews",
+              "Service charge analysis",
               "All reported issues",
               "Your block details",
               "Invite & share tools",
@@ -156,28 +156,23 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
         {scStats?.hasData && (
         <div className="rounded-[14px] p-5 mb-4" style={{ background: "var(--navy-card)", border: "1px solid rgba(30,198,164,0.15)" }}>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[11px] font-bold text-white uppercase tracking-[1.5px]">Service charges at {dev?.name}</span>
+            <span className="text-[11px] font-bold text-white uppercase tracking-[1.5px]">Service charges in your building</span>
             <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
           </div>
           <p className="text-xs leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
             Residents at {dev?.name} are already tracking their service charges on BlockVoice. Here&apos;s what they&apos;re seeing.
           </p>
 
-          {/* 3 stat cards */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          {/* Stat cards — £/sqft + YoY only */}
+          <div className="grid grid-cols-2 gap-2 mb-4">
             <div className="rounded-[10px] p-3.5 text-center" style={{ background: "var(--navy)", border: "1px solid var(--navy-card-b)" }}>
               <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Current rate</div>
               <div className="text-2xl font-extrabold" style={{ color: teal }}>£{scStats.avgPerSqft?.toFixed(2)}</div>
               <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>per sqft / year</div>
             </div>
-            <div className="rounded-[10px] p-3.5 text-center" style={{ background: "var(--navy)", border: "1px solid var(--navy-card-b)" }}>
-              <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Monthly cost</div>
-              <div className="text-2xl font-extrabold text-white">£{scStats.avgMonthly?.toLocaleString()}</div>
-              <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>per apartment</div>
-            </div>
             {scStats.lastYoYPct != null && (
             <div className="rounded-[10px] p-3.5 text-center" style={{ background: scStats.lastYoYPct > 5 ? "rgba(248,113,113,0.06)" : "var(--navy)", border: `1px solid ${scStats.lastYoYPct > 5 ? "rgba(248,113,113,0.15)" : "var(--navy-card-b)"}` }}>
-              <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Last year</div>
+              <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Last year&apos;s change</div>
               <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>+{scStats.lastYoYPct.toFixed(1)}%</div>
               <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>year on year</div>
             </div>

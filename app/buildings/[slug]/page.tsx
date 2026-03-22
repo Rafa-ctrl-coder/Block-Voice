@@ -105,6 +105,9 @@ export default function BuildingPage() {
   const [residentCount, setResidentCount] = useState<number | null>(null);
   const [authed, setAuthed] = useState(false);
   const [userDevId, setUserDevId] = useState<string | null>(null);
+  const [scStats, setScStats] = useState<{ hasData: boolean; avgPerSqft?: number; avgMonthly?: number; lastYoYPct?: number | null; trend?: string } | null>(null);
+  const [agentRating, setAgentRating] = useState<{ score: number; count: number } | null>(null);
+  const [fhRating, setFhRating] = useState<{ score: number; count: number } | null>(null);
 
   useEffect(() => {
     if (slug) loadPage();
@@ -149,13 +152,50 @@ export default function BuildingPage() {
       setResidentCount(stats.residentCount || 0);
     } catch { /* stays null */ }
 
+    // fetch SC stats
+    try {
+      const scRes = await fetch(`/api/sc-stats?slug=${encodeURIComponent(slug)}`);
+      const sc = await scRes.json();
+      setScStats(sc);
+    } catch { /* no SC data */ }
+
     // fetch link (agent + freeholder)
     const { data: linkData } = await supabase
       .from("development_links")
       .select("*, managing_agents(*), freeholders(*)")
       .eq("development_id", devData.id)
       .single();
-    if (linkData) setLink(linkData as LinkRow);
+    if (linkData) {
+      setLink(linkData as LinkRow);
+
+      // fetch aggregate ratings for agent and freeholder
+      if (linkData.managing_agent_id) {
+        const { data: agentRatings } = await supabase
+          .from("agent_ratings")
+          .select("responsiveness, communication, value_for_money, maintenance, transparency")
+          .eq("development_id", devData.id);
+        if (agentRatings && agentRatings.length >= 3) {
+          const avg = agentRatings.reduce((sum, r) => {
+            const s = (r.responsiveness + r.communication + r.value_for_money + r.maintenance + r.transparency) / 5;
+            return sum + s;
+          }, 0) / agentRatings.length;
+          setAgentRating({ score: Math.round(avg * 10) / 10, count: agentRatings.length });
+        }
+      }
+      if (linkData.freeholder_id) {
+        const { data: fhRatings } = await supabase
+          .from("freeholder_ratings")
+          .select("building_investment, leaseholder_relations, transparency, accountability")
+          .eq("development_id", devData.id);
+        if (fhRatings && fhRatings.length >= 3) {
+          const avg = fhRatings.reduce((sum, r) => {
+            const s = (r.building_investment + r.leaseholder_relations + r.transparency + r.accountability) / 4;
+            return sum + s;
+          }, 0) / fhRatings.length;
+          setFhRating({ score: Math.round(avg * 10) / 10, count: fhRatings.length });
+        }
+      }
+    }
 
     // fetch blocks
     const { data: blockData } = await supabase
@@ -226,6 +266,8 @@ export default function BuildingPage() {
 
   const agent = link?.managing_agents ?? null;
   const freeholder = link?.freeholders ?? null;
+  const teal = "#1ec6a4";
+  const postcode = dev.postcodes?.[0] || "";
 
   // -- render -----------------------------------------------------------------
 
@@ -233,187 +275,148 @@ export default function BuildingPage() {
     <div className="min-h-screen bg-[#0f1f3d] text-white">
       <Nav />
 
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        {/* ── Header ──────────────────────────────────────────────────── */}
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold mb-1">
-            {dev.name}
-          </h1>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[rgba(255,255,255,0.55)]">
-            <span>{dev.postcodes?.[0]}</span>
-            <span className="text-[rgba(255,255,255,0.2)]">·</span>
-            <span>{dev.total_units.toLocaleString()} units</span>
-            {dev.developer && (
-              <>
-                <span className="text-[rgba(255,255,255,0.2)]">·</span>
-                <span>{dev.developer}</span>
-              </>
-            )}
+      <div className="max-w-[640px] mx-auto px-4 py-8">
+
+        {/* ── Development header (centered, like join page) ──────────── */}
+        <div className="text-center mb-7">
+          <div className="text-[10px] uppercase tracking-[2px] font-bold mb-1" style={{ color: teal }}>Join your neighbours on BlockVoice</div>
+          <h1 className="text-[30px] font-extrabold text-white mb-1.5">{dev.name}</h1>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>{postcode} · {dev.total_units} units{blocks.length > 0 ? ` · ${blocks.length} blocks` : ""}</p>
+          <div className="flex justify-center gap-4 mt-3.5">
+            <div className="rounded-lg px-4 py-2" style={{ background: "#1e293b", border: "1px solid #1e3a5f" }}>
+              <span className="text-lg font-extrabold" style={{ color: teal }}>{residentCount ?? 0}</span>
+              <span className="text-xs ml-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>residents joined</span>
+            </div>
+            <div className="rounded-lg px-4 py-2" style={{ background: "#1e293b", border: "1px solid #1e3a5f" }}>
+              <span className="text-lg font-extrabold text-white">{issueCount}</span>
+              <span className="text-xs ml-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>issues reported</span>
+            </div>
           </div>
-          <p className="text-sm text-[rgba(255,255,255,0.3)] mt-2">
-            {residentCount !== null ? `${residentCount} resident${residentCount !== 1 ? "s" : ""} joined` : "●●● residents joined"}
-          </p>
         </div>
 
-        {/* ── Managing Agent ──────────────────────────────────────────── */}
-        <Card title="Managing Agent">
-          {agent ? (
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-white">{agent.name}</span>
-                {link && confidenceBadge(link.agent_confidence)}
+        {/* ── What you'll see ────────────────────────────────────────── */}
+        <div className="rounded-xl p-5 mb-4" style={{ background: "#1e293b", border: "1px solid #1e3a5f" }}>
+          <h3 className="text-sm font-bold text-white mb-2.5">When you join, you&apos;ll see</h3>
+          <div className="grid grid-cols-2 gap-1">
+            {[
+              agent ? `Managing agent: ${agent.name}` : "Managing agent details",
+              freeholder ? `Freeholder: ${freeholder.name}` : "Freeholder details",
+              "Service charge analysis",
+              "All reported issues",
+              "Your block details",
+              "Invite & share tools",
+            ].map(t => (
+              <div key={t} className="flex items-center gap-1.5 py-1.5">
+                <span className="text-xs" style={{ color: teal }}>✓</span>
+                <span className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{t}</span>
               </div>
-              {link?.agent_source && (
-                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
-                  Source: {link.agent_source}
-                </p>
+            ))}
+          </div>
+
+          {/* Teaser ratings */}
+          {(agentRating || fhRating) && (
+          <div className="mt-3 pt-3 border-t border-[#1e3a5f]">
+            <p className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Resident ratings</p>
+            <div className="grid grid-cols-2 gap-2">
+              {agent && (
+              <div className="rounded-lg p-3" style={{ background: "#0f1f3d", border: "1px solid #1e3a5f" }}>
+                <div className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{agent.name}</div>
+                {agentRating ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-lg font-black ${agentRating.score >= 4 ? "text-green-400" : agentRating.score >= 2.5 ? "text-amber-400" : "text-red-400"}`}>{agentRating.score.toFixed(1)}</span>
+                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>/ 5.0</span>
+                  </div>
+                ) : (
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Not enough ratings yet</span>
+                )}
+              </div>
               )}
-              {authed ? (
-                <ContactDetails
-                  phone={agent.phone}
-                  email={agent.email}
-                  website={agent.website}
-                  address={agent.address}
-                />
-              ) : (
-                <LockedRow label="Sign up to see contact details" slug={slug} />
+              {freeholder && (
+              <div className="rounded-lg p-3" style={{ background: "#0f1f3d", border: "1px solid #1e3a5f" }}>
+                <div className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{freeholder.name}</div>
+                {fhRating ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-lg font-black ${fhRating.score >= 4 ? "text-green-400" : fhRating.score >= 2.5 ? "text-amber-400" : "text-red-400"}`}>{fhRating.score.toFixed(1)}</span>
+                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>/ 5.0</span>
+                  </div>
+                ) : (
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Not enough ratings yet</span>
+                )}
+              </div>
               )}
             </div>
-          ) : (
-            <p className="text-[rgba(255,255,255,0.3)] text-sm">
-              No managing agent recorded yet.
+            <p className="text-[10px] mt-2" style={{ color: teal }}>
+              <Link href={`/signup?building=${slug}`} className="hover:underline">Sign up to see full ratings and add yours →</Link>
             </p>
+          </div>
           )}
-        </Card>
+        </div>
 
-        {/* ── Freeholder ──────────────────────────────────────────────── */}
-        <Card title="Freeholder">
-          {freeholder ? (
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-white">
-                  {freeholder.name}
-                </span>
-                {link && confidenceBadge(link.freeholder_confidence)}
-              </div>
-              {freeholder.parent_company && (
-                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-1">
-                  Part of {freeholder.parent_company}
-                </p>
-              )}
-              {link?.freeholder_source && (
-                <p className="text-xs text-[rgba(255,255,255,0.3)] mb-3">
-                  Source: {link.freeholder_source}
-                </p>
-              )}
-              {authed ? (
-                <ContactDetails
-                  phone={freeholder.phone}
-                  email={freeholder.email}
-                  address={freeholder.address}
-                />
-              ) : (
-                <LockedRow label="Sign up to see contact details" slug={slug} />
-              )}
+        {/* ── Service charge snapshot teaser ──────────────────────────── */}
+        {scStats?.hasData && (
+        <div className="rounded-[14px] p-5 mb-4" style={{ background: "#1e293b", border: "1px solid rgba(30,198,164,0.15)" }}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[11px] font-bold text-white uppercase tracking-[1.5px]">Service charges in your building</span>
+            <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
+          </div>
+          <p className="text-xs leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
+            Residents at {dev.name} are already tracking their service charges on BlockVoice. Here&apos;s what they&apos;re seeing.
+          </p>
+
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="rounded-[10px] p-3.5 text-center" style={{ background: "#0f1f3d", border: "1px solid #1e3a5f" }}>
+              <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>Current rate</div>
+              <div className="text-2xl font-extrabold" style={{ color: teal }}>£{scStats.avgPerSqft?.toFixed(2)}</div>
+              <div className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>per sqft / year</div>
             </div>
-          ) : (
-            <p className="text-[rgba(255,255,255,0.3)] text-sm">
-              No freeholder recorded yet.
-            </p>
-          )}
-        </Card>
+            {scStats.lastYoYPct != null && (
+            <div className="rounded-[10px] p-3.5 text-center" style={{ background: scStats.lastYoYPct > 5 ? "rgba(248,113,113,0.06)" : "#0f1f3d", border: `1px solid ${scStats.lastYoYPct > 5 ? "rgba(248,113,113,0.15)" : "#1e3a5f"}` }}>
+              <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>Last year&apos;s change</div>
+              <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>+{scStats.lastYoYPct.toFixed(1)}%</div>
+              <div className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>year on year</div>
+            </div>
+            )}
+          </div>
 
-        {/* ── Blocks ──────────────────────────────────────────────────── */}
-        {blocks.length > 0 && (
-          <Card title="Blocks">
-            <div className="flex flex-wrap gap-2">
-              {blocks.map((b) => (
-                <span
-                  key={b.id}
-                  className="bg-[#162d50] text-[rgba(255,255,255,0.7)] text-xs px-3 py-1.5 rounded-lg"
-                >
-                  {b.name}
-                  <span className="text-[rgba(255,255,255,0.3)] ml-1">
-                    · {b.total_units} units
-                  </span>
-                </span>
+          {/* Blurred YoY chart */}
+          <div className="relative overflow-hidden rounded-[10px] mb-4" style={{ background: "#0f1f3d", border: "1px solid #1e3a5f" }}>
+            <div className="flex items-end justify-center gap-6 h-20 px-8 pt-5 pb-3.5" style={{ filter: "blur(5px)", opacity: 0.4 }}>
+              {[{ h: 22, c: "#fbbf24", y: "2023/24" }, { h: 42, c: "#f87171", y: "2024/25" }, { h: 62, c: "#f87171", y: "2025/26" }].map(b => (
+                <div key={b.y} className="text-center">
+                  <div className="w-[70px] mx-auto rounded-t" style={{ height: b.h, background: b.c }} />
+                  <div className="text-[9px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>{b.y}</div>
+                </div>
               ))}
             </div>
-          </Card>
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+              <div className="text-[13px] font-bold text-white mb-0.5">
+                {scStats.trend === "accelerating" ? "Year-by-year growth is accelerating" : "See how your charges are trending"}
+              </div>
+              <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>Sign up to see the full breakdown</div>
+            </div>
+          </div>
+
+          <Link href={`/signup?building=${slug}`}
+            className="block w-full py-3.5 rounded-[10px] font-bold text-[15px] text-center text-white" style={{ background: teal }}>
+            Join {dev.name} on BlockVoice — free
+          </Link>
+          <p className="text-[11px] text-center mt-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Add your service charge to help build accurate data for fellow residents.
+          </p>
+        </div>
         )}
 
-        {/* ── Issues ──────────────────────────────────────────────────── */}
-        <Card
-          title={
-            issueCount > 0
-              ? `${issueCount} open issue${issueCount !== 1 ? "s" : ""} raised by residents`
-              : "No open issues"
-          }
-        >
-          {issues.length === 0 ? (
-            <p className="text-[rgba(255,255,255,0.3)] text-sm">
-              No issues have been raised yet.
-            </p>
-          ) : authed ? (
-            /* ── GATED: full issue list ── */
-            <div className="space-y-3">
-              {issues.map((issue) => (
-                <div
-                  key={issue.id}
-                  className="bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg p-4"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h4 className="font-semibold text-white text-sm">
-                      <span className="mr-1.5">
-                        {CATEGORY_EMOJI[issue.category] || "📋"}
-                      </span>
-                      {issue.title}
-                    </h4>
-                    {statusBadge(issue.status)}
-                  </div>
-                  {issue.description && (
-                    <p className="text-[rgba(255,255,255,0.55)] text-xs mt-1 mb-2">
-                      {issue.description}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-3 text-xs text-[rgba(255,255,255,0.3)]">
-                    <span>
-                      {issue.supporter_count}{" "}
-                      {issue.supporter_count === 1 ? "resident" : "residents"}
-                    </span>
-                    <span>
-                      {new Date(issue.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            /* ── PUBLIC: teaser list ── */
-            <div className="relative">
-              <div className="space-y-2">
-                {issues.slice(0, 3).map((issue, i) => (
-                  <div
-                    key={issue.id}
-                    className={`flex items-center gap-2 text-sm ${i >= 2 ? "opacity-40" : ""}`}
-                  >
-                    <span>{CATEGORY_EMOJI[issue.category] || "📋"}</span>
-                    <span className="text-[rgba(255,255,255,0.7)]">
-                      {truncate(issue.title, 60)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {issues.length > 2 && (
-                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-gray-900 to-transparent flex items-end justify-center pb-1">
-                  <span className="text-xs text-[rgba(255,255,255,0.55)]">
-                    Sign up to see all issues and add your voice
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-        </Card>
+        {/* ── Join in 30 seconds CTA ─────────────────────────────────── */}
+        {!authed && (
+        <div className="rounded-xl p-5 mb-5 text-center" style={{ background: "#1e293b", border: "1px solid #1e3a5f" }}>
+          <h3 className="text-[15px] font-bold text-white mb-1.5">Join in 30 seconds</h3>
+          <p className="text-xs mb-3.5" style={{ color: "rgba(255,255,255,0.5)" }}>Tell us your apartment number and whether you&apos;re an owner or tenant. That&apos;s it.</p>
+          <Link href={`/signup?building=${slug}`}
+            className="inline-block font-bold text-[14px] px-8 py-3 rounded-[10px] text-white" style={{ background: teal }}>
+            Sign up now
+          </Link>
+        </div>
+        )}
 
         {/* ── Correction link (authed only) ───────────────────────────── */}
         {authed && (
@@ -425,20 +428,7 @@ export default function BuildingPage() {
           </p>
         )}
 
-        {/* ── CTA (public) ────────────────────────────────────────────── */}
-        {!authed && (
-          <div className="bg-[#132847] rounded-xl p-6 text-center border border-[#1e3a5f]">
-            <Link
-              href={`/signup?building=${slug}`}
-              className="block w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-3.5 rounded-xl font-bold text-base"
-            >
-              Sign up free to see full details and raise issues
-            </Link>
-            <p className="text-xs text-[rgba(255,255,255,0.3)] mt-3">
-              Join residents at {dev.name} · Free forever · 30 seconds
-            </p>
-          </div>
-        )}
+        <div className="text-center py-5 text-[11px]" style={{ color: "#334155" }}>BlockVoice — Everything about your building. In one place.</div>
       </div>
     </div>
   );
