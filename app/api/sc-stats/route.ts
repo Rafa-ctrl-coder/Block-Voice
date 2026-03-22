@@ -70,33 +70,41 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Group annuals by year, annualise each entry
-    const yearData: Record<string, { totals: number[]; perSqfts: number[]; monthlies: number[] }> = {};
+    // Group annuals by year — annualise ALL records for per-sqft/monthly averages
+    // but only use complete records for YoY growth calculations
+    const yearData: Record<string, { totals: number[]; perSqfts: number[]; monthlies: number[]; completePerSqfts: number[] }> = {};
 
     for (const a of annuals) {
-      const isPartial = a.is_half_yearly && !a.has_both_halves;
-      const isQPartial = a.quarter_count > 0 && a.quarter_count < 4;
+      const isPartialHY = a.is_half_yearly && !a.has_both_halves;
+      const qCount = a.quarter_count || 0;
+      const isPartialQ = qCount > 0 && qCount < 4;
+      const isComplete = a.has_both_halves || qCount >= 4;
       const total = Number(a.annual_total);
 
-      // Annualise
+      // Annualise partial records — check quarterly first (takes precedence)
       let annualised = total;
-      let months = 12;
-      if (isPartial) { annualised = total * 2; months = 6; }
-      else if (isQPartial) { annualised = (total / a.quarter_count) * 4; months = a.quarter_count * 3; }
+      if (isPartialQ) annualised = (total / qCount) * 4;
+      else if (isPartialHY) annualised = total * 2;
 
-      const monthly = total / months;
+      const monthly = annualised / 12;
       const sqft = sizeMap[`${a.profile_id}|${a.building_id}`] || 0;
       const perSqft = sqft > 0 ? annualised / sqft : 0;
 
-      if (!yearData[a.year]) yearData[a.year] = { totals: [], perSqfts: [], monthlies: [] };
+      if (!yearData[a.year]) yearData[a.year] = { totals: [], perSqfts: [], monthlies: [], completePerSqfts: [] };
       yearData[a.year].totals.push(annualised);
       if (perSqft > 0) yearData[a.year].perSqfts.push(perSqft);
       yearData[a.year].monthlies.push(monthly);
+      // Only complete records count for YoY
+      if (isComplete && perSqft > 0) yearData[a.year].completePerSqfts.push(perSqft);
     }
 
     const years = Object.keys(yearData).sort();
 
-    // Calculate averages for the latest year
+    if (years.length === 0) {
+      return NextResponse.json({ hasData: false });
+    }
+
+    // Calculate averages for the latest year (using all data, annualised)
     const latestYear = years[years.length - 1];
     const latestData = yearData[latestYear];
 
@@ -105,11 +113,11 @@ export async function GET(req: NextRequest) {
     const avgPerSqft = avg(latestData.perSqfts);
     const avgMonthly = avg(latestData.monthlies);
 
-    // Calculate YoY for each year pair
+    // Calculate YoY using only complete records (no partial annualisations)
     const yoyPcts: { year: string; pct: number }[] = [];
     for (let i = 1; i < years.length; i++) {
-      const prevSqfts = yearData[years[i - 1]].perSqfts;
-      const currSqfts = yearData[years[i]].perSqfts;
+      const prevSqfts = yearData[years[i - 1]].completePerSqfts;
+      const currSqfts = yearData[years[i]].completePerSqfts;
       if (prevSqfts.length > 0 && currSqfts.length > 0) {
         const prevAvg = avg(prevSqfts);
         const currAvg = avg(currSqfts);

@@ -183,7 +183,7 @@ export default function Home() {
                 {scStats.lastYoYPct != null && (
                 <>
                 <div>
-                  <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>+{scStats.lastYoYPct.toFixed(1)}%</div>
+                  <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>{scStats.lastYoYPct > 0 ? "+" : ""}{scStats.lastYoYPct.toFixed(1)}%</div>
                   <div className="text-[10px]" style={{ color: "var(--t3)" }}>last year&apos;s increase</div>
                 </div>
                 <div className="w-px h-10" style={{ background: "var(--border)" }} />
