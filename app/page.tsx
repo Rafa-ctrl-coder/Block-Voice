@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface Candidate { slug: string; name: string; totalUnits: number }
 interface Address { line_1: string; line_2: string; building_name: string; sub_building_name: string; thoroughfare: string; post_town: string }
+interface ScStats { hasData: boolean; avgPerSqft?: number; avgMonthly?: number; lastYoYPct?: number | null; trend?: string }
 
 export default function Home() {
   const router = useRouter();
@@ -16,6 +17,11 @@ export default function Home() {
   const [matching, setMatching] = useState(false);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [noMatch, setNoMatch] = useState(false);
+  const [scStats, setScStats] = useState<ScStats | null>(null);
+
+  useEffect(() => {
+    fetch("/api/sc-stats").then(r => r.json()).then(setScStats).catch(() => {});
+  }, []);
 
   function reset() { setAddresses([]); setShowAddresses(false); setCandidates([]); setNoMatch(false); setError(""); }
 
@@ -167,21 +173,27 @@ export default function Home() {
               <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
                 Upload your service charge and instantly see your cost per sqft, how it&apos;s changing year on year, and how your building compares to others in Battersea.
               </p>
+              {scStats?.hasData && (
               <div className="flex items-center gap-6 mb-5">
                 <div>
-                  <div className="text-2xl font-extrabold" style={{ color: teal }}>£9.89</div>
+                  <div className="text-2xl font-extrabold" style={{ color: teal }}>£{scStats.avgPerSqft?.toFixed(2)}</div>
                   <div className="text-[10px]" style={{ color: "var(--t3)" }}>avg per sqft / year</div>
                 </div>
                 <div className="w-px h-10" style={{ background: "var(--border)" }} />
+                {scStats.lastYoYPct != null && (
+                <>
                 <div>
-                  <div className="text-2xl font-extrabold text-red-400">+7.1%</div>
+                  <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>+{scStats.lastYoYPct.toFixed(1)}%</div>
                   <div className="text-[10px]" style={{ color: "var(--t3)" }}>last year&apos;s increase</div>
                 </div>
                 <div className="w-px h-10" style={{ background: "var(--border)" }} />
                 <div className="text-[13px] leading-snug" style={{ color: "var(--t2)" }}>
-                  Charges in Battersea<br/>are <strong className="text-red-400">accelerating</strong>
+                  Charges in Battersea<br/>are <strong className={scStats.trend === "accelerating" ? "text-red-400" : "text-amber-400"}>{scStats.trend || "changing"}</strong>
                 </div>
+                </>
+                )}
               </div>
+              )}
               <Link href="/signup" className="inline-block font-bold text-[14px] px-7 py-3 rounded-[10px] text-white" style={{ background: teal }}>
                 Join free to analyse your charges
               </Link>

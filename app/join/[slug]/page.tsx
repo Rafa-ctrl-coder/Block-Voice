@@ -20,6 +20,7 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
   const [issueCount, setIssueCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [scStats, setScStats] = useState<{ hasData: boolean; avgPerSqft?: number; avgMonthly?: number; lastYoYPct?: number | null; trend?: string } | null>(null);
 
   useEffect(() => {
     loadDev();
@@ -64,6 +65,13 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
       setResidentCount(stats.residentCount || 0);
       setIssueCount(stats.issueCount || 0);
     } catch { /* counts stay at 0 */ }
+
+    // Fetch SC stats for this development
+    try {
+      const scRes = await fetch(`/api/sc-stats?slug=${encodeURIComponent(slug)}`);
+      const sc = await scRes.json();
+      setScStats(sc);
+    } catch { /* no SC data */ }
 
     setLoading(false);
   }
@@ -145,6 +153,7 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
         </div>
 
         {/* Service charge snapshot teaser */}
+        {scStats?.hasData && (
         <div className="rounded-[14px] p-5 mb-4" style={{ background: "var(--navy-card)", border: "1px solid rgba(30,198,164,0.15)" }}>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-[11px] font-bold text-white uppercase tracking-[1.5px]">Service charges at {dev?.name}</span>
@@ -158,19 +167,21 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="rounded-[10px] p-3.5 text-center" style={{ background: "var(--navy)", border: "1px solid var(--navy-card-b)" }}>
               <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Current rate</div>
-              <div className="text-2xl font-extrabold" style={{ color: teal }}>£9.89</div>
+              <div className="text-2xl font-extrabold" style={{ color: teal }}>£{scStats.avgPerSqft?.toFixed(2)}</div>
               <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>per sqft / year</div>
             </div>
             <div className="rounded-[10px] p-3.5 text-center" style={{ background: "var(--navy)", border: "1px solid var(--navy-card-b)" }}>
               <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Monthly cost</div>
-              <div className="text-2xl font-extrabold text-white">£1,018</div>
+              <div className="text-2xl font-extrabold text-white">£{scStats.avgMonthly?.toLocaleString()}</div>
               <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>per apartment</div>
             </div>
-            <div className="rounded-[10px] p-3.5 text-center" style={{ background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.15)" }}>
+            {scStats.lastYoYPct != null && (
+            <div className="rounded-[10px] p-3.5 text-center" style={{ background: scStats.lastYoYPct > 5 ? "rgba(248,113,113,0.06)" : "var(--navy)", border: `1px solid ${scStats.lastYoYPct > 5 ? "rgba(248,113,113,0.15)" : "var(--navy-card-b)"}` }}>
               <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>Last year</div>
-              <div className="text-2xl font-extrabold text-red-400">+7.1%</div>
+              <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>+{scStats.lastYoYPct.toFixed(1)}%</div>
               <div className="text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>year on year</div>
             </div>
+            )}
           </div>
 
           {/* Blurred YoY chart teaser */}
@@ -184,7 +195,9 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
               ))}
             </div>
             <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-              <div className="text-[13px] font-bold text-white mb-0.5">Year-by-year growth is accelerating</div>
+              <div className="text-[13px] font-bold text-white mb-0.5">
+                {scStats.trend === "accelerating" ? "Year-by-year growth is accelerating" : "See how your charges are trending"}
+              </div>
               <div className="text-[11px]" style={{ color: "var(--t2)" }}>Sign up to see the full breakdown</div>
             </div>
           </div>
@@ -197,6 +210,7 @@ export default function JoinPage({ params }: { params: Promise<{ slug: string }>
             Add your latest service charge invoice to help BlockVoice build more accurate data to share with fellow residents.
           </p>
         </div>
+        )}
 
         {/* Quick signup hint */}
         <div className="rounded-xl p-5 mb-5 text-center" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
