@@ -1266,6 +1266,18 @@ function ServiceChargesSection({
     };
   });
 
+  // YoY growth per year (annualised comparison)
+  const yoyData = chartData.slice(1).map((curr, i) => {
+    const prev = chartData[i];
+    const prevAnnualised = prev.perSqft;
+    const currAnnualised = curr.perSqft;
+    const pct = prevAnnualised > 0 ? ((currAnnualised - prevAnnualised) / prevAnnualised) * 100 : 0;
+    return { year: curr.year, pct, prevSqft: prevAnnualised, currSqft: currAnnualised };
+  });
+
+  // Last year's YoY for the headline stat
+  const lastYoY = yoyData.length > 0 ? yoyData[yoyData.length - 1] : null;
+
   const fmt = (n: number) => n.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const fmt2 = (n: number) => n.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -1367,44 +1379,40 @@ function ServiceChargesSection({
         ) : null}
 
         {/* Key stats */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
-            <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">{periodLabel} Service Charge</p>
-            <p className="text-2xl font-extrabold text-white">£{fmt(latestTotal)}</p>
-            <p className="text-[10px] text-[rgba(255,255,255,0.3)]">{latest?.year} {periodLabelShort}{latestIsPartial ? " (one half)" : ""}</p>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="bg-[#0f1f3d] rounded-lg p-3.5 text-center">
+            <div className="text-[9px] text-[rgba(255,255,255,0.3)] uppercase tracking-wider mb-1.5">Service charge rate</div>
+            <div className="text-2xl font-black text-[#1ec6a4]">{sqft > 0 ? `£${fmt2(perSqft)}` : "—"}</div>
+            <div className="text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5">per sqft / year</div>
           </div>
-          <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
-            <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">Monthly Cost</p>
-            <p className="text-2xl font-extrabold text-white">£{fmt(monthly)}</p>
-            <p className="text-[10px] text-[rgba(255,255,255,0.3)]">per month (from {periodLabelShort})</p>
+          <div className="bg-[#0f1f3d] rounded-lg p-3.5 text-center">
+            <div className="text-[9px] text-[rgba(255,255,255,0.3)] uppercase tracking-wider mb-1.5">Monthly cost</div>
+            <div className="text-2xl font-black text-white">£{fmt(monthly)}</div>
+            <div className="text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5">per month</div>
           </div>
-          <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
-            <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">Per Square Foot</p>
-            <p className="text-2xl font-extrabold text-white">{sqft > 0 ? `£${fmt2(perSqft)}` : "—"}</p>
-            <p className="text-[10px] text-[rgba(255,255,255,0.3)]">{sqft > 0 ? `£${fmt2(perSqftMonth)}/sqft/month` : "Set property size above"}</p>
+          <div className="rounded-lg p-3.5 text-center" style={{ background: lastYoY && lastYoY.pct > 5 ? "rgba(248,113,113,0.06)" : "#0f1f3d", border: lastYoY && lastYoY.pct > 5 ? "1px solid rgba(248,113,113,0.15)" : "1px solid transparent" }}>
+            <div className="text-[9px] text-[rgba(255,255,255,0.3)] uppercase tracking-wider mb-1.5">Last year&apos;s increase</div>
+            <div className={`text-2xl font-black ${lastYoY && lastYoY.pct > 5 ? "text-red-400" : lastYoY && lastYoY.pct > 0 ? "text-amber-400" : "text-[#1ec6a4]"}`}>
+              {lastYoY ? `${lastYoY.pct >= 0 ? "+" : ""}${fmt2(lastYoY.pct)}%` : "—"}
+            </div>
+            <div className="text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5">year on year</div>
           </div>
         </div>
 
-        {/* Growth stats */}
-        {sorted.length > 1 && (
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">
-                {sorted.length > 2 ? "3-Year" : "Year-on-Year"} Growth
-              </p>
-              <p className={`text-2xl font-extrabold ${growthPct > 10 ? "text-red-400" : growthPct > 5 ? "text-amber-400" : "text-[#1ec6a4]"}`}>
-                {growthPct >= 0 ? "+" : ""}{fmt2(growthPct)}%
-              </p>
-              <p className="text-[10px] text-[rgba(255,255,255,0.3)]">{earliest?.year} → {latest?.year}</p>
-            </div>
-            <div className="bg-[#0f1f3d] rounded-lg p-4 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-[rgba(255,255,255,0.3)] mb-1">Monthly Increase</p>
-              <p className={`text-2xl font-extrabold ${monthlyIncrease > 100 ? "text-red-400" : monthlyIncrease > 50 ? "text-amber-400" : "text-[#1ec6a4]"}`}>
-                {monthlyIncrease >= 0 ? "+" : ""}£{fmt(monthlyIncrease)}
-              </p>
-              <p className="text-[10px] text-[rgba(255,255,255,0.3)]">
-                £{fmt(Number(earliest!.annual_total) / 12)}/mo → £{fmt(Number(latest!.annual_total) / 12)}/mo
-              </p>
+        {/* Year-on-year growth per year */}
+        {yoyData.length > 0 && (
+          <div className="mb-4">
+            <div className="text-[10px] text-[rgba(255,255,255,0.3)] uppercase tracking-wider mb-2">Year-on-year growth</div>
+            <div className={`grid gap-2 ${yoyData.length >= 3 ? "grid-cols-3" : yoyData.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+              {yoyData.map((y, i) => (
+                <div key={i} className="bg-[#0f1f3d] rounded-lg p-3 text-center" style={{ background: y.pct > 5 ? "rgba(248,113,113,0.06)" : undefined, border: y.pct > 5 ? "1px solid rgba(248,113,113,0.15)" : "1px solid #1e3a5f" }}>
+                  <div className="text-[9px] text-[rgba(255,255,255,0.3)] mb-1">{y.year}</div>
+                  <div className={`text-lg font-extrabold ${y.pct > 5 ? "text-red-400" : y.pct > 0 ? "text-amber-400" : "text-[#1ec6a4]"}`}>
+                    {y.pct >= 0 ? "+" : ""}{fmt2(y.pct)}%
+                  </div>
+                  <div className="text-[10px] text-[rgba(255,255,255,0.3)] mt-1">£{fmt2(y.prevSqft)} → £{fmt2(y.currSqft)}/sqft</div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -1462,15 +1470,19 @@ function ServiceChargesSection({
         )}
 
         {/* Key insights */}
-        {sorted.length > 1 && (
-          <div className="mt-5 bg-[#0f1f3d] rounded-lg p-4 border border-[#1e3a5f]">
+        {lastYoY && (
+          <div className="mt-5 rounded-lg p-4 border" style={{ background: "rgba(30,198,164,0.04)", borderColor: "rgba(30,198,164,0.15)" }}>
             <p className="text-[10px] uppercase font-bold tracking-wide text-[#1ec6a4] mb-1">Key Insights</p>
             <p className="text-xs text-[rgba(255,255,255,0.5)] leading-relaxed">
-              Your {latestIsPartial ? "half-yearly" : "annual"} service charge has grown from £{fmt(Number(earliest!.annual_total))} to £{fmt(latestTotal)} over{" "}
-              {sorted.length > 2 ? `${sorted.length} periods` : "the last period"} — a {fmt2(Math.abs(growthPct))}%{" "}
-              {growthPct >= 0 ? "increase" : "decrease"}. That means you are now paying £{fmt(Math.abs(monthlyIncrease))}{" "}
-              {monthlyIncrease >= 0 ? "more" : "less"} per month than you were in {earliest!.year}.
-              {sqft > 0 && ` At ${fmt(sqft)} sqft, your current rate is £${fmt2(perSqft)} per square foot per year (£${fmt2(perSqftMonth)}/sqft/month).`}
+              Your service charge increased <strong className={lastYoY.pct > 5 ? "text-red-400" : "text-amber-400"}>+{fmt2(lastYoY.pct)}%</strong> last year
+              {yoyData.length > 1 && yoyData[yoyData.length - 1].pct > yoyData[yoyData.length - 2].pct
+                ? <>, up from +{fmt2(yoyData[yoyData.length - 2].pct)}% the year before. The rate of increase is <strong className="text-red-400">accelerating</strong></>
+                : yoyData.length > 1
+                ? <>, down from +{fmt2(yoyData[yoyData.length - 2].pct)}% the year before</>
+                : null
+              }.{" "}
+              {sqft > 0 && <>You are paying <strong className="text-white">£{fmt2(perSqft)} per sqft</strong> per year (£{fmt2(perSqftMonth)}/sqft per month). </>}
+              {sqft > 0 && lastYoY.pct > 0 && <>At this rate, next year could exceed £{fmt2(perSqft * (1 + lastYoY.pct / 100))}/sqft.</>}
             </p>
           </div>
         )}
