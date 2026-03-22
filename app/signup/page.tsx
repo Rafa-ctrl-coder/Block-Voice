@@ -233,10 +233,21 @@ export default function SignUp() {
         if (existingCheck && existingCheck.length > 0) {
           buildingId = existingCheck[0].id;
         } else {
-          // Determine development name
-          const devName = form.developmentName && form.developmentName !== "__no__" && form.developmentName !== "__ask__"
+          // Determine development name — try user input first, then auto-match by postcode
+          let devName = form.developmentName && form.developmentName !== "__no__" && form.developmentName !== "__ask__"
             ? form.developmentName.trim()
             : null;
+
+          if (!devName) {
+            // Auto-match: check if this postcode belongs to a known development
+            const { data: devMatch } = await supabase
+              .from("developments")
+              .select("name")
+              .contains("postcodes", [cleanedPostcode]);
+            if (devMatch && devMatch.length > 0) {
+              devName = devMatch[0].name;
+            }
+          }
 
           const { data: newBuilding, error: buildingError } = await supabase
             .from("buildings")

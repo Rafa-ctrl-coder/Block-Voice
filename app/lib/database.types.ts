@@ -120,6 +120,63 @@ export interface Correction {
   created_at: string;
 }
 
+// Service Charge types
+export type PeriodType = 'half_yearly_advance' | 'deficit' | 'surplus' | 'insurance' | 'other';
+export type PropertySizeSource = 'epc' | 'user_range' | 'user_exact';
+
+export interface ServiceChargeLine {
+  id: string;
+  profile_id: string;
+  building_id: string;
+  invoice_number: string | null;
+  invoice_date: string | null;
+  description: string;
+  amount: number;
+  period_type: PeriodType;
+  year_end: string | null;
+  document_url: string | null;
+  created_at: string;
+}
+
+export interface ServiceChargeAnnual {
+  id: string;
+  profile_id: string;
+  building_id: string;
+  year: string;
+  annual_total: number;
+  h1_total: number | null;
+  h2_total: number | null;
+  adjustment_total: number;
+  is_half_yearly: boolean;
+  has_both_halves: boolean;
+  quarter_count: number;
+  created_at: string;
+}
+
+export interface PropertySize {
+  id: string;
+  profile_id: string;
+  building_id: string;
+  sqft: number;
+  sqm: number | null;
+  source: PropertySizeSource;
+  confirmed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceChargeBenchmark {
+  id: string;
+  region: string;
+  year: string;
+  avg_annual: number | null;
+  avg_per_sqft: number | null;
+  avg_monthly: number | null;
+  contributing_buildings: number | null;
+  contributing_residents: number | null;
+  calculated_at: string;
+}
+
 // Joined types for common queries
 export interface DevelopmentWithLinks extends Development {
   development_links: (DevelopmentLink & {
