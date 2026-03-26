@@ -256,10 +256,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  // Dedup guard — check if we already sent a digest today
+  // Dedup guard — check if we already sent a digest today (use api_usage_log which has created_at)
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   const { data: recentLog } = await supabase
-    .from("email_log")
+    .from("api_usage_log")
     .select("id")
     .eq("endpoint", "weekly_digest_cron")
     .gte("created_at", today + "T00:00:00Z")
@@ -269,8 +269,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ skipped: true, reason: "already sent today" });
   }
 
-  // Log this send to prevent duplicates
-  await supabase.from("email_log").insert({ endpoint: "weekly_digest_cron", model: "cron", input_tokens: 0, output_tokens: 0, cost_estimate: 0 });
+  // Log this send FIRST to prevent duplicates from concurrent retries
+  await supabase.from("api_usage_log").insert({ endpoint: "weekly_digest_cron", model: "cron", input_tokens: 0, output_tokens: 0, cost_estimate: 0 });
 
   // Hardcoded non-member list from Vista Residents Register
   const nonMemberEmails = [
