@@ -226,8 +226,8 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
           from: "BlockVoice <hello@blockvoice.co.uk>",
           to: [nm.email],
-          subject: `${issues.length} issue${issues.length !== 1 ? "s" : ""} raised at Vista — your neighbours need your support`,
-          html: nonMemberEmailHtml(nm.first || "there", issues, residentCount),
+          subject: `${(issues || []).length} issue${(issues || []).length !== 1 ? "s" : ""} raised at Vista — your neighbours need your support`,
+          html: nonMemberEmailHtml(nm.first || "there", issues || [], residentCount),
         });
         results.nonMembersSent++;
       } catch (e: unknown) {
