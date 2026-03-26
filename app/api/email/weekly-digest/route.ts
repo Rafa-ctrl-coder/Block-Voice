@@ -240,3 +240,126 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json(results);
 }
+
+// GET handler for Vercel Cron (Saturday 10am UK)
+export async function GET(req: NextRequest) {
+  const isCron = req.nextUrl.searchParams.get("cron") === "true";
+  const authHeader = req.headers.get("authorization");
+
+  // Vercel cron sends Authorization: Bearer <CRON_SECRET>
+  // Also allow if ?cron=true and CRON_SECRET matches or no CRON_SECRET set
+  if (!isCron) {
+    return NextResponse.json({ error: "method not allowed" }, { status: 405 });
+  }
+
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  // Hardcoded non-member list from Vista Residents Register
+  const nonMemberEmails = [
+    {first:"Maha",email:"maha@mosaic-enterprises.com"},{first:"Mohamed",email:"mohamed.abbas@hotmail.co.uk"},
+    {first:"Seif",email:"seifeldefrawi@gmail.com"},{first:"Ali",email:"aliizic@gmail.com"},
+    {first:"Sherief",email:"defrawisherief@gmail.com"},{first:"Ezz",email:"ezzeldef@hotmail.co.uk"},
+    {first:"Dascha",email:"nefedov.dascha@gmail.com"},{first:"Gabriel",email:"gabriel.jourdan@gmx.de"},
+    {first:"Busra",email:"uygarmesudiyeli@hotmail.com"},{first:"Bertug",email:"osenbertug@gmail.com"},
+    {first:"Erkan",email:"erkan@dogruer.com"},{first:"John",email:"cuneytozgumus@gmail.com"},
+    {first:"Levent",email:"levent@akgerman.com"},{first:"Isil",email:"isilsusokmenn03@gmail.com"},
+    {first:"Deborah",email:"debandmartin@hotmail.com"},{first:"Galina",email:"galina.dean@gmail.com"},
+    {first:"Jude",email:"nkutoubi@gmail.com"},{first:"Abdullah",email:"52cascadecourt@gmail.com"},
+    {first:"Mehmet",email:"mehmetpilavci@hotmail.com"},{first:"Ahmed",email:"ahmedbhameed@outlook.com"},
+    {first:"Saad",email:"saad.alkaabi@gmail.com"},{first:"Kumsal",email:"kumsalsahin@hotmail.com"},
+    {first:"Fiona",email:"roqafi@gmail.com"},{first:"Alex",email:"alexyeosn@gmail.com"},
+    {first:"Bill",email:"wedgewood638@gmail.com"},{first:"Jason",email:"jasonparisgeorge@aol.com"},
+    {first:"Sultan",email:"sultan.sokmen@yahoo.com"},{first:"Dean",email:"dean.possenniskie@aenetworks.co.uk"},
+    {first:"Richard",email:"rbagley82@gmail.com"},{first:"Nadia",email:"nadia.alsaeed@gmail.com"},
+    {first:"Gigi",email:"ghislaine.hock@gmail.com"},{first:"Valerie",email:"teh.valerie@gmail.com"},
+    {first:"Masarra",email:"arch.masara@gmail.com"},{first:"Barbara",email:"clark.ba1984@gmail.com"},
+    {first:"Abdulrahman",email:"ar.alrugaib@gmail.com"},{first:"Agne",email:"shopping@gautama.ca"},
+    {first:"Hyun",email:"greentyvv@gmail.com"},{first:"Alex",email:"alexanderhodgkins@hotmail.com"},
+  ];
+
+  // Simulate a POST request internally
+  const devSlug = "vista-chelsea-bridge";
+
+  const { data: dev } = await supabase
+    .from("developments")
+    .select("id, name")
+    .eq("slug", devSlug)
+    .single();
+
+  if (!dev) return NextResponse.json({ error: "development not found" }, { status: 404 });
+
+  const { data: issues } = await supabase
+    .from("issues")
+    .select("id, title, category, description, status, created_at")
+    .eq("development_id", dev.id)
+    .order("created_at", { ascending: false });
+
+  if (!issues || issues.length === 0) {
+    return NextResponse.json({ skipped: true, reason: "no issues to report" });
+  }
+
+  const issuesWithCounts: Issue[] = [];
+  for (const issue of issues) {
+    const { count } = await supabase
+      .from("issue_supporters")
+      .select("id", { count: "exact", head: true })
+      .eq("issue_id", issue.id);
+    issuesWithCounts.push({ ...issue, supporters: count || 0 });
+  }
+
+  const { data: buildings } = await supabase
+    .from("buildings")
+    .select("id")
+    .eq("development_name", dev.name);
+
+  const buildingIds = (buildings || []).map(b => b.id);
+
+  const { data: members } = await supabase
+    .from("profiles")
+    .select("first_name, email, building_id")
+    .in("building_id", buildingIds);
+
+  const residentCount = members?.length || 0;
+  const issueCount = issuesWithCounts.length;
+  const results = { membersSent: 0, nonMembersSent: 0, failed: 0, errors: [] as string[] };
+
+  // Send to members
+  for (const m of members || []) {
+    try {
+      await resend.emails.send({
+        from: "BlockVoice <hello@blockvoice.co.uk>",
+        to: [m.email],
+        subject: `${issueCount} issue${issueCount !== 1 ? "s" : ""} raised at Vista this week`,
+        html: memberEmailHtml(m.first_name || "there", issuesWithCounts, residentCount, devSlug),
+      });
+      results.membersSent++;
+    } catch (e: unknown) {
+      results.failed++;
+      results.errors.push(`${m.email}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  // Send to non-members
+  const memberEmailSet = new Set((members || []).map(m => m.email.toLowerCase()));
+  for (const nm of nonMemberEmails) {
+    if (memberEmailSet.has(nm.email.toLowerCase())) continue;
+    try {
+      await resend.emails.send({
+        from: "BlockVoice <hello@blockvoice.co.uk>",
+        to: [nm.email],
+        subject: `${issues.length} issue${issues.length !== 1 ? "s" : ""} raised at Vista — your neighbours need your support`,
+        html: nonMemberEmailHtml(nm.first || "there", issuesWithCounts, residentCount),
+      });
+      results.nonMembersSent++;
+    } catch (e: unknown) {
+      results.failed++;
+      results.errors.push(`${nm.email}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  return NextResponse.json(results);
+}
