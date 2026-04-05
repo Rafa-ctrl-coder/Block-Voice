@@ -505,489 +505,415 @@ export default function Dashboard() {
 
   // ─── render ─────────────────────────────────────────────────────────────
 
-  return (
-    <div className="min-h-screen bg-[#0f1f3d] text-white">
+  // Tab state
+  const [activeTab, setActiveTab] = useState("overview");
 
-      {/* ── Nav ──────────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 flex justify-between items-center px-6 md:px-8 py-3.5 border-b border-[#1e3a5f]" style={{ background: "#0f1f3d" }}>
-        <Link href="/dashboard" className="text-lg font-extrabold text-[#1ec6a4]">BlockVoice</Link>
-        <div className="flex items-center gap-4">
-          <span className="text-xs text-[rgba(255,255,255,0.4)] hidden sm:inline">{dev.name}</span>
-          <span className="text-xs text-[rgba(255,255,255,0.55)]">{userName}</span>
-          <button onClick={handleLogout} className="text-xs text-[rgba(255,255,255,0.3)] hover:text-white">Log out</button>
+  // Computed
+  const agentAvg = agentAgg?.overall ?? null;
+  const fhAvg = fhAgg?.overall ?? null;
+
+  return (
+    <div className="min-h-screen bg-[#0f1f3d] text-white" style={{ fontSize: 14 }}>
+
+      {/* ── Nav ── */}
+      <nav className="sticky top-0 z-50 flex justify-between items-center px-[6%] h-12" style={{ background: "#0f1f3d", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <Link href="/dashboard" className="font-extrabold text-[15px] text-[#1ec6a4]">BlockVoice</Link>
+        <div className="flex items-center gap-3 text-[12px]">
+          <span className="text-[rgba(255,255,255,0.35)]">{userName}</span>
+          <span className="text-[rgba(255,255,255,0.12)]">·</span>
+          <button onClick={handleLogout} className="text-[rgba(255,255,255,0.3)] hover:text-white">Sign Out</button>
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 space-y-6">
+      <div className="max-w-[820px] mx-auto px-6 py-5">
 
-        {/* ── Verification Banner ────────────────────────────────────── */}
+        {/* ── Page Header ── */}
+        <div className="mb-1">
+          <h1 className="text-[28px] font-extrabold tracking-[-0.8px] leading-tight">{dev.name}</h1>
+          <div className="flex items-center gap-[6px] flex-wrap text-[12px] text-[rgba(255,255,255,0.3)] mt-1">
+            <span>{dev.postcodes?.[0]}</span><span className="w-[3px] h-[3px] rounded-full bg-[rgba(255,255,255,0.2)]" />
+            <span>{dev.total_units} units</span><span className="w-[3px] h-[3px] rounded-full bg-[rgba(255,255,255,0.2)]" />
+            <span>{userBlockName}</span><span className="w-[3px] h-[3px] rounded-full bg-[rgba(255,255,255,0.2)]" />
+            <span>Flat {userFlat}</span><span className="w-[3px] h-[3px] rounded-full bg-[rgba(255,255,255,0.2)]" />
+            <span className="capitalize">{userStatus}</span>
+          </div>
+        </div>
+
+        {/* ── Tabs ── */}
+        <div className="flex gap-0 border-b border-[rgba(255,255,255,0.06)] mt-3 mb-5">
+          {[
+            { id: "overview", label: "Overview" },
+            { id: "charges", label: "Service Charges", badge: "BETA" },
+            { id: "documents", label: "Documents" },
+            { id: "settings", label: "Settings" },
+          ].map(t => (
+            <button key={t.id} onClick={() => setActiveTab(t.id)}
+              className={`px-4 py-2 text-[12px] font-semibold border-b-2 transition-all ${activeTab === t.id ? "text-[#1ec6a4] border-[#1ec6a4]" : "text-[rgba(255,255,255,0.3)] border-transparent hover:text-[rgba(255,255,255,0.5)]"}`}>
+              {t.label}
+              {t.badge && <span className="ml-1 text-[9px] font-bold px-[5px] py-[1px] rounded-full bg-[#fbbf24] text-[#412402]">{t.badge}</span>}
+              {t.id === "issues" && issues.length > 0 && <span className="ml-1 text-[10px] bg-[rgba(30,198,164,0.15)] text-[#1ec6a4] px-[5px] py-[1px] rounded-full">{issues.length}</span>}
+            </button>
+          ))}
+        </div>
+
+        {/* ════════════════════ OVERVIEW TAB ════════════════════ */}
+        {activeTab === "overview" && (
+          <div>
+
+        {/* ── Verification Banner ── */}
         {verificationStatus !== "verified" && (
-          <Link href="/verify"
-            className="flex items-center justify-between bg-[#132847] border border-amber-900/30 rounded-xl px-5 py-3 hover:border-[#1ec6a4]/30 transition-colors">
-            <div className="flex items-center gap-3">
-              <span className="text-lg">{verificationStatus === "pending" ? "⏳" : "🔒"}</span>
+          <Link href="/verify" className="flex items-center justify-between bg-[#132847] border border-amber-900/30 rounded-lg px-4 py-2.5 hover:border-[#1ec6a4]/30 transition-colors mb-5">
+            <div className="flex items-center gap-2">
+              <span className="text-base">{verificationStatus === "pending" ? "⏳" : "🔒"}</span>
               <div>
-                <p className="text-sm font-semibold text-white">
-                  {verificationStatus === "pending" ? "Verification in progress" : "Verify your identity"}
-                </p>
-                <p className="text-xs text-[rgba(255,255,255,0.4)]">
-                  {verificationStatus === "pending"
-                    ? "We're reviewing your document — usually 1–2 working days."
-                    : "Upload a document to prove your address and unlock all features."}
-                </p>
+                <p className="text-[12px] font-semibold">{verificationStatus === "pending" ? "Verification in progress" : "Verify your identity"}</p>
+                <p className="text-[10px] text-[rgba(255,255,255,0.3)]">{verificationStatus === "pending" ? "We're reviewing your documents" : "Verified residents carry more weight"}</p>
               </div>
             </div>
-            <span className="text-xs text-[#1ec6a4] font-semibold flex-shrink-0">
-              {verificationStatus === "pending" ? "View status →" : "Verify now →"}
-            </span>
+            <span className="text-[11px] text-[#1ec6a4]">→</span>
           </Link>
         )}
 
-        {/* ── Development Overview (compact + action bar) ──────────── */}
-        <Card title="Your Development">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-extrabold text-white">{dev.name}</h2>
-              <span className="text-[11px] text-[rgba(255,255,255,0.45)]">{dev.postcodes?.[0]} · {dev.total_units.toLocaleString()} units{blocks.length > 0 ? ` · ${blocks.length} blocks` : ""}{dev.developer ? ` · ${dev.developer}` : ""}</span>
-            </div>
-            <div className="text-right">
-              <span className="text-xs text-[rgba(255,255,255,0.5)]">{memberCount} of ~{dev.total_units} signed up</span>
-              <div className="text-sm font-extrabold text-[#1ec6a4]">{pct}%</div>
-            </div>
-          </div>
-          <div className="mt-2 bg-[#0f1f3d] rounded h-1 overflow-hidden">
-            <div className="bg-[#1ec6a4] h-1 rounded transition-all" style={{ width: `${Math.max(Math.min(pct, 100), 0.5)}%` }} />
-          </div>
-          {/* Action bar */}
-          <div className="flex gap-2 mt-3 pt-3 border-t border-[#1e3a5f]">
-            <button onClick={() => setInviteOpen(!inviteOpen)}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-[#1ec6a4] text-[#0f1f3d] border-none rounded-lg py-2.5 font-bold text-xs cursor-pointer">
-              👥 Invite your neighbours
-            </button>
-            <button onClick={() => setFeedbackOpen(!feedbackOpen)}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-[#334155] text-white border border-[#1e3a5f] rounded-lg py-2.5 font-bold text-xs cursor-pointer">
-              💬 Send us feedback
-            </button>
-          </div>
-        </Card>
-
-        {/* Invite expanded */}
-        {inviteOpen && dev && (
-          <Card title="">
-            <div className="text-[9px] text-[rgba(255,255,255,0.3)] uppercase tracking-wider mb-2">Invite other residents</div>
-            <div className="flex gap-1.5 mb-2">
-              <input readOnly value={`blockvoice.co.uk/join/${dev.slug}`}
-                className="flex-1 bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs" />
-              <button onClick={() => { navigator.clipboard.writeText(`https://blockvoice.co.uk/join/${dev.slug}`); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
-                className="bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-[11px] font-semibold cursor-pointer">
-                {linkCopied ? "✓ Copied!" : "Copy"}
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              <a href={`https://wa.me/?text=${encodeURIComponent(`Hey 👋 I've joined BlockVoice for ${dev.name}. Join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 bg-[#25D366] text-white border-none rounded-lg py-2 font-bold text-xs">
-                💬 WhatsApp
-              </a>
-              <a href={`mailto:?subject=${encodeURIComponent(`Join BlockVoice for ${dev.name}`)}&body=${encodeURIComponent(`Join BlockVoice for ${dev.name}: https://blockvoice.co.uk/join/${dev.slug}`)}`}
-                className="flex items-center justify-center gap-1.5 bg-[#334155] text-white border-none rounded-lg py-2 font-bold text-xs">
-                ✉️ Email
-              </a>
-            </div>
-          </Card>
-        )}
-
-        {/* Feedback expanded */}
-        {feedbackOpen && (
-          <Card title="">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-bold text-white">We&apos;d love your feedback</h3>
-              <button onClick={() => setFeedbackOpen(false)} className="text-[rgba(255,255,255,0.3)] text-lg cursor-pointer bg-transparent border-none">×</button>
-            </div>
-            <p className="text-[11px] text-[rgba(255,255,255,0.4)] mb-2">Tell us what&apos;s working, what&apos;s not, and what you&apos;d like to see next.</p>
-            <textarea value={feedbackText} onChange={e => setFeedbackText(e.target.value)}
-              placeholder="What would make BlockVoice more useful?"
-              rows={3} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none mb-2" />
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] text-[rgba(255,255,255,0.2)]">Sent to hello@blockvoice.co.uk</span>
-              <button onClick={async () => {
-                await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, message: feedbackText }) });
-                setFeedbackText(""); setFeedbackOpen(false); setFeedbackSent(true); setTimeout(() => setFeedbackSent(false), 3000);
-              }} className="bg-[#1ec6a4] text-[#0f1f3d] border-none rounded-lg px-5 py-2 font-bold text-xs cursor-pointer">Send</button>
-            </div>
-          </Card>
-        )}
-        {feedbackSent && <p className="text-xs text-green-400 text-center">Thanks! Your feedback has been sent.</p>}
-
-        {/* ── Service Charges (moved up — highest value section) ──────── */}
-        {userStatus === "owner" && (
-          <ServiceChargesSection
-            profileId={userId}
-            buildingId={userBuildingId}
-            postcode={dev?.postcodes?.[0] || ""}
-            buildingName={userBlockName || ""}
-            flatNumber={userFlat || ""}
-          />
-        )}
-
-        {/* ── Agent + Freeholder — 2 columns on desktop ──────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-          {/* Managing Agent (compact) */}
-          <Card title="Managing Agent">
-            {agent ? (
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[15px] font-bold text-white">{agent.name}</span>
-                  {link && confidenceBadge(link.agent_confidence)}
-                </div>
-                {agent.phone && <div className="text-[11px] text-[rgba(255,255,255,0.5)]">{agent.phone}</div>}
-                {/* Overall score */}
-                <div className="flex items-center gap-2 mt-2">
-                  {agentAgg ? (
-                    <>
-                      <span className={`text-lg font-black ${ratingColor(agentAgg.overall)}`}>{agentAgg.overall.toFixed(1)}</span>
-                      <span className="text-[11px] text-[rgba(255,255,255,0.3)]">/ 5.0 · {allAgentRatings.length} ratings</span>
-                    </>
-                  ) : (
-                    <span className="text-[11px] text-[rgba(255,255,255,0.3)]">
-                      {allAgentRatings.length > 0
-                        ? `${allAgentRatings.length} rating${allAgentRatings.length !== 1 ? "s" : ""} — need ${3 - allAgentRatings.length} more to show.`
-                        : "No ratings yet — be the first!"}
-                    </span>
-                  )}
-                </div>
-                {/* Collapsible full ratings */}
-                {agentAgg && (
-                  <button onClick={() => setShowAgentDetails(!showAgentDetails)} className="text-[10px] text-[#1ec6a4] bg-transparent border-none cursor-pointer mt-1 p-0">
-                    {showAgentDetails ? "Hide ratings" : "See full ratings"}
-                  </button>
-                )}
-                {showAgentDetails && agentAgg && (
-                  <div className="mt-2 pt-2 border-t border-[#1e3a5f]">
-                    {AGENT_CATS.map(c => (
-                      <div key={c} className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] text-[rgba(255,255,255,0.35)]">{AGENT_LABELS[c]}</span>
-                        <div className="flex items-center gap-1">
-                          <div className="w-[50px] h-[3px] bg-[#0f1f3d] rounded overflow-hidden">
-                            <div className={`h-full ${ratingBarColor(agentAgg[c])}`} style={{ width: `${(agentAgg[c] / 5) * 100}%` }} />
-                          </div>
-                          <span className={`text-[10px] font-bold ${ratingColor(agentAgg[c])}`}>{agentAgg[c].toFixed(1)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <button onClick={() => setShowAgentRating(!showAgentRating)}
-                  className="mt-2 w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg py-1.5 text-[11px] font-semibold text-[#1ec6a4] cursor-pointer">
-                  {myAgentRating ? "★ Update your rating" : "★ Rate this managing agent"}
-                </button>
-                {showAgentRating && (
-                  <div className="mt-3 space-y-2.5">
-                    {AGENT_CATS.map(c => (
-                      <div key={c} className="flex items-center justify-between">
-                        <span className="text-xs text-[rgba(255,255,255,0.55)]">{AGENT_LABELS[c]}</span>
-                        <StarSelector value={agentForm[c] || 0} onChange={v => setAgentForm({ ...agentForm, [c]: v })} />
-                      </div>
-                    ))}
-                    <textarea placeholder="Optional comment..." value={agentComment} onChange={e => setAgentComment(e.target.value)}
-                      rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none" />
-                    <button onClick={submitAgentRating} disabled={submittingRating}
-                      className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-xs font-semibold disabled:opacity-50">
-                      {submittingRating ? "Saving..." : myAgentRating ? "Update Rating" : "Submit Rating"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-[rgba(255,255,255,0.3)] text-sm">No managing agent recorded yet.</p>
-            )}
-          </Card>
-
-          {/* Freeholder (compact) */}
-          <Card title="Freeholder">
-            {freeholder ? (
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[15px] font-bold text-white">{freeholder.name}</span>
-                  {link && confidenceBadge(link.freeholder_confidence)}
-                </div>
-                {freeholder.parent_company && (
-                  <div className="text-[11px] text-[rgba(255,255,255,0.5)]">{freeholder.parent_company}</div>
-                )}
-                {/* Overall score */}
-                <div className="flex items-center gap-2 mt-2">
-                  {fhAgg ? (
-                    <>
-                      <span className={`text-lg font-black ${ratingColor(fhAgg.overall)}`}>{fhAgg.overall.toFixed(1)}</span>
-                      <span className="text-[11px] text-[rgba(255,255,255,0.3)]">/ 5.0 · {allFhRatings.length} ratings</span>
-                    </>
-                  ) : (
-                    <span className="text-[11px] text-[rgba(255,255,255,0.3)]">
-                      {allFhRatings.length > 0
-                        ? `${allFhRatings.length} rating${allFhRatings.length !== 1 ? "s" : ""} — need ${3 - allFhRatings.length} more to show.`
-                        : "No ratings yet — be the first!"}
-                    </span>
-                  )}
-                </div>
-                {fhAgg && (
-                  <button onClick={() => setShowFhDetails(!showFhDetails)} className="text-[10px] text-[#1ec6a4] bg-transparent border-none cursor-pointer mt-1 p-0">
-                    {showFhDetails ? "Hide ratings" : "See full ratings"}
-                  </button>
-                )}
-                {showFhDetails && fhAgg && (
-                  <div className="mt-2 pt-2 border-t border-[#1e3a5f]">
-                    {FH_CATS.map(c => (
-                      <div key={c} className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] text-[rgba(255,255,255,0.35)]">{FH_LABELS[c]}</span>
-                        <div className="flex items-center gap-1">
-                          <div className="w-[50px] h-[3px] bg-[#0f1f3d] rounded overflow-hidden">
-                            <div className={`h-full ${ratingBarColor(fhAgg[c])}`} style={{ width: `${(fhAgg[c] / 5) * 100}%` }} />
-                          </div>
-                          <span className={`text-[10px] font-bold ${ratingColor(fhAgg[c])}`}>{fhAgg[c].toFixed(1)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <button onClick={() => setShowFhRating(!showFhRating)}
-                  className="mt-2 w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg py-1.5 text-[11px] font-semibold text-[#1ec6a4] cursor-pointer">
-                  {myFhRating ? "★ Update your rating" : "★ Rate this freeholder"}
-                </button>
-                {showFhRating && (
-                  <div className="mt-3 space-y-2.5">
-                    {FH_CATS.map(c => (
-                      <div key={c} className="flex items-center justify-between">
-                        <span className="text-xs text-[rgba(255,255,255,0.55)]">{FH_LABELS[c]}</span>
-                        <StarSelector value={fhForm[c] || 0} onChange={v => setFhForm({ ...fhForm, [c]: v })} />
-                      </div>
-                    ))}
-                    <textarea placeholder="Optional comment..." value={fhComment} onChange={e => setFhComment(e.target.value)}
-                      rows={2} className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-xs resize-none" />
-                    <button onClick={submitFhRating} disabled={submittingRating}
-                      className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-xs font-semibold disabled:opacity-50">
-                      {submittingRating ? "Saving..." : myFhRating ? "Update Rating" : "Submit Rating"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-[rgba(255,255,255,0.3)] text-sm">No freeholder recorded yet.</p>
-            )}
-          </Card>
+        {/* ── Quick Stats ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{memberCount}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Apartments</div></div>
+          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{issues.length}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Issues</div></div>
+          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{"—"}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">£/sqft</div></div>
+          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className={`text-[18px] font-extrabold tracking-[-0.5px] ${agentAvg ? (agentAvg >= 3 ? "text-green-400" : "text-amber-400") : ""}`}>{agentAvg ? `★ ${agentAvg.toFixed(1)}` : "—"}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Agent</div></div>
         </div>
 
-        {/* ── Blocks Grid ────────────────────────────────────────────── */}
-        {blocks.length > 0 && (
-          <Card title="Blocks in Your Development">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {blocks.map(b => {
-                const isUser = b.id === userBlockId;
-                const bIssues = issuesByBlock[b.id] || 0;
-                return (
-                  <div key={b.id}
-                    className={`rounded-xl p-4 border transition-colors ${isUser ? "border-[#1ec6a4] ring-1 ring-[#1ec6a4]/30 bg-[#162d50]" : "border-[#1e3a5f] bg-[#0f1f3d]"}`}>
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <h4 className="font-semibold text-white text-sm">{b.name}</h4>
-                      {isUser && <span className="text-[8px] font-bold uppercase bg-[#1ec6a4]/20 text-[#1ec6a4] px-1.5 py-0.5 rounded tracking-wide">You</span>}
-                    </div>
-                    <div className="space-y-0.5 text-xs text-[rgba(255,255,255,0.55)]">
-                      <p>{b.total_units} apartments</p>
-                      <p>{bIssues} issue{bIssues !== 1 ? "s" : ""}</p>
-                    </div>
-                  </div>
-                );
-              })}
+        {/* ── Progress ── */}
+        <div className="mb-5">
+          <div className="flex justify-between text-[11px] text-[rgba(255,255,255,0.3)] mb-1">
+            <span>{memberCount} of ~{dev.total_units} apartments signed up</span><span>{pct}%</span>
+          </div>
+          <div className="h-[3px] bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
+            <div className="h-[3px] bg-[#1ec6a4] rounded-full" style={{ width: `${Math.max(pct, 1)}%` }} />
+          </div>
+        </div>
+
+        {/* ── Building Details (Notion-style props) ── */}
+        <div className="mb-5">
+          <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-2">Building details</div>
+          <div className="space-y-0">
+            {/* Agent */}
+            <div className="flex items-center py-[5px] text-[13px] hover:bg-[rgba(255,255,255,0.02)] rounded px-1">
+              <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Managing agent</span>
+              <div className="flex items-center gap-[6px]">
+                <strong>{agent?.name || "Unknown"}</strong>
+                {link && confidenceBadge(link.agent_confidence)}
+                {agentAvg && <><span className="text-[12px] text-amber-400">{"★".repeat(Math.round(agentAvg))}</span><span className="text-[11px] text-[rgba(255,255,255,0.3)]">{agentAvg.toFixed(1)}</span></>}
+              </div>
             </div>
-          </Card>
+            {agent?.phone && (
+              <div className="flex items-center py-[5px] text-[13px] px-1">
+                <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Agent phone</span>
+                <a href={`tel:${agent.phone}`} className="text-[#1ec6a4]">{agent.phone}</a>
+              </div>
+            )}
+            {agent?.email && (
+              <div className="flex items-center py-[5px] text-[13px] px-1">
+                <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Agent email</span>
+                <a href={`mailto:${agent.email}`} className="text-[#1ec6a4]">{agent.email}</a>
+              </div>
+            )}
+            {/* Freeholder */}
+            <div className="flex items-center py-[5px] text-[13px] hover:bg-[rgba(255,255,255,0.02)] rounded px-1">
+              <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Freeholder</span>
+              <div className="flex items-center gap-[6px]">
+                <strong>{freeholder?.name || "Unknown"}</strong>
+                {link && confidenceBadge(link.freeholder_confidence)}
+              </div>
+            </div>
+            {freeholder?.parent_company && (
+              <div className="flex items-center py-[5px] text-[13px] px-1">
+                <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Parent company</span>
+                <span>{freeholder.parent_company}</span>
+              </div>
+            )}
+            {dev.developer && (
+              <div className="flex items-center py-[5px] text-[13px] px-1">
+                <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Developer</span>
+                <span>{dev.developer}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
+
+        {/* ── Blocks ── */}
+        {blocks.length > 0 && (
+          <div className="mb-5">
+            <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-2">Blocks</div>
+            <div className="flex flex-wrap gap-[6px]">
+              {blocks.map(b => (
+                <span key={b.id} className={`text-[11px] py-[5px] px-[10px] rounded-md border ${b.id === userBlockId ? "bg-[rgba(30,198,164,0.08)] border-[rgba(30,198,164,0.2)] text-[#1ec6a4]" : "bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.5)]"}`}>
+                  {b.name}{b.total_units > 0 && <span className="text-[10px] text-[rgba(255,255,255,0.25)] ml-1">· {b.total_units}</span>}
+                  {issuesByBlock[b.id] && <span className="ml-1 text-[9px] text-amber-400">({issuesByBlock[b.id]})</span>}
+                </span>
+              ))}
+            </div>
+          </div>
         )}
 
-        {/* ── Issues ─────────────────────────────────────────────────── */}
-        <div>
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h2 className="text-lg font-bold">Issues in Your Development</h2>
-            <button onClick={() => setShowIssueForm(!showIssueForm)}
-              className="bg-[#1ec6a4] hover:bg-[#25d4b0] text-white px-4 py-2 rounded-lg text-sm font-semibold">
-              {showIssueForm ? "Cancel" : "Report Issue"}
-            </button>
-          </div>
+        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <select value={filterBlock} onChange={e => setFilterBlock(e.target.value)}
-              className="bg-[#132847] border border-[#1e3a5f] rounded-lg px-3 py-1.5 text-xs text-white">
-              <option value="">All Blocks</option>
-              {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
-            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
-              className="bg-[#132847] border border-[#1e3a5f] rounded-lg px-3 py-1.5 text-xs text-white">
-              <option value="">All Categories</option>
-              {categories.map(c => <option key={c} value={c}>{CATEGORY_EMOJI[c]} {c.replace("_", " ")}</option>)}
-            </select>
+        {/* ── Open Issues ── */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)]">Open issues</div>
+            <button onClick={() => setShowIssueForm(!showIssueForm)} className="text-[11px] font-semibold text-[#1ec6a4] hover:underline">+ Report issue</button>
           </div>
 
           {/* Issue form */}
           {showIssueForm && (
-            <Card title="Report an Issue">
-              <div className="space-y-3">
-                <input type="text" placeholder="Issue title (e.g. Broken lift)" value={newIssue.title}
-                  onChange={e => setNewIssue({ ...newIssue, title: e.target.value })}
-                  className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2.5 text-white text-sm" />
-                <textarea placeholder="Describe the issue..." value={newIssue.description}
-                  onChange={e => setNewIssue({ ...newIssue, description: e.target.value })} rows={3}
-                  className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2.5 text-white text-sm resize-none" />
-                <div className="grid grid-cols-2 gap-3">
-                  <select value={newIssue.category} onChange={e => setNewIssue({ ...newIssue, category: e.target.value })}
-                    className="bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-sm">
-                    {categories.map(c => <option key={c} value={c}>{CATEGORY_EMOJI[c]} {c.replace("_", " ")}</option>)}
+            <div className="bg-[#132847] rounded-lg border border-[#1e3a5f] p-4 mb-3 space-y-3">
+              <input type="text" placeholder="What's the issue?" value={newIssue.title} onChange={e => setNewIssue({...newIssue, title: e.target.value})}
+                className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[13px] text-white outline-none" />
+              <textarea placeholder="Describe the issue (optional)" value={newIssue.description} onChange={e => setNewIssue({...newIssue, description: e.target.value})} rows={2}
+                className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[13px] text-white outline-none resize-none" />
+              <div className="flex gap-2">
+                <select value={newIssue.category} onChange={e => setNewIssue({...newIssue, category: e.target.value})}
+                  className="flex-1 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-white outline-none">
+                  {categories.map(c => <option key={c} value={c}>{CATEGORY_EMOJI[c]} {c.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</option>)}
+                </select>
+                {blocks.length > 0 && (
+                  <select value={newIssue.block_id} onChange={e => setNewIssue({...newIssue, block_id: e.target.value})}
+                    className="flex-1 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-white outline-none">
+                    <option value="">All blocks</option>
+                    {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
-                  {blocks.length > 0 && (
-                    <select value={newIssue.block_id} onChange={e => setNewIssue({ ...newIssue, block_id: e.target.value })}
-                      className="bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-3 py-2 text-white text-sm">
-                      <option value="">Whole development</option>
-                      {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                    </select>
-                  )}
-                </div>
-                <label className="flex items-center gap-3 bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-3 cursor-pointer hover:border-[#1ec6a4]/30">
-                  <input type="checkbox" checked={isAnonymous} onChange={() => setIsAnonymous(!isAnonymous)} className="w-4 h-4 accent-[#1ec6a4]" />
-                  <div>
-                    <span className="text-sm text-white">Report anonymously</span>
-                    <p className="text-xs text-[rgba(255,255,255,0.3)] mt-0.5">Your name will be hidden from other residents.</p>
-                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-[11px] text-[rgba(255,255,255,0.4)] cursor-pointer">
+                  <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} className="rounded" /> Report anonymously
                 </label>
-                <button onClick={submitIssue} disabled={submittingIssue}
-                  className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50">
-                  {submittingIssue ? "Submitting..." : "Submit Issue"}
+                <button onClick={submitIssue} disabled={!newIssue.title.trim() || submittingIssue}
+                  className="bg-[#1ec6a4] text-white font-bold text-[12px] px-4 py-2 rounded-lg disabled:opacity-40">
+                  {submittingIssue ? "Submitting..." : "Submit"}
                 </button>
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Issue list */}
           {filtered.length === 0 ? (
-            <Card title="No open issues">
-              <p className="text-[rgba(255,255,255,0.3)] text-sm">No issues have been raised yet. Be the first!</p>
-            </Card>
+            <p className="text-[12px] text-[rgba(255,255,255,0.25)] py-2">No open issues. Be the first to report one.</p>
           ) : (
-            <div className="space-y-3">
-              {filtered.map(issue => (
-                <div key={issue.id} className="bg-[#132847] border border-[#1e3a5f] rounded-xl p-4">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h4 className="font-semibold text-white text-sm">
-                      <span className="mr-1.5">{CATEGORY_EMOJI[issue.category] || "📋"}</span>
-                      {issue.title}
-                    </h4>
-                    {statusBadge(issue.status)}
+            filtered.map(issue => (
+              <div key={issue.id} className="flex items-center gap-[10px] py-2 px-[6px] rounded-md hover:bg-[rgba(255,255,255,0.03)] cursor-pointer"
+                onClick={() => { setExpandedIssue(expandedIssue === issue.id ? null : issue.id); if (!supporters[issue.id]) loadSupporters(issue.id); }}>
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${issue.status === "resolved" ? "bg-green-400" : "bg-amber-400"}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-semibold truncate">{issue.title}</div>
+                  <div className="text-[10px] text-[rgba(255,255,255,0.25)] mt-[1px]">
+                    {issue.category.replace(/_/g, " ")} · {new Date(issue.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                    {blocks.find(b => b.id === issue.block_id)?.name && ` · ${blocks.find(b => b.id === issue.block_id)?.name}`}
                   </div>
-                  {issue.description && (
-                    <p className="text-[rgba(255,255,255,0.55)] text-xs mt-1 mb-2">{issue.description}</p>
-                  )}
-                  <div className="flex items-center gap-3 text-xs text-[rgba(255,255,255,0.3)] mb-3">
-                    <span>{issue.supporter_count} {issue.supporter_count === 1 ? "resident" : "residents"}</span>
-                    <span>{new Date(issue.created_at).toLocaleDateString()}</span>
-                    {issue.block_id && blocks.find(b => b.id === issue.block_id) && (
-                      <span className="bg-[#162d50] px-2 py-0.5 rounded text-[10px]">
-                        {blocks.find(b => b.id === issue.block_id)?.name}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => toggleSupport(issue.id, issue.user_supported)}
-                      className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                        issue.user_supported
-                          ? "bg-green-900/60 text-green-400"
-                          : "bg-[#0f1f3d] border border-[#1e3a5f] text-[rgba(255,255,255,0.55)] hover:border-[#1ec6a4]/40"
-                      }`}>
-                      {issue.user_supported ? "✓ Supported" : "I have this problem too"}
-                    </button>
-                    <button onClick={() => {
-                      if (expandedIssue === issue.id) { setExpandedIssue(null); }
-                      else { setExpandedIssue(issue.id); loadSupporters(issue.id); }
-                    }} className="text-xs text-[#1ec6a4] hover:underline">
-                      {expandedIssue === issue.id ? "Hide names" : "See who"}
-                    </button>
-                  </div>
-                  {expandedIssue === issue.id && supporters[issue.id] && (
-                    <div className="mt-3 bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg p-3">
-                      <p className="text-xs text-[rgba(255,255,255,0.3)] mb-1.5 font-semibold">Supported by:</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {supporters[issue.id].map((s, i) => (
-                          <span key={i} className="text-xs bg-[#1ec6a4]/10 text-[#1ec6a4] px-2 py-1 rounded-full">
-                            {s.first_name} {s.last_name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
-              ))}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-[11px] text-[rgba(255,255,255,0.3)]">{issue.supporter_count}</span>
+                  <button onClick={e => { e.stopPropagation(); toggleSupport(issue.id, issue.user_supported); }}
+                    className={`text-[10px] font-bold px-2 py-[3px] rounded-[5px] ${issue.user_supported ? "bg-[rgba(30,198,164,0.15)] text-[#1ec6a4] border border-[#1ec6a4]" : "bg-[rgba(30,198,164,0.08)] text-[#1ec6a4] border border-[rgba(30,198,164,0.15)]"}`}>
+                    {issue.user_supported ? "Supported" : "Support"}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
+
+        {/* ── Invite ── */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between p-[14px] rounded-[10px] bg-[rgba(30,198,164,0.06)] border border-[rgba(30,198,164,0.15)]">
+            <div>
+              <strong>{memberCount} apartments joined</strong> — help us reach 50
+              <p className="text-[12px] text-[rgba(255,255,255,0.4)] mt-[2px]">More residents = stronger data, louder voice</p>
+            </div>
+            <button onClick={() => setInviteOpen(!inviteOpen)} className="bg-[#1ec6a4] text-[#0f1f3d] font-bold text-[12px] px-4 py-[7px] rounded-lg flex-shrink-0">
+              Invite neighbours
+            </button>
+          </div>
+          {inviteOpen && (
+            <div className="bg-[#132847] rounded-lg border border-[#1e3a5f] p-4 mt-2 space-y-3">
+              <div className="flex items-center gap-2">
+                <input readOnly value={`blockvoice.co.uk/join/${dev.slug}`} className="flex-1 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-[rgba(255,255,255,0.6)] outline-none" />
+                <button onClick={() => { navigator.clipboard.writeText(`https://blockvoice.co.uk/join/${dev.slug}`); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
+                  className="bg-[#1ec6a4] text-[#0f1f3d] font-bold text-[11px] px-3 py-2 rounded-lg flex-shrink-0">
+                  {linkCopied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <a href={`https://wa.me/?text=${encodeURIComponent(`Hey! I've joined BlockVoice for ${dev.name}. Join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
+                  target="_blank" rel="noopener noreferrer" className="flex-1 text-center text-[12px] font-bold text-green-400 border border-green-400/30 rounded-lg py-2">WhatsApp</a>
+                <a href={`mailto:?subject=Join ${dev.name} on BlockVoice&body=Hey, I've joined BlockVoice for ${dev.name}. Join here: https://blockvoice.co.uk/join/${dev.slug}`}
+                  className="flex-1 text-center text-[12px] font-bold text-blue-400 border border-blue-400/30 rounded-lg py-2">Email</a>
+              </div>
             </div>
           )}
         </div>
 
-        {/* (Invite section moved into overview card action bar above) */}
+        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
 
-        {/* ── Coming Soon ────────────────────────────────────────────── */}
-        <div>
-          <h2 className="text-lg font-bold mb-4">Coming Soon</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              { icon: "📄", title: "AI Document Analysis", desc: "Upload your lease or service charge statement and get plain-English summaries and anomaly flags." },
-              { icon: "📊", title: "Managing Agent Scorecard", desc: "Compare your managing agent against others across all developments they manage." },
-              { icon: "✍️", title: "AI Complaint Drafting", desc: "Generate formal complaints based on your issues and evidence, with legal guidance." },
-              { icon: "💷", title: "Service Charge Comparison", desc: "See how your charges compare to similar developments in your area." },
-            ].map(item => (
-              <div key={item.title} className="bg-[#132847] rounded-xl p-4 border border-dashed border-[#1e3a5f] opacity-50">
-                <span className="text-xl block mb-2">{item.icon}</span>
-                <h3 className="font-semibold text-sm text-white mb-1">{item.title}</h3>
-                <p className="text-xs text-[rgba(255,255,255,0.3)] leading-relaxed">{item.desc}</p>
-                <span className="inline-block mt-2 text-[8px] uppercase font-bold px-2 py-0.5 rounded-full tracking-wide bg-amber-900/30 text-amber-400 border border-amber-800/30">
-                  Coming Soon
-                </span>
-              </div>
-            ))}
+        {/* ── Rate ── */}
+        <div className="mb-5">
+          <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-2">Rate your building management</div>
+          <div className="flex gap-[10px]">
+            <button onClick={() => setShowAgentRating(!showAgentRating)}
+              className="flex-1 text-center text-[12px] font-bold text-[#1ec6a4] bg-[rgba(30,198,164,0.08)] border border-[rgba(30,198,164,0.15)] rounded-lg py-2 hover:bg-[rgba(30,198,164,0.12)]">
+              ★ Rate {agent?.name || "Agent"}
+            </button>
+            <button onClick={() => setShowFhRating(!showFhRating)}
+              className="flex-1 text-center text-[12px] font-bold text-[#1ec6a4] bg-[rgba(30,198,164,0.08)] border border-[rgba(30,198,164,0.15)] rounded-lg py-2 hover:bg-[rgba(30,198,164,0.12)]">
+              ★ Rate {freeholder?.name || "Freeholder"}
+            </button>
           </div>
+
+          {/* Agent rating form */}
+          {showAgentRating && (
+            <div className="bg-[#132847] rounded-lg border border-[#1e3a5f] p-4 mt-2 space-y-3">
+              <p className="text-[12px] font-semibold">Rate {agent?.name} (1-5 for each)</p>
+              {AGENT_CATS.map(c => (
+                <div key={c} className="flex items-center justify-between">
+                  <span className="text-[12px] text-[rgba(255,255,255,0.5)]">{AGENT_LABELS[c]}</span>
+                  <div className="flex gap-1">{[1,2,3,4,5].map(n => (
+                    <button key={n} onClick={() => setAgentForm({...agentForm, [c]: n})}
+                      className={`w-7 h-7 rounded text-[12px] font-bold ${agentForm[c] === n ? "bg-[#1ec6a4] text-white" : "bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.4)]"}`}>{n}</button>
+                  ))}</div>
+                </div>
+              ))}
+              <textarea placeholder="Any comments? (optional)" value={agentComment} onChange={e => setAgentComment(e.target.value)} rows={2}
+                className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-white outline-none resize-none" />
+              <button onClick={submitAgentRating} disabled={submittingRating}
+                className="w-full bg-[#1ec6a4] text-white font-bold text-[12px] py-2 rounded-lg disabled:opacity-40">
+                {submittingRating ? "Submitting..." : myAgentRating ? "Update Rating" : "Submit Rating"}
+              </button>
+            </div>
+          )}
+
+          {/* Freeholder rating form */}
+          {showFhRating && (
+            <div className="bg-[#132847] rounded-lg border border-[#1e3a5f] p-4 mt-2 space-y-3">
+              <p className="text-[12px] font-semibold">Rate {freeholder?.name} (1-5 for each)</p>
+              {FH_CATS.map(c => (
+                <div key={c} className="flex items-center justify-between">
+                  <span className="text-[12px] text-[rgba(255,255,255,0.5)]">{FH_LABELS[c]}</span>
+                  <div className="flex gap-1">{[1,2,3,4,5].map(n => (
+                    <button key={n} onClick={() => setFhForm({...fhForm, [c]: n})}
+                      className={`w-7 h-7 rounded text-[12px] font-bold ${fhForm[c] === n ? "bg-[#1ec6a4] text-white" : "bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.4)]"}`}>{n}</button>
+                  ))}</div>
+                </div>
+              ))}
+              <textarea placeholder="Any comments? (optional)" value={fhComment} onChange={e => setFhComment(e.target.value)} rows={2}
+                className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-white outline-none resize-none" />
+              <button onClick={submitFhRating} disabled={submittingRating}
+                className="w-full bg-[#1ec6a4] text-white font-bold text-[12px] py-2 rounded-lg disabled:opacity-40">
+                {submittingRating ? "Submitting..." : myFhRating ? "Update Rating" : "Submit Rating"}
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* ── Suggest correction (bottom) ──────────────────────────────── */}
-        <div className="text-center">
-          <button onClick={() => setShowCorrection(!showCorrection)} className="text-[11px] text-[rgba(255,255,255,0.3)] hover:underline bg-transparent border-none cursor-pointer">
-            Something wrong? Suggest a correction
-          </button>
-          {corrSuccess && <p className="text-xs text-green-400 mt-1">Thanks! We&apos;ll review your correction.</p>}
-        </div>
-        {showCorrection && (
-          <Card title="Suggest a Correction">
-            <div className="space-y-3">
+        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
+
+        {/* ── Corrections ── */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)]">Something wrong?</div>
+            <button onClick={() => setShowCorrection(!showCorrection)} className="text-[11px] font-semibold text-[#1ec6a4] hover:underline">Suggest correction</button>
+          </div>
+          {corrSuccess && <p className="text-[12px] text-green-400 mb-2">Correction submitted — thank you!</p>}
+          {showCorrection && (
+            <div className="bg-[#132847] rounded-lg border border-[#1e3a5f] p-4 space-y-3">
               <select value={corrField} onChange={e => setCorrField(e.target.value)}
-                className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2.5 text-white text-sm">
+                className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-white outline-none">
                 <option value="">What needs correcting?</option>
                 {CORRECTION_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
               </select>
               {corrField && (
                 <>
-                  {getCurrentValue(corrField) && (
-                    <p className="text-xs text-[rgba(255,255,255,0.3)]">Currently: {getCurrentValue(corrField)}</p>
+                  {corrField !== "other" && getCurrentValue(corrField) && (
+                    <p className="text-[11px] text-[rgba(255,255,255,0.35)]">Current: {getCurrentValue(corrField)}</p>
                   )}
-                  <input type="text" value={corrValue} onChange={e => setCorrValue(e.target.value)}
-                    placeholder="What should it be?" className="w-full bg-[#0f1f3d] border border-[#1e3a5f] rounded-lg px-4 py-2.5 text-white text-sm" />
+                  <input type="text" placeholder="What should it be?" value={corrValue} onChange={e => setCorrValue(e.target.value)}
+                    className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-white outline-none" />
                   <button onClick={submitCorrection} disabled={submittingCorr}
-                    className="w-full bg-[#1ec6a4] hover:bg-[#25d4b0] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
+                    className="w-full bg-[#1ec6a4] text-white font-bold text-[12px] py-2 rounded-lg disabled:opacity-40">
                     {submittingCorr ? "Submitting..." : "Submit Correction"}
                   </button>
                 </>
               )}
             </div>
-          </Card>
+          )}
+        </div>
+
+        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
+
+        {/* ── Feedback ── */}
+        <div className="mb-5">
+          <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-2">Feedback</div>
+          {feedbackSent ? (
+            <p className="text-[12px] text-green-400">Thanks for your feedback!</p>
+          ) : (
+            <div className="flex items-center gap-[10px] p-[10px] rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)]">
+              <input type="text" placeholder="What should we build next? Tell us..." value={feedbackText}
+                onChange={e => setFeedbackText(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && feedbackText.trim()) {
+                  fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, feedback: feedbackText, developmentId: dev.id }) });
+                  setFeedbackText(""); setFeedbackSent(true); setTimeout(() => setFeedbackSent(false), 3000);
+                }}}
+                className="flex-1 bg-transparent border-none outline-none text-[12px] text-white placeholder:text-[rgba(255,255,255,0.2)]" />
+              <button onClick={() => {
+                if (!feedbackText.trim()) return;
+                fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, feedback: feedbackText, developmentId: dev.id }) });
+                setFeedbackText(""); setFeedbackSent(true); setTimeout(() => setFeedbackSent(false), 3000);
+              }} className="text-[11px] font-bold text-[#1ec6a4] flex-shrink-0">Send</button>
+            </div>
+          )}
+        </div>
+
+        <div className="text-center py-3 text-[rgba(255,255,255,0.1)] text-[10px]">BlockVoice — Your building, fully understood</div>
+
+          </div>
         )}
 
-        <div className="text-center py-3 text-[#334155] text-[10px]">BlockVoice — Everything about your building. In one place.</div>
+        {/* ════════════════════ SERVICE CHARGES TAB ════════════════════ */}
+        {activeTab === "charges" && (
+          <ServiceChargesSection profileId={userId} buildingId={userBuildingId} postcode={dev.postcodes?.[0] || ""} buildingName={userBlockName} flatNumber={userFlat} />
+        )}
+
+        {/* ════════════════════ DOCUMENTS TAB ════════════════════ */}
+        {activeTab === "documents" && (
+          <div className="py-10 text-center">
+            <p className="text-[15px] font-semibold text-[rgba(255,255,255,0.4)] mb-2">Document analysis — coming soon</p>
+            <p className="text-[12px] text-[rgba(255,255,255,0.25)]">Upload your lease, service charge statements, and notices. AI will break them down in plain English.</p>
+          </div>
+        )}
+
+        {/* ════════════════════ SETTINGS TAB ════════════════════ */}
+        {activeTab === "settings" && (
+          <div className="py-5">
+            <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-3">Profile</div>
+            <div className="space-y-0">
+              <div className="flex py-[5px] text-[13px] px-1"><span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Name</span><span>{userName}</span></div>
+              <div className="flex py-[5px] text-[13px] px-1"><span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Block</span><span>{userBlockName}</span></div>
+              <div className="flex py-[5px] text-[13px] px-1"><span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Flat</span><span>{userFlat}</span></div>
+              <div className="flex py-[5px] text-[13px] px-1"><span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Status</span><span className="capitalize">{userStatus}</span></div>
+              <div className="flex py-[5px] text-[13px] px-1"><span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Verified</span><span className="capitalize">{verificationStatus}</span></div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
   );
 }
+
+// ─── old layout code removed ───
 
 // ─── sub-components ─────────────────────────────────────────────────────────
 
@@ -1001,45 +927,6 @@ function Card({ title, badge, children }: { title: string; badge?: React.ReactNo
         </div>
       )}
       {children}
-    </div>
-  );
-}
-
-function ContactDetails({ phone, email, website, address }: { phone?: string | null; email?: string | null; website?: string | null; address?: string | null }) {
-  const rows = [
-    phone && { label: "Phone", value: phone, href: `tel:${phone}` },
-    email && { label: "Email", value: email, href: `mailto:${email}` },
-    website && { label: "Website", value: website, href: website.startsWith("http") ? website : `https://${website}` },
-    address && { label: "Address", value: address },
-  ].filter(Boolean) as { label: string; value: string; href?: string }[];
-
-  if (rows.length === 0) return <p className="text-[rgba(255,255,255,0.3)] text-sm mt-2">No contact details on file.</p>;
-
-  return (
-    <div className="space-y-2 mt-2">
-      {rows.map(r => (
-        <div key={r.label} className="flex items-start gap-2 text-sm">
-          <span className="text-[rgba(255,255,255,0.3)] w-16 flex-shrink-0">{r.label}</span>
-          {r.href ? (
-            <a href={r.href} className="text-[#1ec6a4] hover:underline break-all" target="_blank" rel="noopener noreferrer">{r.value}</a>
-          ) : (
-            <span className="text-[rgba(255,255,255,0.7)] break-all">{r.value}</span>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function StarSelector({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map(star => (
-        <button key={star} onClick={() => onChange(star)} type="button"
-          className={`text-lg transition-colors ${star <= value ? "text-amber-400" : "text-[rgba(255,255,255,0.15)]"} hover:text-amber-300`}>
-          ★
-        </button>
-      ))}
     </div>
   );
 }
