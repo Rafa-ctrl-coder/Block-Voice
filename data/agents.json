@@ -1,0 +1,3740 @@
+[
+  {
+    "name": "RENDALL & RITTNER LIMITED",
+    "slug": "rendall-and-rittner-limited",
+    "company_number": "02515428",
+    "status": "active",
+    "incorporated": "1990-06-25",
+    "address": {
+      "line1": "13b St. George Wharf",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SW8 2LE",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FIRSTPORT BESPOKE PROPERTY SERVICES LIMITED",
+    "slug": "firstport-bespoke-property-services-limited",
+    "company_number": "01623496",
+    "status": "active",
+    "incorporated": "1982-03-22",
+    "address": {
+      "line1": "Fifth Floor The Lantern",
+      "line2": "75 Hampstead Road",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 2PL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CORDEA SAVILLS UK PROPERTY VENTURES NO. 1 LP",
+    "slug": "cordea-savills-uk-property-ventures-no-1-lp",
+    "company_number": "LP012251",
+    "status": "active",
+    "incorporated": "2007-06-27",
+    "address": {
+      "line1": "33 Margaret Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1G 0JD",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "limited-partnership"
+  },
+  {
+    "name": "JLL PROPERTY MANAGEMENT LIMITED",
+    "slug": "jll-property-management-limited",
+    "company_number": "17021479",
+    "status": "active",
+    "incorporated": "2026-02-09",
+    "address": {
+      "line1": "1 Sunnybrow Close",
+      "line2": "",
+      "locality": "Spennymoor",
+      "region": "",
+      "postal_code": "DL16 7WJ",
+      "country": "England"
+    },
+    "sic_codes": [
+      "98000"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CBRE SPANISH RESIDENTIAL QAHC LIMITED",
+    "slug": "cbre-spanish-residential-qahc-limited",
+    "company_number": "16889680",
+    "status": "active",
+    "incorporated": "2025-12-03",
+    "address": {
+      "line1": "Third Floor",
+      "line2": "One New Change",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC4M 9AF",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CUSHMAN & WAKEFIELD UK HOLDCO (LONDON) LIMITED",
+    "slug": "cushman-and-wakefield-uk-holdco-london-limited",
+    "company_number": "11414195",
+    "status": "active",
+    "incorporated": "2018-06-13",
+    "address": {
+      "line1": "125 Old Broad Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC2N 1AR",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "KNIGHT FRANK LLP",
+    "slug": "knight-frank-llp",
+    "company_number": "OC305934",
+    "status": "active",
+    "incorporated": "2003-11-03",
+    "address": {
+      "line1": "55 Baker Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1U 8AN",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "llp"
+  },
+  {
+    "name": "MAINSTAY GROUP LIMITED",
+    "slug": "mainstay-group-limited",
+    "company_number": "15048115",
+    "status": "active",
+    "incorporated": "2023-08-03",
+    "address": {
+      "line1": "Fifth Floor The Lantern",
+      "line2": "75 Hampstead Road",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 2PL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "THEYDON PARK LTD",
+    "slug": "theydon-park-ltd",
+    "company_number": "11825564",
+    "status": "active",
+    "incorporated": "2019-02-13",
+    "address": {
+      "line1": "7-8 Portmill Lane",
+      "line2": "",
+      "locality": "Hitchin",
+      "region": "Hertfordshire",
+      "postal_code": "SG5 1DJ",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "WESTLONDON HOMES LIMITED",
+    "slug": "westlondon-homes-limited",
+    "company_number": "08689079",
+    "status": "dissolved",
+    "incorporated": "2013-09-13",
+    "address": {
+      "line1": "College House",
+      "line2": "17 King Edwards Road",
+      "locality": "Ruislip",
+      "region": "Middlesex",
+      "postal_code": "HA4 7AE",
+      "country": "England"
+    },
+    "sic_codes": [],
+    "type": "ltd"
+  },
+  {
+    "name": "HARRODS ESTATES LIMITED",
+    "slug": "harrods-estates-limited",
+    "company_number": "00835993",
+    "status": "active",
+    "incorporated": "1965-01-29",
+    "address": {
+      "line1": "87/135 Brompton Road",
+      "line2": "London",
+      "locality": "",
+      "region": "",
+      "postal_code": "SW1X 7XL",
+      "country": ""
+    },
+    "sic_codes": [
+      "68310"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "GRAINGER PLC",
+    "slug": "grainger-plc",
+    "company_number": "00125575",
+    "status": "active",
+    "incorporated": "1912-11-27",
+    "address": {
+      "line1": "Citygate",
+      "line2": "St James Boulevard",
+      "locality": "Newcastle Upon Tyne",
+      "region": "",
+      "postal_code": "NE1 4JE",
+      "country": ""
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "GREYSTAR EUROPE HOLDINGS LTD",
+    "slug": "greystar-europe-holdings-ltd",
+    "company_number": "08741469",
+    "status": "active",
+    "incorporated": "2013-10-21",
+    "address": {
+      "line1": "Ground Floor (West) And Level 1 The Gilbert",
+      "line2": "40 Finsbury Square",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC2A 1PX",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BALLYMORE GROUP LIMITED",
+    "slug": "ballymore-group-limited",
+    "company_number": "16900646",
+    "status": "active",
+    "incorporated": "2025-12-09",
+    "address": {
+      "line1": "154 Chaucer Drive",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SE1 5RG",
+      "country": "England"
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "AIRD MOTORS LIMITED",
+    "slug": "aird-motors-limited",
+    "company_number": "02448075",
+    "status": "active",
+    "incorporated": "1989-11-30",
+    "address": {
+      "line1": "Vaughan Chambers",
+      "line2": "Vaughan Road",
+      "locality": "Harpenden",
+      "region": "Hertfordshire",
+      "postal_code": "AL5 4EE",
+      "country": ""
+    },
+    "sic_codes": [
+      "45190",
+      "45200",
+      "45310"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BARRATT DEVELOPMENTS LIMITED",
+    "slug": "barratt-developments-limited",
+    "company_number": "15998687",
+    "status": "active",
+    "incorporated": "2024-10-04",
+    "address": {
+      "line1": "Barratt House Cartwright Way, Forest Business Park",
+      "line2": "Bardon Hill",
+      "locality": "Coalville",
+      "region": "Leicestershire",
+      "postal_code": "LE67 1UF",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "74990"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "MOUNT ANVIL LIMITED",
+    "slug": "mount-anvil-limited",
+    "company_number": "02706348",
+    "status": "active",
+    "incorporated": "1992-04-13",
+    "address": {
+      "line1": "140 Aldersgate Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC1A 4HY",
+      "country": ""
+    },
+    "sic_codes": [
+      "41202"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BPS ESTATES LETTINGS LIMITED",
+    "slug": "bps-estates-lettings-limited",
+    "company_number": "12496034",
+    "status": "active",
+    "incorporated": "2020-03-03",
+    "address": {
+      "line1": "138 Whitham Road",
+      "line2": "",
+      "locality": "Sheffield",
+      "region": "",
+      "postal_code": "S10 2SR",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BERMONDSEY 1A OPCO LLP",
+    "slug": "bermondsey-1a-opco-llp",
+    "company_number": "OC456239",
+    "status": "active",
+    "incorporated": "2025-04-04",
+    "address": {
+      "line1": "4th Floor 140 Aldersgate Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC1A 4HY",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [],
+    "type": "llp"
+  },
+  {
+    "name": "MODA LIVING LIMITED",
+    "slug": "moda-living-limited",
+    "company_number": "09109087",
+    "status": "active",
+    "incorporated": "2014-07-01",
+    "address": {
+      "line1": "Castlegarth Grange",
+      "line2": "Scott Lane",
+      "locality": "Wetherby",
+      "region": "West Yorkshire",
+      "postal_code": "LS22 6LH",
+      "country": ""
+    },
+    "sic_codes": [
+      "68100",
+      "68320",
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "DEXTERS AI LTD",
+    "slug": "dexters-ai-ltd",
+    "company_number": "16796871",
+    "status": "active",
+    "incorporated": "2025-10-20",
+    "address": {
+      "line1": "124 City Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC1V 2NX",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "62090"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FOXTONS LIMITED",
+    "slug": "foxtons-limited",
+    "company_number": "01680058",
+    "status": "active",
+    "incorporated": "1982-11-22",
+    "address": {
+      "line1": "Building 12 566 Chiswick High Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W4 5AN",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68310"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "KINLEIGH FOLKARD & HAYWARD LIMITED",
+    "slug": "kinleigh-folkard-and-hayward-limited",
+    "company_number": "02965708",
+    "status": "active",
+    "incorporated": "1994-09-07",
+    "address": {
+      "line1": "4th Floor 20 Red Lion Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC1R 4PS",
+      "country": "England"
+    },
+    "sic_codes": [
+      "74909"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "MARSH & PARSONS LIMITED",
+    "slug": "marsh-and-parsons-limited",
+    "company_number": "05377981",
+    "status": "active",
+    "incorporated": "2005-02-28",
+    "address": {
+      "line1": "3 Park Road",
+      "line2": "",
+      "locality": "Teddington",
+      "region": "",
+      "postal_code": "TW11 0AP",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68310"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "WINKWORTH LIMITED",
+    "slug": "winkworth-limited",
+    "company_number": "14767502",
+    "status": "dissolved",
+    "incorporated": "2023-03-29",
+    "address": {
+      "line1": "15 Rupert Kettle Drive",
+      "line2": "Bishops Itchington",
+      "locality": "Southam",
+      "region": "",
+      "postal_code": "CV47 2PU",
+      "country": "England"
+    },
+    "sic_codes": [
+      "70229"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BENHAM AND REEVES LIMITED",
+    "slug": "benham-and-reeves-limited",
+    "company_number": "01633981",
+    "status": "active",
+    "incorporated": "1982-05-07",
+    "address": {
+      "line1": "C/O Parker Cavendish, Suite 301, Stanmore Business And Innovation Centre",
+      "line2": "Howard Road",
+      "locality": "Stanmore",
+      "region": "Middlesex",
+      "postal_code": "HA7 1FW",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68310"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CHESTERTONS INTERNATIONAL FOUNDATION",
+    "slug": "chestertons-international-foundation",
+    "company_number": "12071118",
+    "status": "active",
+    "incorporated": "2019-06-26",
+    "address": {
+      "line1": "3 Hill Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1J 5LB",
+      "country": "England"
+    },
+    "sic_codes": [
+      "82990"
+    ],
+    "type": "private-limited-guarant-nsc-limited-exemption"
+  },
+  {
+    "name": "LUDGATE COURT PROPERTY MANAGEMENT LIMITED",
+    "slug": "ludgate-court-property-management-limited",
+    "company_number": "05979506",
+    "status": "dissolved",
+    "incorporated": "2006-10-26",
+    "address": {
+      "line1": "23 Buckingham Palace Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SW1W 0PP",
+      "country": ""
+    },
+    "sic_codes": [
+      "7032"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CONWAY ESTATES LIMITED",
+    "slug": "conway-estates-limited",
+    "company_number": "NI063940",
+    "status": "active",
+    "incorporated": "2007-03-30",
+    "address": {
+      "line1": "58 Moneymore Road",
+      "line2": "Magherafelt",
+      "locality": "Co Derry",
+      "region": "",
+      "postal_code": "BT45 6HG",
+      "country": ""
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "HML GROUP LTD",
+    "slug": "hml-group-ltd",
+    "company_number": "NI656807",
+    "status": "active",
+    "incorporated": "2018-11-02",
+    "address": {
+      "line1": "Unit B1",
+      "line2": "Balliniska Road",
+      "locality": "Londonderry",
+      "region": "",
+      "postal_code": "BT48 0NA",
+      "country": "Northern Ireland"
+    },
+    "sic_codes": [
+      "41201"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "AGILITY RMG LIMITED",
+    "slug": "agility-rmg-limited",
+    "company_number": "07385963",
+    "status": "active",
+    "incorporated": "2010-09-23",
+    "address": {
+      "line1": "53 Haliburton Road",
+      "line2": "St Margarets",
+      "locality": "Twickenham",
+      "region": "",
+      "postal_code": "TW1 1PD",
+      "country": "England"
+    },
+    "sic_codes": [
+      "70229"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "PINNACLE PLACES LIMITED",
+    "slug": "pinnacle-places-limited",
+    "company_number": "03256483",
+    "status": "active",
+    "incorporated": "1996-09-30",
+    "address": {
+      "line1": "8th Floor Holborn Tower",
+      "line2": "137-144 High Holborn",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC1V 6PL",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FREEHOLD MANAGERS PLC",
+    "slug": "freehold-managers-plc",
+    "company_number": "02783487",
+    "status": "active",
+    "incorporated": "1993-01-20",
+    "address": {
+      "line1": "Butlers Wharf Building",
+      "line2": "36 Shad Thames",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SE1 2YE",
+      "country": ""
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "PROPERTY HUB LIMITED",
+    "slug": "property-hub-limited",
+    "company_number": "06556983",
+    "status": "active",
+    "incorporated": "2008-04-07",
+    "address": {
+      "line1": "38 Court Parade",
+      "line2": "",
+      "locality": "Wembley",
+      "region": "Middlesex",
+      "postal_code": "HA0 3HS",
+      "country": ""
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ST GEORGE PLC",
+    "slug": "st-george-plc",
+    "company_number": "02590468",
+    "status": "active",
+    "incorporated": "1991-03-11",
+    "address": {
+      "line1": "Berkeley House",
+      "line2": "19 Portsmouth Road",
+      "locality": "Cobham",
+      "region": "Surrey",
+      "postal_code": "KT11 1JG",
+      "country": ""
+    },
+    "sic_codes": [
+      "41100",
+      "41202",
+      "64203",
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "ST JAMES GROUP LIMITED",
+    "slug": "st-james-group-limited",
+    "company_number": "03190056",
+    "status": "active",
+    "incorporated": "1996-04-24",
+    "address": {
+      "line1": "Berkeley House",
+      "line2": "19 Portsmouth Road",
+      "locality": "Cobham",
+      "region": "Surrey",
+      "postal_code": "KT11 1JG",
+      "country": ""
+    },
+    "sic_codes": [
+      "41100",
+      "41202",
+      "64203",
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "TAYLOR WIMPEY PLC",
+    "slug": "taylor-wimpey-plc",
+    "company_number": "00296805",
+    "status": "active",
+    "incorporated": "1935-02-01",
+    "address": {
+      "line1": "Gate House",
+      "line2": "Turnpike Road",
+      "locality": "High Wycombe",
+      "region": "Buckinghamshire",
+      "postal_code": "HP12 3NR",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "REDROW HOMES LIMITED",
+    "slug": "redrow-homes-limited",
+    "company_number": "01990710",
+    "status": "active",
+    "incorporated": "1986-02-18",
+    "address": {
+      "line1": "Redrow House",
+      "line2": "St Davids Park",
+      "locality": "Flintshire",
+      "region": "",
+      "postal_code": "CH5 3RX",
+      "country": ""
+    },
+    "sic_codes": [
+      "41202"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BELLWAY HOMES LIMITED",
+    "slug": "bellway-homes-limited",
+    "company_number": "00670176",
+    "status": "active",
+    "incorporated": "1960-09-16",
+    "address": {
+      "line1": "Woolsington House",
+      "line2": "Woolsington",
+      "locality": "Newcastle Upon Tyne",
+      "region": "",
+      "postal_code": "NE13 8BF",
+      "country": "England"
+    },
+    "sic_codes": [
+      "41202"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "PERSIMMON HOMES LIMITED",
+    "slug": "persimmon-homes-limited",
+    "company_number": "04108747",
+    "status": "active",
+    "incorporated": "2000-11-16",
+    "address": {
+      "line1": "Persimmon House",
+      "line2": "Fulford",
+      "locality": "York",
+      "region": "",
+      "postal_code": "YO19 4FE",
+      "country": ""
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CREST NICHOLSON PLC",
+    "slug": "crest-nicholson-plc",
+    "company_number": "01040616",
+    "status": "active",
+    "incorporated": "1972-01-31",
+    "address": {
+      "line1": "500 Dashwood Lang Road",
+      "line2": "Bourne Business Park",
+      "locality": "Addlestone",
+      "region": "Surrey",
+      "postal_code": "KT15 2HJ",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "COUNTRYSIDE L&Q (BEAULIEU) LLP",
+    "slug": "countryside-l-and-q-beaulieu-llp",
+    "company_number": "OC340340",
+    "status": "active",
+    "incorporated": "2008-09-24",
+    "address": {
+      "line1": "Countryside House",
+      "line2": "The Drive Great Warley",
+      "locality": "Brentwood",
+      "region": "Essex",
+      "postal_code": "CM13 3AT",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "llp"
+  },
+  {
+    "name": "DSBRANTUO LIMITED",
+    "slug": "dsbrantuo-limited",
+    "company_number": "09467985",
+    "status": "active",
+    "incorporated": "2015-03-03",
+    "address": {
+      "line1": "257 Goresway",
+      "line2": "",
+      "locality": "Romford",
+      "region": "Essex",
+      "postal_code": "RM7 0SB",
+      "country": ""
+    },
+    "sic_codes": [
+      "95110"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "HYDE HOUSING LIMITED",
+    "slug": "hyde-housing-limited",
+    "company_number": "12117186",
+    "status": "active",
+    "incorporated": "2019-07-23",
+    "address": {
+      "line1": "30 Greenbox Weston Hall Road",
+      "line2": "Stoke Prior",
+      "locality": "Bromsgrove",
+      "region": "Worcestershire",
+      "postal_code": "B60 4AL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "87900"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ABACUS ACCOUNTS (THAMES VALLEY) LTD",
+    "slug": "abacus-accounts-thames-valley-ltd",
+    "company_number": "12602137",
+    "status": "active",
+    "incorporated": "2020-05-14",
+    "address": {
+      "line1": "30 Commercial Road",
+      "line2": "",
+      "locality": "Swindon",
+      "region": "",
+      "postal_code": "SN1 5NS",
+      "country": "England"
+    },
+    "sic_codes": [
+      "99999"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "A2DOMINION DEVELOPMENTS LIMITED",
+    "slug": "a2dominion-developments-limited",
+    "company_number": "05585321",
+    "status": "active",
+    "incorporated": "2005-10-06",
+    "address": {
+      "line1": "113 Uxbridge Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W5 5TL",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "NOTTING HILL GENESIS",
+    "slug": "notting-hill-genesis",
+    "company_number": "RS007746",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "SOUTHERN HOUSING",
+    "slug": "southern-housing",
+    "company_number": "RS008983",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "PA HOUSING LIMITED",
+    "slug": "pa-housing-limited",
+    "company_number": "10496999",
+    "status": "dissolved",
+    "incorporated": "2016-11-25",
+    "address": {
+      "line1": "Third Floor, Pentagon House",
+      "line2": "52-54 Southwark Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SE1 1UN",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68201"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "SANCTUARY HOUSING LTD",
+    "slug": "sanctuary-housing-ltd",
+    "company_number": "16048184",
+    "status": "active",
+    "incorporated": "2024-10-29",
+    "address": {
+      "line1": "128 City Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC1V 2NX",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68100",
+      "68201",
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "PLACES FOR PEOPLE ARRANGEMENTS 1 LIMITED",
+    "slug": "places-for-people-arrangements-1-limited",
+    "company_number": "08740550",
+    "status": "active",
+    "incorporated": "2013-10-21",
+    "address": {
+      "line1": "305 Gray's Inn Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC1X 8QR",
+      "country": "England"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "HOME GROUP LIMITED",
+    "slug": "home-group-limited",
+    "company_number": "IP22981R",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "CLARION HOUSING ASSOCIATION LIMITED",
+    "slug": "clarion-housing-association-limited",
+    "company_number": "RS007686",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "STONEWATER LIMITED",
+    "slug": "stonewater-limited",
+    "company_number": "IP20558R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "SOVEREIGN HOUSING LTD",
+    "slug": "sovereign-housing-ltd",
+    "company_number": "15742426",
+    "status": "active",
+    "incorporated": "2024-05-25",
+    "address": {
+      "line1": "12a Legge Lane",
+      "line2": "",
+      "locality": "Birmingham",
+      "region": "",
+      "postal_code": "B1 3LD",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68201"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "LONGHURST GROUP LIMITED",
+    "slug": "longhurst-group-limited",
+    "company_number": "RS008009",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "ORBIT GROUP LIMITED",
+    "slug": "orbit-group-limited",
+    "company_number": "IP28503R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "MIDLAND HEART LIMITED",
+    "slug": "midland-heart-limited",
+    "company_number": "IP30069R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "BROMFORD HOUSING ASSOCIATION LIMITED",
+    "slug": "bromford-housing-association-limited",
+    "company_number": "RS007106",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "LIVEWEST LTD",
+    "slug": "livewest-ltd",
+    "company_number": "10694862",
+    "status": "dissolved",
+    "incorporated": "2017-03-28",
+    "address": {
+      "line1": "Moore Stephens",
+      "line2": "30 Gay Street",
+      "locality": "Bath",
+      "region": "Somerset",
+      "postal_code": "BA1 2PA",
+      "country": "England"
+    },
+    "sic_codes": [
+      "82990"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "RIVERSIDE HOUSING LTD",
+    "slug": "riverside-housing-ltd",
+    "company_number": "11977984",
+    "status": "active",
+    "incorporated": "2019-05-03",
+    "address": {
+      "line1": "17 George Street",
+      "line2": "Balsall Heath",
+      "locality": "Birmingham",
+      "region": "",
+      "postal_code": "B12 9RG",
+      "country": "England"
+    },
+    "sic_codes": [
+      "55100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "TOGETHER HOUSING LTD",
+    "slug": "together-housing-ltd",
+    "company_number": "16509966",
+    "status": "active",
+    "incorporated": "2025-06-10",
+    "address": {
+      "line1": "5a Charter House",
+      "line2": "Corbett Street",
+      "locality": "Smethwick",
+      "region": "",
+      "postal_code": "B66 3PN",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ANCHOR HANOVER GROUP",
+    "slug": "anchor-hanover-group",
+    "company_number": "RS007843",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "MCCARTHY & STONE LIMITED",
+    "slug": "mccarthy-and-stone-limited",
+    "company_number": "06622199",
+    "status": "active",
+    "incorporated": "2008-06-17",
+    "address": {
+      "line1": "Fourth Floor",
+      "line2": "100 Holdenhurst Road",
+      "locality": "Bournemouth",
+      "region": "Dorset",
+      "postal_code": "BH8 8AQ",
+      "country": "England"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CHURCHILL LIVING (DEVELOPMENTS) PLC",
+    "slug": "churchill-living-developments-plc",
+    "company_number": "07428858",
+    "status": "active",
+    "incorporated": "2010-11-03",
+    "address": {
+      "line1": "Churchill House",
+      "line2": "Parkside",
+      "locality": "Ringwood",
+      "region": "Hampshire",
+      "postal_code": "BH24 3SG",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "INSPIRED VILLAGES GROUP LIMITED",
+    "slug": "inspired-villages-group-limited",
+    "company_number": "10876791",
+    "status": "active",
+    "incorporated": "2017-07-20",
+    "address": {
+      "line1": "Unit 3, Edwalton Business Park Landmere Lane",
+      "line2": "Edwalton",
+      "locality": "Nottingham",
+      "region": "",
+      "postal_code": "NG12 4JL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "AUDLEY GROUP LIMITED",
+    "slug": "audley-group-limited",
+    "company_number": "09906780",
+    "status": "active",
+    "incorporated": "2015-12-08",
+    "address": {
+      "line1": "65 High Street",
+      "line2": "",
+      "locality": "Egham",
+      "region": "",
+      "postal_code": "TW20 9EY",
+      "country": "England"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "RETIREMENT VILLAGES LIMITED",
+    "slug": "retirement-villages-limited",
+    "company_number": "03800268",
+    "status": "active",
+    "incorporated": "1999-06-29",
+    "address": {
+      "line1": "2nd Floor 52 Grosvenor Gardens",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SW1W 0AU",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "96090"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "THE EXTRACARE CHARITABLE TRUST",
+    "slug": "the-extracare-charitable-trust",
+    "company_number": "02205136",
+    "status": "active",
+    "incorporated": "1987-12-11",
+    "address": {
+      "line1": "7 Harry Weston Road, Binley Business Park",
+      "line2": "Binley",
+      "locality": "Coventry",
+      "region": "",
+      "postal_code": "CV3 2SN",
+      "country": ""
+    },
+    "sic_codes": [
+      "68201",
+      "68209",
+      "86900"
+    ],
+    "type": "private-limited-guarant-nsc-limited-exemption"
+  },
+  {
+    "name": "PEGASUS GROUP LIMITED",
+    "slug": "pegasus-group-limited",
+    "company_number": "01135517",
+    "status": "dissolved",
+    "incorporated": "1973-09-21",
+    "address": {
+      "line1": "One Central Boulevard",
+      "line2": "Blythe Valley Park, Shirley",
+      "locality": "Solihull",
+      "region": "",
+      "postal_code": "B90 8BG",
+      "country": "England"
+    },
+    "sic_codes": [
+      "99999"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "PEGASUSLIFE DEVELOPMENT LIMITED",
+    "slug": "pegasuslife-development-limited",
+    "company_number": "09340939",
+    "status": "active",
+    "incorporated": "2014-12-04",
+    "address": {
+      "line1": "105-107 Bath Road",
+      "line2": "Cheltenham",
+      "locality": "Gloucestershire",
+      "region": "",
+      "postal_code": "GL53 7PR",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68100",
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CARTWRIGHT PICKARD ARCHITECTS LIMITED",
+    "slug": "cartwright-pickard-architects-limited",
+    "company_number": "03179673",
+    "status": "active",
+    "incorporated": "1996-03-28",
+    "address": {
+      "line1": "1 Canal Side Studios",
+      "line2": "8-14 St Pancras Way",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 0QG",
+      "country": ""
+    },
+    "sic_codes": [
+      "71111"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "LENDLEASE BLUEWATER LIMITED",
+    "slug": "lendlease-bluewater-limited",
+    "company_number": "06551840",
+    "status": "active",
+    "incorporated": "2008-04-01",
+    "address": {
+      "line1": "Level 7, 1 Eversholt Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 2DN",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "MULTIPLEX",
+    "slug": "multiplex",
+    "company_number": "LP003764",
+    "status": "active",
+    "incorporated": "1989-11-21",
+    "address": {
+      "line1": "6th Floor",
+      "line2": "32 Ludgate Hill",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC4M 7DR",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "limited-partnership"
+  },
+  {
+    "name": "MACE GROUP LIMITED",
+    "slug": "mace-group-limited",
+    "company_number": "04228706",
+    "status": "active",
+    "incorporated": "2001-06-05",
+    "address": {
+      "line1": "155 Moorgate",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC2M 6XB",
+      "country": ""
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "VISTRY GROUP PLC",
+    "slug": "vistry-group-plc",
+    "company_number": "00306718",
+    "status": "active",
+    "incorporated": "1935-11-04",
+    "address": {
+      "line1": "11 Tower View",
+      "line2": "Kings Hill",
+      "locality": "West Malling",
+      "region": "",
+      "postal_code": "ME19 4UY",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "COUNTRYSIDE PARTNERSHIPS LIMITED",
+    "slug": "countryside-partnerships-limited",
+    "company_number": "09878920",
+    "status": "active",
+    "incorporated": "2015-11-18",
+    "address": {
+      "line1": "11 Tower View, Kings Hill",
+      "line2": "West Malling",
+      "locality": "Kent",
+      "region": "United Kingdom",
+      "postal_code": "ME19 4UY",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "GALLIFORD TRY LIMITED",
+    "slug": "galliford-try-limited",
+    "company_number": "00836539",
+    "status": "active",
+    "incorporated": "1965-02-03",
+    "address": {
+      "line1": "Blake House 3 Frayswater Place",
+      "line2": "Cowley",
+      "locality": "Uxbridge",
+      "region": "Middlesex",
+      "postal_code": "UB8 2AD",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41201",
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "KIER GROUP PLC",
+    "slug": "kier-group-plc",
+    "company_number": "02708030",
+    "status": "active",
+    "incorporated": "1992-04-21",
+    "address": {
+      "line1": "2nd Floor, Optimum House",
+      "line2": "Clippers Quay",
+      "locality": "Salford",
+      "region": "",
+      "postal_code": "M50 3XP",
+      "country": "England"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "MORGAN SINDALL LIMITED",
+    "slug": "morgan-sindall-limited",
+    "company_number": "15166961",
+    "status": "active",
+    "incorporated": "2023-09-26",
+    "address": {
+      "line1": "C/O Morgan Sindall Group Plc Kent House",
+      "line2": "14-17 Market Place",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1W 8AJ",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "99999"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "WILLMOTT DIXON LIMITED",
+    "slug": "willmott-dixon-limited",
+    "company_number": "05922246",
+    "status": "active",
+    "incorporated": "2006-09-01",
+    "address": {
+      "line1": "Suite 201 The Spirella Building",
+      "line2": "Bridge Road",
+      "locality": "Letchworth Garden City",
+      "region": "Hertfordshire",
+      "postal_code": "SG6 4ET",
+      "country": "England"
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ISG LIMITED",
+    "slug": "isg-limited",
+    "company_number": "10081578",
+    "status": "liquidation",
+    "incorporated": "2016-03-23",
+    "address": {
+      "line1": "C/O Azets 5th Floor Ship Canal House",
+      "line2": "98 King Street",
+      "locality": "Manchester",
+      "region": "",
+      "postal_code": "M2 4WU",
+      "country": "England"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "WATES GROUP LIMITED",
+    "slug": "wates-group-limited",
+    "company_number": "01824828",
+    "status": "active",
+    "incorporated": "1984-06-14",
+    "address": {
+      "line1": "Wates House",
+      "line2": "Station Approach",
+      "locality": "Leatherhead",
+      "region": "Surrey",
+      "postal_code": "KT22 7SW",
+      "country": ""
+    },
+    "sic_codes": [
+      "64203"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BAM CONSTRUCTION LIMITED",
+    "slug": "bam-construction-limited",
+    "company_number": "02379469",
+    "status": "active",
+    "incorporated": "1989-05-04",
+    "address": {
+      "line1": "Breakspear Park",
+      "line2": "Breakspear Way",
+      "locality": "Hemel Hempstead",
+      "region": "",
+      "postal_code": "HP2 4FL",
+      "country": ""
+    },
+    "sic_codes": [
+      "41201"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BOUYGUES (U.K.) LIMITED",
+    "slug": "bouygues-u-k-limited",
+    "company_number": "03460378",
+    "status": "active",
+    "incorporated": "1997-11-04",
+    "address": {
+      "line1": "Becket House",
+      "line2": "1 Lambeth Palace Road",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SE1 7EU",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100",
+      "41201",
+      "41202"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "SKANSKA UK PLC",
+    "slug": "skanska-uk-plc",
+    "company_number": "00784752",
+    "status": "active",
+    "incorporated": "1963-12-16",
+    "address": {
+      "line1": "1 Hercules Way",
+      "line2": "",
+      "locality": "Leavesden",
+      "region": "Watford",
+      "postal_code": "WD25 7GS",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41201"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "LAING O'ROURKE PLC.",
+    "slug": "laing-o-rourke-plc",
+    "company_number": "04222545",
+    "status": "active",
+    "incorporated": "2001-05-23",
+    "address": {
+      "line1": "Bridge Place Anchor Boulevard",
+      "line2": "Admirals Park Crossways",
+      "locality": "Dartford",
+      "region": "Kent",
+      "postal_code": "DA2 6SN",
+      "country": ""
+    },
+    "sic_codes": [
+      "41201"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "VOLKERWESSELS UK LIMITED",
+    "slug": "volkerwessels-uk-limited",
+    "company_number": "01179305",
+    "status": "active",
+    "incorporated": "1974-07-31",
+    "address": {
+      "line1": "Hertford Road",
+      "line2": "Hoddesdon",
+      "locality": "Hertfordshire",
+      "region": "",
+      "postal_code": "EN11 9BX",
+      "country": ""
+    },
+    "sic_codes": [
+      "41201",
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "15083087 LTD",
+    "slug": "15083087-ltd",
+    "company_number": "15083087",
+    "status": "dissolved",
+    "incorporated": "2023-08-18",
+    "address": {
+      "line1": "22 Exmouth Avenue",
+      "line2": "",
+      "locality": "Corby",
+      "region": "",
+      "postal_code": "NN18 8EE",
+      "country": "England"
+    },
+    "sic_codes": [
+      "41201",
+      "41202"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "MCALPINE & COMPANY. LIMITED",
+    "slug": "mcalpine-and-company-limited",
+    "company_number": "SC006445",
+    "status": "active",
+    "incorporated": "1907-03-09",
+    "address": {
+      "line1": "Kelvin Avenue",
+      "line2": "Hillington",
+      "locality": "Glasgow",
+      "region": "",
+      "postal_code": "G52 4LF",
+      "country": ""
+    },
+    "sic_codes": [
+      "22290"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "TRAVIS PERKINS PLC",
+    "slug": "travis-perkins-plc",
+    "company_number": "00824821",
+    "status": "active",
+    "incorporated": "1964-10-27",
+    "address": {
+      "line1": "Ryehill House Rye Hill Close",
+      "line2": "Lodge Farm Industrial Estate",
+      "locality": "Northampton",
+      "region": "",
+      "postal_code": "NN5 7UA",
+      "country": "England"
+    },
+    "sic_codes": [
+      "46900"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "JOINERY CORPORATION LIMITED",
+    "slug": "joinery-corporation-limited",
+    "company_number": "11723091",
+    "status": "dissolved",
+    "incorporated": "2018-12-12",
+    "address": {
+      "line1": "60 High Street",
+      "line2": "",
+      "locality": "Berkhamsted",
+      "region": "",
+      "postal_code": "HP4 2BP",
+      "country": "England"
+    },
+    "sic_codes": [
+      "96090"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "WARWICK ESTATES LIMITED",
+    "slug": "warwick-estates-limited",
+    "company_number": "15131385",
+    "status": "active",
+    "incorporated": "2023-09-11",
+    "address": {
+      "line1": "21 Warwick Grove",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "E5 9HX",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68100",
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FEXCO PROPERTY SERVICES (MANAGEMENT) LIMITED",
+    "slug": "fexco-property-services-management-limited",
+    "company_number": "02570943",
+    "status": "active",
+    "incorporated": "1990-12-24",
+    "address": {
+      "line1": "Fisher House",
+      "line2": "84 Fisherton Street",
+      "locality": "Salisbury",
+      "region": "",
+      "postal_code": "SP2 7QY",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FIRSTPORT PROPERTY SERVICES NO.6 LIMITED",
+    "slug": "firstport-property-services-no-6-limited",
+    "company_number": "05851267",
+    "status": "active",
+    "incorporated": "2006-06-20",
+    "address": {
+      "line1": "Fifth Floor The Lantern",
+      "line2": "75 Hampstead Road",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 2PL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BRADY SOLICITORS LIMITED",
+    "slug": "brady-solicitors-limited",
+    "company_number": "06524424",
+    "status": "active",
+    "incorporated": "2008-03-05",
+    "address": {
+      "line1": "28 Regent Street",
+      "line2": "",
+      "locality": "Nottingham",
+      "region": "",
+      "postal_code": "NG1 5BQ",
+      "country": "England"
+    },
+    "sic_codes": [
+      "69102"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "RINGLEY GROUP LIMITED",
+    "slug": "ringley-group-limited",
+    "company_number": "12416807",
+    "status": "active",
+    "incorporated": "2020-01-21",
+    "address": {
+      "line1": "1 Castle Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 8PR",
+      "country": ""
+    },
+    "sic_codes": [
+      "82110"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "PMS MANAGING ESTATES LTD",
+    "slug": "pms-managing-estates-ltd",
+    "company_number": "10014926",
+    "status": "active",
+    "incorporated": "2016-02-19",
+    "address": {
+      "line1": "Vantage Point",
+      "line2": "23 Mark Road",
+      "locality": "Hemel Hempstead",
+      "region": "Hertfordshire",
+      "postal_code": "HP2 7DN",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ENCORE ESTATE MANAGEMENT LIMITED",
+    "slug": "encore-estate-management-limited",
+    "company_number": "04985188",
+    "status": "active",
+    "incorporated": "2003-12-04",
+    "address": {
+      "line1": "2 Hills Road",
+      "line2": "",
+      "locality": "Cambridge",
+      "region": "",
+      "postal_code": "CB2 1JP",
+      "country": ""
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "RESIDENTIAL MANAGEMENT GROUP LIMITED",
+    "slug": "residential-management-group-limited",
+    "company_number": "01513643",
+    "status": "active",
+    "incorporated": "1980-08-21",
+    "address": {
+      "line1": "Rmg House",
+      "line2": "Essex Road",
+      "locality": "Hoddesdon",
+      "region": "Hertfordshire",
+      "postal_code": "EN11 0DR",
+      "country": ""
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FIRSTPORT GROUP LIMITED",
+    "slug": "firstport-group-limited",
+    "company_number": "04352396",
+    "status": "active",
+    "incorporated": "2002-01-14",
+    "address": {
+      "line1": "Fifth Floor The Lantern",
+      "line2": "75 Hampstead Road",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 2PL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "PLACES FOR PEOPLE LIVING+ LIMITED",
+    "slug": "places-for-people-living-and-limited",
+    "company_number": "IP20014R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "PEABODY SOUTH EAST LIMITED",
+    "slug": "peabody-south-east-limited",
+    "company_number": "RS007636",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "OPTIVO",
+    "slug": "optivo",
+    "company_number": "RS007561",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "PARADIGM HOUSING LIMITED",
+    "slug": "paradigm-housing-limited",
+    "company_number": "13251099",
+    "status": "dissolved",
+    "incorporated": "2021-03-08",
+    "address": {
+      "line1": "Studio 210 134-146 Curtain Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC2A 3AR",
+      "country": "England"
+    },
+    "sic_codes": [
+      "98000"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "DAMAC PROPERTIES LIMITED",
+    "slug": "damac-properties-limited",
+    "company_number": "NI023015",
+    "status": "active",
+    "incorporated": "1989-08-22",
+    "address": {
+      "line1": "21 Bushfoot Drive",
+      "line2": "",
+      "locality": "Portballintrae",
+      "region": "",
+      "postal_code": "BT57 8YN",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68201"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ECOWORLD LIMITED",
+    "slug": "ecoworld-limited",
+    "company_number": "15629965",
+    "status": "active",
+    "incorporated": "2024-04-09",
+    "address": {
+      "line1": "76-78 Colne Road",
+      "line2": "Brierfield",
+      "locality": "Nelson",
+      "region": "",
+      "postal_code": "BB9 5NN",
+      "country": "England"
+    },
+    "sic_codes": [
+      "43220"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "R&F PROPERTIES CAMBS LTD",
+    "slug": "r-and-f-properties-cambs-ltd",
+    "company_number": "16382216",
+    "status": "active",
+    "incorporated": "2025-04-11",
+    "address": {
+      "line1": "32a East Street",
+      "line2": "",
+      "locality": "St. Ives",
+      "region": "",
+      "postal_code": "PE27 5PD",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CC LAND HOLDINGS LTD",
+    "slug": "cc-land-holdings-ltd",
+    "company_number": "12106834",
+    "status": "dissolved",
+    "incorporated": "2019-07-17",
+    "address": {
+      "line1": "21 High View Close",
+      "line2": "Hamilton Office Park",
+      "locality": "Leicester",
+      "region": "",
+      "postal_code": "LE4 9LJ",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "SP SETIA GROUP LTD",
+    "slug": "sp-setia-group-ltd",
+    "company_number": "12742080",
+    "status": "active",
+    "incorporated": "2020-07-14",
+    "address": {
+      "line1": "50 Faulkner Street",
+      "line2": "Lower Ground Floor",
+      "locality": "Manchester",
+      "region": "",
+      "postal_code": "M1 4FH",
+      "country": "England"
+    },
+    "sic_codes": [
+      "56103"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "SIME DARBY PROPERTY (LONDON) LIMITED",
+    "slug": "sime-darby-property-london-limited",
+    "company_number": "01063138",
+    "status": "active",
+    "incorporated": "1972-07-27",
+    "address": {
+      "line1": "C/O Irwin Mitchell Llp Riverside East",
+      "line2": "2 Millsands",
+      "locality": "Sheffield",
+      "region": "South Yorkshire",
+      "postal_code": "S3 8DT",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "HUTCHISON PROPERTY LIMITED",
+    "slug": "hutchison-property-limited",
+    "company_number": "13216542",
+    "status": "dissolved",
+    "incorporated": "2021-02-22",
+    "address": {
+      "line1": "12 Hatherley Road",
+      "line2": "",
+      "locality": "Sidcup",
+      "region": "",
+      "postal_code": "DA14 4BG",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "HAL VENTURES LIMITED",
+    "slug": "hal-ventures-limited",
+    "company_number": "13267706",
+    "status": "active",
+    "incorporated": "2021-03-15",
+    "address": {
+      "line1": "123 Chevening Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW6 6DU",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CANARY WHARF GROUP PLC",
+    "slug": "canary-wharf-group-plc",
+    "company_number": "04191122",
+    "status": "active",
+    "incorporated": "2001-03-30",
+    "address": {
+      "line1": "One Canada Square",
+      "line2": "Canary Wharf",
+      "locality": "London",
+      "region": "",
+      "postal_code": "E14 5AB",
+      "country": ""
+    },
+    "sic_codes": [
+      "82990"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "BRITISH LAND COMPANY PUBLIC LIMITED COMPANY(THE)",
+    "slug": "british-land-company-public-limited-company-the",
+    "company_number": "00621920",
+    "status": "active",
+    "incorporated": "1959-02-26",
+    "address": {
+      "line1": "York House",
+      "line2": "45 Seymour Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1H 7LX",
+      "country": ""
+    },
+    "sic_codes": [
+      "41100",
+      "64209"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "GTAM APEX LAKESIDE LIMITED",
+    "slug": "gtam-apex-lakeside-limited",
+    "company_number": "04299277",
+    "status": "active",
+    "incorporated": "2001-10-04",
+    "address": {
+      "line1": "10th Floor 110 Cannon Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC4N 6EU",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "GREAT PORTLAND ESTATES P L C",
+    "slug": "great-portland-estates-p-l-c",
+    "company_number": "00596137",
+    "status": "active",
+    "incorporated": "1957-12-30",
+    "address": {
+      "line1": "33 Cavendish Square",
+      "line2": "London",
+      "locality": "",
+      "region": "",
+      "postal_code": "W1G 0PW",
+      "country": ""
+    },
+    "sic_codes": [
+      "41100",
+      "68100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "DERWENT LONDON PLC",
+    "slug": "derwent-london-plc",
+    "company_number": "01819699",
+    "status": "active",
+    "incorporated": "1984-05-25",
+    "address": {
+      "line1": "25 Savile Row",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1S 2ER",
+      "country": ""
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "SHAFTESBURY CAPITAL PLC",
+    "slug": "shaftesbury-capital-plc",
+    "company_number": "07145051",
+    "status": "active",
+    "incorporated": "2010-02-03",
+    "address": {
+      "line1": "Regal House",
+      "line2": "14 James Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC2E 8BU",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "64209",
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "CAPITAL & COUNTIES LIMITED",
+    "slug": "capital-and-counties-limited",
+    "company_number": "00280739",
+    "status": "active",
+    "incorporated": "1933-10-18",
+    "address": {
+      "line1": "Regal House",
+      "line2": "14 James Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC2E 8BU",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "HELICAL PLC",
+    "slug": "helical-plc",
+    "company_number": "00156663",
+    "status": "active",
+    "incorporated": "1919-07-03",
+    "address": {
+      "line1": "22 Ganton Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1F 7FD",
+      "country": "England"
+    },
+    "sic_codes": [
+      "41100",
+      "64306",
+      "68100",
+      "68209"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "WORKSPACE GROUP PLC",
+    "slug": "workspace-group-plc",
+    "company_number": "02041612",
+    "status": "active",
+    "incorporated": "1986-07-29",
+    "address": {
+      "line1": "Centro One",
+      "line2": "39 Plender Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 0DT",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "MCKAY SECURITIES LIMITED",
+    "slug": "mckay-securities-limited",
+    "company_number": "00421479",
+    "status": "active",
+    "incorporated": "1946-10-14",
+    "address": {
+      "line1": "Centro One",
+      "line2": "39 Plender Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 0DT",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "TOWN CENTRE SECURITIES PLC",
+    "slug": "town-centre-securities-plc",
+    "company_number": "00623364",
+    "status": "active",
+    "incorporated": "1959-03-17",
+    "address": {
+      "line1": "Town Centre House",
+      "line2": "The Merrion Centre",
+      "locality": "Leeds",
+      "region": "",
+      "postal_code": "LS2 8LY",
+      "country": ""
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "ASSURA LIMITED",
+    "slug": "assura-limited",
+    "company_number": "09349441",
+    "status": "active",
+    "incorporated": "2014-12-10",
+    "address": {
+      "line1": "3 Barrington Road",
+      "line2": "",
+      "locality": "Altrincham",
+      "region": "",
+      "postal_code": "WA14 1GY",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "64209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "PRIMARY HEALTH PROPERTIES PLC",
+    "slug": "primary-health-properties-plc",
+    "company_number": "03033634",
+    "status": "active",
+    "incorporated": "1995-03-16",
+    "address": {
+      "line1": "5th Floor Burdett House 15-16",
+      "line2": "Buckingham Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC2N 6DU",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "TRITAX BIG BOX DEVELOPMENTS LTD",
+    "slug": "tritax-big-box-developments-ltd",
+    "company_number": "11685402",
+    "status": "active",
+    "incorporated": "2018-11-19",
+    "address": {
+      "line1": "Unit B Grange Park Court",
+      "line2": "Roman Way",
+      "locality": "Northampton",
+      "region": "",
+      "postal_code": "NN4 5EA",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "SEGRO PUBLIC LIMITED COMPANY",
+    "slug": "segro-public-limited-company",
+    "company_number": "00167591",
+    "status": "active",
+    "incorporated": "1920-05-19",
+    "address": {
+      "line1": "1 New Burlington Place",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1S 2HR",
+      "country": "England"
+    },
+    "sic_codes": [
+      "64306",
+      "68100",
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "UNITE STUDENTS LIMITED",
+    "slug": "unite-students-limited",
+    "company_number": "16189738",
+    "status": "active",
+    "incorporated": "2025-01-16",
+    "address": {
+      "line1": "Greenhouse",
+      "line2": "Beeston Road",
+      "locality": "Leeds",
+      "region": "",
+      "postal_code": "LS11 6AD",
+      "country": "England"
+    },
+    "sic_codes": [
+      "81210",
+      "81222"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "EMPIRIC STUDENT PROPERTY LIMITED",
+    "slug": "empiric-student-property-limited",
+    "company_number": "08886906",
+    "status": "active",
+    "incorporated": "2014-02-11",
+    "address": {
+      "line1": "1st Floor Hop Yard Studios,",
+      "line2": "72 Borough High Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SE1 1XF",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "GEMINI STUDENT LIVING LIMITED",
+    "slug": "gemini-student-living-limited",
+    "company_number": "08420243",
+    "status": "dissolved",
+    "incorporated": "2013-02-26",
+    "address": {
+      "line1": "4 Greengate",
+      "line2": "Cardale Park",
+      "locality": "Harrogate",
+      "region": "North Yorkshire",
+      "postal_code": "HG3 1GY",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "64306"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CLS HOLDINGS PLC",
+    "slug": "cls-holdings-plc",
+    "company_number": "02714781",
+    "status": "active",
+    "incorporated": "1992-05-14",
+    "address": {
+      "line1": "16 Tinworth Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SE11 5AL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "SIRIUS REAL ESTATE LIMITED",
+    "slug": "sirius-real-estate-limited",
+    "company_number": "05980788",
+    "status": "dissolved",
+    "incorporated": "2006-10-27",
+    "address": {
+      "line1": "Birchin Court",
+      "line2": "20 Birchin Lane",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC3V 9DJ",
+      "country": ""
+    },
+    "sic_codes": [
+      "82990"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "PALACE CAPITAL PLC",
+    "slug": "palace-capital-plc",
+    "company_number": "05332938",
+    "status": "active",
+    "incorporated": "2005-01-14",
+    "address": {
+      "line1": "201 Temple Chambers",
+      "line2": "3-7 Temple Avenue",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC4Y 0DT",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "68209"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "INLAND HOMES PLC",
+    "slug": "inland-homes-plc",
+    "company_number": "05482990",
+    "status": "liquidation",
+    "incorporated": "2005-06-16",
+    "address": {
+      "line1": "2nd Floor 110 Cannon Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC4N 6EU",
+      "country": ""
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "TELFORD HOMES LIMITED",
+    "slug": "telford-homes-limited",
+    "company_number": "04118370",
+    "status": "active",
+    "incorporated": "2000-12-01",
+    "address": {
+      "line1": "Telford House Queensgate",
+      "line2": "Britannia Road",
+      "locality": "Waltham Cross",
+      "region": "Hertfordshire",
+      "postal_code": "EN8 7TF",
+      "country": ""
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "REGAL LONDON LIMITED",
+    "slug": "regal-london-limited",
+    "company_number": "05735591",
+    "status": "active",
+    "incorporated": "2006-03-09",
+    "address": {
+      "line1": "Unit 20 Fleetway West Business Park",
+      "line2": "14-16 Wadsworth Road",
+      "locality": "Greenford",
+      "region": "",
+      "postal_code": "UB6 7LD",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "56302"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "LODHA DEVELOPERS UK LIMITED",
+    "slug": "lodha-developers-uk-limited",
+    "company_number": "07089469",
+    "status": "active",
+    "incorporated": "2009-11-27",
+    "address": {
+      "line1": "18 Portugal Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC2A 2AT",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100",
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "NORTHACRE LIMITED",
+    "slug": "northacre-limited",
+    "company_number": "03442280",
+    "status": "active",
+    "incorporated": "1997-09-25",
+    "address": {
+      "line1": "27 Old Gloucester Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC1N 3AX",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100",
+      "68100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FINCHATTON LIMITED",
+    "slug": "finchatton-limited",
+    "company_number": "10838095",
+    "status": "active",
+    "incorporated": "2017-06-27",
+    "address": {
+      "line1": "72 Royal Hospital Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SW3 4HP",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "CANDY & CANDY LIMITED",
+    "slug": "candy-and-candy-limited",
+    "company_number": "11317009",
+    "status": "active",
+    "incorporated": "2018-04-18",
+    "address": {
+      "line1": "49 Upper Brook Street",
+      "line2": "Mayfair",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1K 2BR",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ONE HYDE PARK LIMITED",
+    "slug": "one-hyde-park-limited",
+    "company_number": "05997101",
+    "status": "active",
+    "incorporated": "2006-11-13",
+    "address": {
+      "line1": "Highdown House",
+      "line2": "Yeoman Way",
+      "locality": "Worthing",
+      "region": "West Sussex",
+      "postal_code": "BN99 3HH",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "98000"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ALMACANTAR LIMITED",
+    "slug": "almacantar-limited",
+    "company_number": "07038904",
+    "status": "active",
+    "incorporated": "2009-10-13",
+    "address": {
+      "line1": "3 Quebec Mews",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1H 7NX",
+      "country": ""
+    },
+    "sic_codes": [
+      "70229"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "RONSON CAPITAL PARTNERS LIMITED",
+    "slug": "ronson-capital-partners-limited",
+    "company_number": "07131094",
+    "status": "dissolved",
+    "incorporated": "2010-01-20",
+    "address": {
+      "line1": "2nd Floor 24 Brook's Mews",
+      "line2": "Mayfair",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1K 4EA",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "82990"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "STANHOPE PLC",
+    "slug": "stanhope-plc",
+    "company_number": "03017841",
+    "status": "active",
+    "incorporated": "1995-02-03",
+    "address": {
+      "line1": "Level 33 8 Bishopsgate",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC2N 4BQ",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "ARGENT LIMITED",
+    "slug": "argent-limited",
+    "company_number": "04697516",
+    "status": "active",
+    "incorporated": "2003-03-13",
+    "address": {
+      "line1": "2 Wellesley Parade",
+      "line2": "Godstone Road",
+      "locality": "Whyteleafe",
+      "region": "Surrey",
+      "postal_code": "CR3 0BL",
+      "country": ""
+    },
+    "sic_codes": [
+      "68100",
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "RELATED ARGENT LIMITED",
+    "slug": "related-argent-limited",
+    "company_number": "11891696",
+    "status": "active",
+    "incorporated": "2019-03-19",
+    "address": {
+      "line1": "4 Stable Street",
+      "line2": "",
+      "locality": "London",
+      "region": "England And Wales",
+      "postal_code": "N1C 4AB",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FUTURE HIGH STREETS LIMITED",
+    "slug": "future-high-streets-limited",
+    "company_number": "09755431",
+    "status": "dissolved",
+    "incorporated": "2015-09-01",
+    "address": {
+      "line1": "100 Victoria Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "SW1E 5JL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "74990"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "QUINTAIN LIMITED",
+    "slug": "quintain-limited",
+    "company_number": "02694983",
+    "status": "active",
+    "incorporated": "1992-03-03",
+    "address": {
+      "line1": "180 Great Portland Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W1W 5QZ",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "41100",
+      "68100",
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ESSENTIAL LIVING LIMITED",
+    "slug": "essential-living-limited",
+    "company_number": "16768138",
+    "status": "active",
+    "incorporated": "2025-10-07",
+    "address": {
+      "line1": "195 Main Road",
+      "line2": "",
+      "locality": "Romford",
+      "region": "",
+      "postal_code": "RM2 6LT",
+      "country": "England"
+    },
+    "sic_codes": [
+      "41100",
+      "68100",
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "TIPI LTD",
+    "slug": "tipi-ltd",
+    "company_number": "08190665",
+    "status": "active",
+    "incorporated": "2012-08-24",
+    "address": {
+      "line1": "22 Piercing Hill",
+      "line2": "Theydon Bois",
+      "locality": "Epping",
+      "region": "Essex",
+      "postal_code": "CM16 7JW",
+      "country": "England"
+    },
+    "sic_codes": [
+      "82110"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "GET LIVING PLC",
+    "slug": "get-living-plc",
+    "company_number": "11532492",
+    "status": "active",
+    "incorporated": "2018-08-22",
+    "address": {
+      "line1": "1 East Park Walk",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "E20 1JL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "64306"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "LEGAL & GENERAL HOMES MODULAR LIMITED",
+    "slug": "legal-and-general-homes-modular-limited",
+    "company_number": "09911886",
+    "status": "active",
+    "incorporated": "2015-12-10",
+    "address": {
+      "line1": "One",
+      "line2": "Coleman Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "EC2R 5AA",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "43999"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "POCKET LIVING LIMITED",
+    "slug": "pocket-living-limited",
+    "company_number": "04538848",
+    "status": "active",
+    "incorporated": "2002-09-18",
+    "address": {
+      "line1": "Tower House",
+      "line2": "10 Southampton Street",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC2E 7HA",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ACTIVE SWIM DOLPHIN LIMITED",
+    "slug": "active-swim-dolphin-limited",
+    "company_number": "11077236",
+    "status": "active",
+    "incorporated": "2017-11-22",
+    "address": {
+      "line1": "107 Clyfford Road",
+      "line2": "",
+      "locality": "Ruislip",
+      "region": "",
+      "postal_code": "HA4 6PX",
+      "country": "England"
+    },
+    "sic_codes": [
+      "93130"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ELIM HOUSING ASSOCIATION LIMITED",
+    "slug": "elim-housing-association-limited",
+    "company_number": "RS016402",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "CATALYST HOUSING LIMITED",
+    "slug": "catalyst-housing-limited",
+    "company_number": "IP16561R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "NETWORK HOMES LIMITED",
+    "slug": "network-homes-limited",
+    "company_number": "16833261",
+    "status": "active",
+    "incorporated": "2025-11-05",
+    "address": {
+      "line1": "Mailbox 9345 Apex House",
+      "line2": "Thomas Street",
+      "locality": "Trethomas",
+      "region": "Caerphilly",
+      "postal_code": "CF83 8DP",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "99999"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ORIGIN HOUSING LIMITED",
+    "slug": "origin-housing-limited",
+    "company_number": "IP10008R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "WANDLE HOUSING ASSOCIATION LIMITED",
+    "slug": "wandle-housing-association-limited",
+    "company_number": "IP19225R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "ONE HOUSING LTD",
+    "slug": "one-housing-ltd",
+    "company_number": "13335842",
+    "status": "active",
+    "incorporated": "2021-04-14",
+    "address": {
+      "line1": "1 Ash Hill",
+      "line2": "",
+      "locality": "Wolverhampton",
+      "region": "",
+      "postal_code": "WV3 9DR",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68100",
+      "68209"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FAMILY MOSAIC HOUSING",
+    "slug": "family-mosaic-housing",
+    "company_number": "IP030093",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "EAST THAMES LIMITED",
+    "slug": "east-thames-limited",
+    "company_number": "RS007444",
+    "status": "converted-closed",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "CIRCLE HOUSING AND SUPPORT",
+    "slug": "circle-housing-and-support",
+    "company_number": "CE026520",
+    "status": "converted-closed",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "charitable-incorporated-organisation"
+  },
+  {
+    "name": "AFFINITY SUTTON CAPITAL MARKETS PLC",
+    "slug": "affinity-sutton-capital-markets-plc",
+    "company_number": "06678086",
+    "status": "active",
+    "incorporated": "2008-08-20",
+    "address": {
+      "line1": "5th Floor, Greater London House",
+      "line2": "Hampstead Road",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 7QX",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "64999"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "GENESIS HOUSING LTD",
+    "slug": "genesis-housing-ltd",
+    "company_number": "12854962",
+    "status": "active",
+    "incorporated": "2020-09-03",
+    "address": {
+      "line1": "204 Green Lanes",
+      "line2": "Palmers Green",
+      "locality": "London",
+      "region": "",
+      "postal_code": "N13 5UE",
+      "country": "England"
+    },
+    "sic_codes": [
+      "87200"
+    ],
+    "type": "private-limited-guarant-nsc"
+  },
+  {
+    "name": "THAMES VALLEY HOUSING ASSOCIATION LIMITED",
+    "slug": "thames-valley-housing-association-limited",
+    "company_number": "IP17375R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "PARAGON HOUSING LIMITED",
+    "slug": "paragon-housing-limited",
+    "company_number": "06592519",
+    "status": "active",
+    "incorporated": "2008-05-14",
+    "address": {
+      "line1": "C/O Gkp Viglen House",
+      "line2": "Alperton Lane",
+      "locality": "Wembley",
+      "region": "",
+      "postal_code": "HA0 1HD",
+      "country": "England"
+    },
+    "sic_codes": [
+      "41100",
+      "68100",
+      "68209",
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ASTER GROUP LIMITED",
+    "slug": "aster-group-limited",
+    "company_number": "IP29573R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "THE GUINNESS PARTNERSHIP LIMITED",
+    "slug": "the-guinness-partnership-limited",
+    "company_number": "IP031693",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "GREAT PLACES LTD",
+    "slug": "great-places-ltd",
+    "company_number": "05629954",
+    "status": "active",
+    "incorporated": "2005-11-20",
+    "address": {
+      "line1": "71a Church Way",
+      "line2": "",
+      "locality": "Northampton",
+      "region": "",
+      "postal_code": "NN3 3BY",
+      "country": ""
+    },
+    "sic_codes": [
+      "41202"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ACCENT GROUP LIMITED",
+    "slug": "accent-group-limited",
+    "company_number": "IP030444",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "KARBON HOMES LIMITED",
+    "slug": "karbon-homes-limited",
+    "company_number": "RS007529",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "BERNICIA GROUP",
+    "slug": "bernicia-group",
+    "company_number": "RS007711",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "THIRTEEN GROUP LIMITED",
+    "slug": "thirteen-group-limited",
+    "company_number": "11674730",
+    "status": "active",
+    "incorporated": "2018-11-13",
+    "address": {
+      "line1": "Devonshire House",
+      "line2": "582 Honeypot Lane",
+      "locality": "Stanmore",
+      "region": "Middlesex",
+      "postal_code": "HA7 1JS",
+      "country": "England"
+    },
+    "sic_codes": [
+      "96090"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "TEES VALLEY HOUSING LIMITED",
+    "slug": "tees-valley-housing-limited",
+    "company_number": "IP17594R",
+    "status": "converted-closed",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "BEYOND HOUSING LIMITED",
+    "slug": "beyond-housing-limited",
+    "company_number": "RS007814",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "YORKSHIRE HOUSING LIMITED",
+    "slug": "yorkshire-housing-limited",
+    "company_number": "IP030443",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "LEEDS FEDERATED HOUSING ASSOCIATION LIMITED",
+    "slug": "leeds-federated-housing-association-limited",
+    "company_number": "IP21457R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "INCOMMUNITIES LIMITED",
+    "slug": "incommunities-limited",
+    "company_number": "IP30178R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "MANNINGHAM HOUSING ASSOCIATION LIMITED",
+    "slug": "manningham-housing-association-limited",
+    "company_number": "IP25548R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "JIGSAW HOMES LIMITED",
+    "slug": "jigsaw-homes-limited",
+    "company_number": "SC242641",
+    "status": "active",
+    "incorporated": "2003-01-21",
+    "address": {
+      "line1": "21 Carlton Place",
+      "line2": "Aberdeen",
+      "locality": "",
+      "region": "",
+      "postal_code": "AB15 4BR",
+      "country": ""
+    },
+    "sic_codes": [
+      "68209",
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ONWARD HOMES LIMITED",
+    "slug": "onward-homes-limited",
+    "company_number": "IP17186R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "TORUS GROUP LIMITED",
+    "slug": "torus-group-limited",
+    "company_number": "11322561",
+    "status": "active",
+    "incorporated": "2018-04-23",
+    "address": {
+      "line1": "27 Old Gloucester Street",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "WC1N 3AX",
+      "country": ""
+    },
+    "sic_codes": [
+      "46711",
+      "64301",
+      "64999",
+      "70221"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "YOUR HOUSING GROUP LIMITED",
+    "slug": "your-housing-group-limited",
+    "company_number": "IP030666",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "MAGENTA LIVING",
+    "slug": "magenta-living",
+    "company_number": "04912562",
+    "status": "active",
+    "incorporated": "2003-09-26",
+    "address": {
+      "line1": "Partnership Building",
+      "line2": "Hamilton Street",
+      "locality": "Birkenhead",
+      "region": "Merseyside",
+      "postal_code": "CH41 5AA",
+      "country": ""
+    },
+    "sic_codes": [
+      "68201"
+    ],
+    "type": "private-limited-guarant-nsc-limited-exemption"
+  },
+  {
+    "name": "PLUS DANE HOUSING LIMITED",
+    "slug": "plus-dane-housing-limited",
+    "company_number": "IP031012",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "MUIR GROUP PUBLIC LIMITED COMPANY",
+    "slug": "muir-group-public-limited-company",
+    "company_number": "SC215392",
+    "status": "active",
+    "incorporated": "2001-02-05",
+    "address": {
+      "line1": "Muir House",
+      "line2": "Belleknowes Industrial Estate",
+      "locality": "Inverkeithing",
+      "region": "Fife",
+      "postal_code": "KY11 1HY",
+      "country": ""
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "plc"
+  },
+  {
+    "name": "THE WREKIN HOUSING GROUP LIMITED",
+    "slug": "the-wrekin-housing-group-limited",
+    "company_number": "RS008067",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "PLATFORM HOUSING LIMITED",
+    "slug": "platform-housing-limited",
+    "company_number": "RS008288",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "11598104 LIMITED",
+    "slug": "11598104-limited",
+    "company_number": "11598104",
+    "status": "dissolved",
+    "incorporated": "2018-10-01",
+    "address": {
+      "line1": "66 Mendip Way",
+      "line2": "Wilnecote",
+      "locality": "Tamworth",
+      "region": "Staffordshire",
+      "postal_code": "B77 4PU",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "TRIDENT HOUSING LTD",
+    "slug": "trident-housing-ltd",
+    "company_number": "11448051",
+    "status": "active",
+    "incorporated": "2018-07-04",
+    "address": {
+      "line1": "58 Lincoln Road",
+      "line2": "",
+      "locality": "Birmingham",
+      "region": "",
+      "postal_code": "B27 6NX",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68100",
+      "68209",
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "ROOFTOP HOUSING ASSOCIATION LIMITED",
+    "slug": "rooftop-housing-association-limited",
+    "company_number": "IP27786R",
+    "status": "active",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "FORTIS LIVING LIMITED",
+    "slug": "fortis-living-limited",
+    "company_number": "RS007523",
+    "status": "unknown",
+    "incorporated": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "locality": "",
+      "region": "",
+      "postal_code": "",
+      "country": ""
+    },
+    "sic_codes": [],
+    "type": "registered-society-non-jurisdictional"
+  },
+  {
+    "name": "CONNEXUS LIMITED",
+    "slug": "connexus-limited",
+    "company_number": "15169493",
+    "status": "active",
+    "incorporated": "2023-09-27",
+    "address": {
+      "line1": "7 Tadia Way",
+      "line2": "Caerleon",
+      "locality": "Newport",
+      "region": "",
+      "postal_code": "NP18 3PG",
+      "country": "Wales"
+    },
+    "sic_codes": [
+      "82302"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BOURNVILLE VILLAGE CRICKET CLUB LIMITED",
+    "slug": "bournville-village-cricket-club-limited",
+    "company_number": "16810706",
+    "status": "active",
+    "incorporated": "2025-10-27",
+    "address": {
+      "line1": "121 Silver Street",
+      "line2": "Kings Norton",
+      "locality": "Birmingham",
+      "region": "",
+      "postal_code": "B38 0EB",
+      "country": "England"
+    },
+    "sic_codes": [
+      "93120"
+    ],
+    "type": "private-limited-guarant-nsc"
+  },
+  {
+    "name": "FIRSTPORT PROPERTY SERVICES LIMITED",
+    "slug": "firstport-property-services-limited",
+    "company_number": "02061041",
+    "status": "active",
+    "incorporated": "1986-10-03",
+    "address": {
+      "line1": "Fifth Floor The Lantern",
+      "line2": "75 Hampstead Road",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 2PL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BALLYMORE ASSET MANAGEMENT LIMITED",
+    "slug": "ballymore-asset-management-limited",
+    "company_number": "06730532",
+    "status": "active",
+    "incorporated": "2008-10-22",
+    "address": {
+      "line1": "4th Floor 161 Marsh Wall",
+      "line2": "",
+      "locality": "London",
+      "region": "England And Wales",
+      "postal_code": "E14 9SJ",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "82990"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FOXTONS GROUP PLC",
+    "slug": "foxtons-group-plc",
+    "company_number": "07108742",
+    "status": "active",
+    "incorporated": "2009-12-18",
+    "address": {
+      "line1": "Building 12 566 Chiswick High Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W4 5AN",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "plc"
+  }
+]
