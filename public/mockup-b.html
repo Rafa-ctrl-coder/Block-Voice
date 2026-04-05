@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Option B: Tabbed Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f1f3d;color:#fff;font-family:system-ui,-apple-system,sans-serif;line-height:1.6}
+.nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:56px;background:#0f1f3d;border-bottom:1px solid rgba(255,255,255,0.08)}
+.logo{font-weight:800;font-size:17px;color:#1ec6a4}
+.nav-r a{font-size:13px;color:rgba(255,255,255,0.5);text-decoration:none}
+.wrap{max-width:900px;margin:0 auto;padding:28px 24px 60px}
+.header{margin-bottom:6px}
+.header h1{font-size:24px;font-weight:800;letter-spacing:-0.5px}
+.header p{font-size:13px;color:rgba(255,255,255,0.4)}
+.tabs{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,0.08);margin:20px 0 28px}
+.tab{padding:10px 20px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.35);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s}
+.tab:hover{color:rgba(255,255,255,0.6)}
+.tab.active{color:#1ec6a4;border-bottom-color:#1ec6a4}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.card{background:#162d50;border:1px solid #1e3a5f;border-radius:14px;padding:22px;margin-bottom:14px}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#1ec6a4;margin-bottom:14px}
+.quick-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.qs{background:#132847;border-radius:10px;padding:14px;text-align:center}
+.qs-val{font-size:22px;font-weight:800}
+.qs-label{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px}
+.agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.agent-name{font-size:16px;font-weight:700;margin-bottom:2px}
+.badge{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:99px;margin-left:6px}
+.badge-green{background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.2)}
+.badge-amber{background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.2)}
+.agent-sub{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:4px}
+.agent-contact{font-size:13px;color:#1ec6a4;text-decoration:none;display:block;margin-top:4px}
+.rating-stars{color:#fbbf24;font-size:14px;margin-top:8px}
+.rating-text{font-size:11px;color:rgba(255,255,255,0.35);margin-left:4px}
+.rate-btn{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:#1ec6a4;padding:6px 14px;border:1px solid rgba(30,198,164,0.3);border-radius:8px;text-decoration:none;background:none;cursor:pointer}
+.activity{margin-top:20px}
+.activity-item{display:flex;align-items:start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:99px;flex-shrink:0;margin-top:6px}
+.activity-dot.green{background:#1ec6a4}
+.activity-dot.amber{background:#fbbf24}
+.activity-dot.blue{background:#60a5fa}
+.activity-text{font-size:13px}
+.activity-time{font-size:11px;color:rgba(255,255,255,0.25);margin-top:2px}
+.invite-banner{background:linear-gradient(135deg,rgba(30,198,164,0.1),rgba(30,198,164,0.02));border:1px solid rgba(30,198,164,0.25);border-radius:14px;padding:22px;display:flex;align-items:center;justify-content:space-between;margin-top:20px}
+.invite-text h3{font-size:15px;font-weight:700;margin-bottom:3px}
+.invite-text p{font-size:12px;color:rgba(255,255,255,0.4)}
+.invite-btn{background:#1ec6a4;color:#0f1f3d;font-weight:700;font-size:13px;padding:10px 24px;border-radius:10px;border:none;cursor:pointer;flex-shrink:0}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:#132847;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:center}
+.stat-val{font-size:22px;font-weight:800}
+.stat-label{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+.stat-sub{font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px}
+.growth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.growth-card{background:#132847;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:center}
+.growth-val{font-size:20px;font-weight:800;color:#ef4444}
+.growth-label{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px}
+.chart-placeholder{height:140px;background:rgba(255,255,255,0.03);border-radius:10px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.12);font-size:12px}
+.upload-card{background:rgba(255,255,255,0.03);border:2px dashed rgba(255,255,255,0.1);border-radius:14px;padding:30px;text-align:center;margin-top:14px}
+.upload-card p{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:12px}
+.upload-btn{background:#1ec6a4;color:#0f1f3d;font-weight:700;font-size:13px;padding:10px 24px;border-radius:10px;border:none;cursor:pointer}
+.issue-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.issue-row:last-child{border-bottom:none}
+.issue-title{font-size:14px;font-weight:600}
+.issue-meta{font-size:11px;color:rgba(255,255,255,0.3);margin-top:3px}
+.issue-cat{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:rgba(30,198,164,0.12);color:#1ec6a4;border:1px solid rgba(30,198,164,0.25);margin-right:6px}
+.issue-sup{font-size:11px;color:rgba(255,255,255,0.4);white-space:nowrap}
+.support-btn{font-size:11px;font-weight:700;color:#1ec6a4;background:rgba(30,198,164,0.08);border:1px solid rgba(30,198,164,0.2);padding:4px 10px;border-radius:6px;cursor:pointer;margin-left:8px}
+.progress-bar{height:5px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.progress-fill{height:5px;background:linear-gradient(90deg,#1ec6a4,#25d4b0);border-radius:99px}
+</style>
+<script>
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-tab="'+name+'"]').classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+</script>
+</head><body>
+<nav class="nav"><span class="logo">BlockVoice</span><div class="nav-r"><a href="#">Sign Out</a></div></nav>
+<div class="wrap">
+
+<div class="header">
+<h1>Vista, Chelsea Bridge</h1>
+<p>SW11 8BY · 456 units · Sophora House · Flat 33</p>
+</div>
+
+<div class="tabs">
+<div class="tab active" data-tab="overview" onclick="switchTab('overview')">Overview</div>
+<div class="tab" data-tab="charges" onclick="switchTab('charges')">Service Charges</div>
+<div class="tab" data-tab="issues" onclick="switchTab('issues')">Issues <span style="font-size:10px;background:rgba(30,198,164,0.15);color:#1ec6a4;padding:1px 6px;border-radius:99px;margin-left:4px">3</span></div>
+<div class="tab" data-tab="settings" onclick="switchTab('settings')">Settings</div>
+</div>
+
+<!-- ==================== OVERVIEW TAB ==================== -->
+<div class="tab-content active" id="tab-overview">
+
+<div class="quick-stats">
+<div class="qs"><div class="qs-val">16</div><div class="qs-label">Apartments joined</div></div>
+<div class="qs"><div class="qs-val">3</div><div class="qs-label">Open issues</div></div>
+<div class="qs"><div class="qs-val">£9.77</div><div class="qs-label">Per sqft / year</div></div>
+<div class="qs"><div class="qs-val">5</div><div class="qs-label">Blocks</div></div>
+</div>
+
+<div class="agent-grid">
+<div class="card">
+<div class="card-title">Managing Agent</div>
+<div class="agent-name">RMG <span class="badge badge-green">Confirmed</span></div>
+<div class="agent-sub">Source: Resident confirmation</div>
+<a class="agent-contact" href="#">0345 002 4444</a>
+<a class="agent-contact" href="#">customerservice@rmguk.com</a>
+<div class="rating-stars">★★☆☆☆ <span class="rating-text">2.0 / 5.0 (4 ratings)</span></div>
+<a class="rate-btn" href="#">★ Rate this agent</a>
+</div>
+<div class="card">
+<div class="card-title">Freeholder</div>
+<div class="agent-name">Harland (PC) Ltd <span class="badge badge-green">Confirmed</span></div>
+<div class="agent-sub">Part of Landmark Investments</div>
+<div class="agent-sub">Source: chelseabridgewharf.org.uk</div>
+<div class="rating-stars"><span class="rating-text">No ratings yet — be the first!</span></div>
+<a class="rate-btn" href="#">★ Rate this freeholder</a>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Recent Activity</div>
+<div class="activity">
+<div class="activity-item">
+<div class="activity-dot amber"></div>
+<div><div class="activity-text">New issue: <strong>Lift frequently out of service</strong></div><div class="activity-time">3 days ago · Sophora House · 5 supporters</div></div>
+</div>
+<div class="activity-item">
+<div class="activity-dot green"></div>
+<div><div class="activity-text"><strong>Valerie J.</strong> joined from Altissima House</div><div class="activity-time">5 days ago</div></div>
+</div>
+<div class="activity-item">
+<div class="activity-dot blue"></div>
+<div><div class="activity-text"><strong>4 residents</strong> rated RMG this week</div><div class="activity-time">Average: 2.0 / 5.0</div></div>
+</div>
+<div class="activity-item">
+<div class="activity-dot green"></div>
+<div><div class="activity-text"><strong>Sri M.</strong> joined from Altissima House</div><div class="activity-time">1 week ago</div></div>
+</div>
+</div>
+</div>
+
+<div class="invite-banner">
+<div class="invite-text">
+<h3>16 apartments joined — help us reach 50</h3>
+<p>The more residents, the stronger the data and the louder the voice.</p>
+</div>
+<button class="invite-btn">Invite neighbours</button>
+</div>
+
+</div>
+
+<!-- ==================== CHARGES TAB ==================== -->
+<div class="tab-content" id="tab-charges">
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font-size:13px;color:rgba(255,255,255,0.5)">Property size:</span>
+<strong>1,250 sqft</strong>
+<span style="font-size:12px;color:rgba(255,255,255,0.3)">(116 sqm)</span>
+</div>
+<a class="rate-btn" href="#">Adjust</a>
+</div>
+
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-val">£12,214</div><div class="stat-label">Annual charge</div><div class="stat-sub">2025/26 FY</div></div>
+<div class="stat-card"><div class="stat-val">£1,018</div><div class="stat-label">Monthly cost</div><div class="stat-sub">per month</div></div>
+<div class="stat-card"><div class="stat-val">£9.77</div><div class="stat-label">Per square foot</div><div class="stat-sub">£0.81/sqft/month</div></div>
+</div>
+
+<div class="growth-grid">
+<div class="growth-card"><div class="growth-val">+15.9%</div><div class="growth-label">Year-on-year · 2024/25 → 2025/26</div></div>
+<div class="growth-card"><div class="growth-val">+£140</div><div class="growth-label">Monthly increase · £878 → £1,018</div></div>
+</div>
+
+<div class="chart-placeholder">[ Service charge trend chart ]</div>
+
+<div class="upload-card">
+<p>Upload another year's service charge to extend your trend</p>
+<button class="upload-btn">Upload another year</button>
+</div>
+
+</div>
+
+<!-- ==================== ISSUES TAB ==================== -->
+<div class="tab-content" id="tab-issues">
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+<div style="font-size:14px;font-weight:600">3 open issues</div>
+<button class="invite-btn" style="font-size:12px;padding:8px 16px">+ Report an issue</button>
+</div>
+
+<div class="card">
+<div class="issue-row">
+<div style="flex:1">
+<div class="issue-title"><span class="issue-cat">Maintenance</span>Lift frequently out of service in Sophora House</div>
+<div class="issue-meta">Reported 3 days ago · Sophora House</div>
+</div>
+<div style="display:flex;align-items:center">
+<span class="issue-sup">5 supporters</span>
+<button class="support-btn">Support</button>
+</div>
+</div>
+<div class="issue-row">
+<div style="flex:1">
+<div class="issue-title"><span class="issue-cat">Building fabric</span>Water ingress in underground car park</div>
+<div class="issue-meta">Reported 1 week ago</div>
+</div>
+<div style="display:flex;align-items:center">
+<span class="issue-sup">3 supporters</span>
+<button class="support-btn">Support</button>
+</div>
+</div>
+<div class="issue-row">
+<div style="flex:1">
+<div class="issue-title"><span class="issue-cat">Management</span>Concierge response times have worsened significantly</div>
+<div class="issue-meta">Reported 2 weeks ago</div>
+</div>
+<div style="display:flex;align-items:center">
+<span class="issue-sup">8 supporters</span>
+<button class="support-btn">Support</button>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ==================== SETTINGS TAB ==================== -->
+<div class="tab-content" id="tab-settings">
+
+<div class="card">
+<div class="card-title">Your Profile</div>
+<div style="display:grid;grid-template-columns:120px 1fr;gap:8px;font-size:13px">
+<span style="color:rgba(255,255,255,0.4)">Name</span><span>Rafael Haq</span>
+<span style="color:rgba(255,255,255,0.4)">Email</span><span>rafael.haq@icloud.com</span>
+<span style="color:rgba(255,255,255,0.4)">Block</span><span>Sophora House</span>
+<span style="color:rgba(255,255,255,0.4)">Flat</span><span>33</span>
+<span style="color:rgba(255,255,255,0.4)">Status</span><span>Owner</span>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Notifications</div>
+<div style="font-size:13px;color:rgba(255,255,255,0.5)">Email preferences and notification settings coming soon.</div>
+</div>
+
+</div>
+
+</div>
+</body></html>

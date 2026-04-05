@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
+import { getEstateForSlug } from "../../service-charges/data";
 import type {
   Development,
   Block,
@@ -108,6 +109,7 @@ export default function BuildingPage() {
   const [scStats, setScStats] = useState<{ hasData: boolean; avgPerSqft?: number; avgMonthly?: number; lastYoYPct?: number | null; trend?: string } | null>(null);
   const [agentRating, setAgentRating] = useState<{ score: number; count: number } | null>(null);
   const [fhRating, setFhRating] = useState<{ score: number; count: number } | null>(null);
+  const estateData = getEstateForSlug(slug);
 
   useEffect(() => {
     if (slug) loadPage();
@@ -378,21 +380,57 @@ export default function BuildingPage() {
             )}
           </div>
 
-          {/* Blurred YoY chart */}
-          <div className="relative overflow-hidden rounded-[10px] mb-4" style={{ background: "#0f1f3d", border: "1px solid #1e3a5f" }}>
-            <div className="flex items-end justify-center gap-6 h-20 px-8 pt-5 pb-3.5" style={{ filter: "blur(5px)", opacity: 0.4 }}>
-              {[{ h: 22, c: "#fbbf24", y: "2023/24" }, { h: 42, c: "#f87171", y: "2024/25" }, { h: 62, c: "#f87171", y: "2025/26" }].map(b => (
-                <div key={b.y} className="text-center">
-                  <div className="w-[70px] mx-auto rounded-t" style={{ height: b.h, background: b.c }} />
-                  <div className="text-[9px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>{b.y}</div>
-                </div>
-              ))}
-            </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-              <div className="text-[13px] font-bold text-white mb-0.5">
-                {scStats.trend === "accelerating" ? "Year-by-year growth is accelerating" : "See how your charges are trending"}
+          {/* Service charge cost mix + forecast */}
+          <div className="mb-4">
+            <p className="text-[10px] uppercase font-semibold tracking-wider mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>What makes up your service charge</p>
+
+            {/* Stacked bar visual */}
+            <div className="rounded-lg p-3 mb-3" style={{ background: "#0f1f3d", border: "1px solid #1e3a5f" }}>
+              <div className="flex h-5 rounded overflow-hidden mb-2.5">
+                {[
+                  { pct: 21.7, color: "#3b82f6" },  // Staff
+                  { pct: 16.9, color: "#f59e0b" },  // Insurance
+                  { pct: 11.5, color: "#14b8a6" },  // Gym & amenities
+                  { pct: 8.5, color: "#6366f1" },   // Reserve fund
+                  { pct: 7.9, color: "#ef4444" },    // Electricity
+                  { pct: 7.2, color: "#8b5cf6" },    // Management
+                  { pct: 7.9, color: "#ec4899" },    // Repairs & maintenance
+                  { pct: 6.1, color: "#22c55e" },    // Cleaning & grounds
+                  { pct: 12.3, color: "#64748b" },   // Other
+                ].map((s, i) => (
+                  <div key={i} style={{ width: `${s.pct}%`, background: s.color }} />
+                ))}
               </div>
-              <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>Sign up to see the full breakdown</div>
+
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {[
+                  { name: "Staff & concierge", pct: 21.7, color: "#3b82f6", forecast: "+3.6%", driver: "NLW increase" },
+                  { name: "Buildings insurance", pct: 16.9, color: "#f59e0b", forecast: "+3.9%", driver: "Reinsurance withdrawal" },
+                  { name: "Gym & amenities", pct: 11.5, color: "#14b8a6", forecast: "+2.1%", driver: "Contract renewals" },
+                  { name: "Reserve fund", pct: 8.5, color: "#6366f1", forecast: "flat", driver: "Fixed contribution" },
+                  { name: "Electricity", pct: 7.9, color: "#ef4444", forecast: "+3.1%", driver: "Energy contracts" },
+                  { name: "Management fees", pct: 7.2, color: "#8b5cf6", forecast: "+2.4%", driver: "CPI-linked" },
+                  { name: "Repairs & electrical", pct: 7.9, color: "#ec4899", forecast: "varies", driver: "Reactive works" },
+                  { name: "Cleaning & grounds", pct: 6.1, color: "#22c55e", forecast: "+2.8%", driver: "Contract rates" },
+                  { name: "Other costs", pct: 12.3, color: "#64748b", forecast: "+2%", driver: "Water, lifts, fire, CCTV" },
+                ].map(item => (
+                  <div key={item.name} className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: item.color }} />
+                    <span className="text-[10px] text-white">{item.name}</span>
+                    <span className="text-[10px] ml-auto" style={{ color: "rgba(255,255,255,0.3)" }}>{item.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Forecast card */}
+            <div className="rounded-lg p-3.5" style={{ background: "linear-gradient(135deg, rgba(30,198,164,0.08) 0%, rgba(30,198,164,0.02) 100%)", border: "1px solid rgba(30,198,164,0.2)" }}>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--teal)" }}>2026/27 Forecast</span>
+              </div>
+              <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+                Based on current market data, we expect service charges at buildings like {dev.name} to increase by <strong className="text-amber-400">+3.4%</strong> next year — driven primarily by staff costs (NLW +£12.21) and insurance (reinsurance withdrawal from UK residential). <Link href="/service-charges" className="font-semibold" style={{ color: "var(--teal)" }}>See the full index →</Link>
+              </p>
             </div>
           </div>
 
