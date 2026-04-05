@@ -141,6 +141,9 @@ export default function Dashboard() {
   const [showFhRating, setShowFhRating] = useState(false);
   const [submittingRating, setSubmittingRating] = useState(false);
 
+  // tabs
+  const [activeTab, setActiveTab] = useState("overview");
+
   // corrections
   const [showCorrection, setShowCorrection] = useState(false);
   const [corrField, setCorrField] = useState("");
@@ -504,9 +507,6 @@ export default function Dashboard() {
   const categories: IssueCategory[] = ["facilities", "maintenance", "service_charge", "security", "safety", "communal_areas", "communication", "other"];
 
   // ─── render ─────────────────────────────────────────────────────────────
-
-  // Tab state
-  const [activeTab, setActiveTab] = useState("overview");
 
   // Computed
   const agentAvg = agentAgg?.overall ?? null;
