@@ -69,6 +69,7 @@ export default function Home() {
         style={{ background: "var(--navy)", borderBottom: "1px solid var(--border)" }}>
         <Link href="/" className="font-extrabold text-[17px]" style={{ color: teal }}>BlockVoice</Link>
         <div className="flex items-center gap-5">
+          <Link href="/agents" className="text-[13px] font-medium" style={{ color: "var(--t2)" }}>Managing Agents</Link>
           <Link href="/login" className="text-[13px] font-medium" style={{ color: "var(--t2)" }}>Sign In</Link>
           <Link href="/signup" className="font-bold text-[12px] px-4 py-[7px] rounded-lg text-white"
             style={{ background: teal }}>Join free</Link>
