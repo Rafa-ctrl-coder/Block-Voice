@@ -38,25 +38,6 @@
     "type": "ltd"
   },
   {
-    "name": "RMG LIMITED",
-    "slug": "rmg-limited",
-    "company_number": "05706153",
-    "status": "dissolved",
-    "incorporated": "2006-02-13",
-    "address": {
-      "line1": "Astute House",
-      "line2": "Wilmslow Road",
-      "locality": "Handforth",
-      "region": "Cheshire",
-      "postal_code": "SK9 3HF",
-      "country": ""
-    },
-    "sic_codes": [
-      "4525"
-    ],
-    "type": "ltd"
-  },
-  {
     "name": "CORDEA SAVILLS UK PROPERTY VENTURES NO. 1 LP",
     "slug": "cordea-savills-uk-property-ventures-no-1-lp",
     "company_number": "LP012251",
@@ -3698,5 +3679,62 @@
       "93120"
     ],
     "type": "private-limited-guarant-nsc"
+  },
+  {
+    "name": "FIRSTPORT PROPERTY SERVICES LIMITED",
+    "slug": "firstport-property-services-limited",
+    "company_number": "02061041",
+    "status": "active",
+    "incorporated": "1986-10-03",
+    "address": {
+      "line1": "Fifth Floor The Lantern",
+      "line2": "75 Hampstead Road",
+      "locality": "London",
+      "region": "",
+      "postal_code": "NW1 2PL",
+      "country": "England"
+    },
+    "sic_codes": [
+      "68320"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "BALLYMORE ASSET MANAGEMENT LIMITED",
+    "slug": "ballymore-asset-management-limited",
+    "company_number": "06730532",
+    "status": "active",
+    "incorporated": "2008-10-22",
+    "address": {
+      "line1": "4th Floor 161 Marsh Wall",
+      "line2": "",
+      "locality": "London",
+      "region": "England And Wales",
+      "postal_code": "E14 9SJ",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "82990"
+    ],
+    "type": "ltd"
+  },
+  {
+    "name": "FOXTONS GROUP PLC",
+    "slug": "foxtons-group-plc",
+    "company_number": "07108742",
+    "status": "active",
+    "incorporated": "2009-12-18",
+    "address": {
+      "line1": "Building 12 566 Chiswick High Road",
+      "line2": "",
+      "locality": "London",
+      "region": "",
+      "postal_code": "W4 5AN",
+      "country": "United Kingdom"
+    },
+    "sic_codes": [
+      "70100"
+    ],
+    "type": "plc"
   }
 ]
