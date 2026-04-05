@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Option D: Notion-style Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f1f3d;color:#fff;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;font-size:14px}
+a{color:inherit;text-decoration:none}
+.nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:48px;background:#0f1f3d;border-bottom:1px solid rgba(255,255,255,0.06)}
+.logo{font-weight:800;font-size:15px;color:#1ec6a4}
+.nav-r{display:flex;align-items:center;gap:12px}
+.nav-r a{font-size:12px;color:rgba(255,255,255,0.35)}
+.wrap{max-width:820px;margin:0 auto;padding:20px 24px 60px}
+
+/* Header — compact like Notion page title */
+.page-header{margin-bottom:4px}
+.page-title{font-size:28px;font-weight:800;letter-spacing:-0.8px;line-height:1.2}
+.page-meta{font-size:12px;color:rgba(255,255,255,0.3);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.page-meta .dot{width:3px;height:3px;border-radius:99px;background:rgba(255,255,255,0.2)}
+
+/* Tabs — thin underline style */
+.tabs{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,0.06);margin:14px 0 20px}
+.tab{padding:8px 16px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
+.tab:hover{color:rgba(255,255,255,0.5)}
+.tab.active{color:#1ec6a4;border-bottom-color:#1ec6a4}
+.tab .count{font-size:10px;background:rgba(30,198,164,0.15);color:#1ec6a4;padding:1px 5px;border-radius:99px;margin-left:4px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Inline properties — Notion-style key:value rows */
+.props{margin-bottom:20px}
+.prop-row{display:flex;align-items:center;padding:5px 0;font-size:13px}
+.prop-row:hover{background:rgba(255,255,255,0.02);border-radius:4px}
+.prop-key{width:140px;flex-shrink:0;color:rgba(255,255,255,0.3);font-size:12px}
+.prop-val{flex:1;display:flex;align-items:center;gap:6px}
+.tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.tag-green{background:rgba(34,197,94,0.12);color:#4ade80}
+.tag-amber{background:rgba(251,191,36,0.12);color:#fbbf24}
+.tag-teal{background:rgba(30,198,164,0.12);color:#1ec6a4}
+.tag-red{background:rgba(239,68,68,0.12);color:#f87171}
+.link{color:#1ec6a4;font-size:13px}
+.link:hover{text-decoration:underline}
+.stars{color:#fbbf24;font-size:12px}
+.stars-text{font-size:11px;color:rgba(255,255,255,0.3)}
+
+/* Section dividers — Notion style */
+.section{margin-bottom:24px}
+.section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.2);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.section-action{font-size:11px;font-weight:600;color:#1ec6a4;cursor:pointer;text-transform:none;letter-spacing:0}
+.section-action:hover{text-decoration:underline}
+.divider{height:1px;background:rgba(255,255,255,0.04);margin:24px 0}
+
+/* Stat pills — compact inline */
+.stat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.stat-pill{background:#132847;border-radius:8px;padding:10px 16px;display:flex;flex-direction:column;align-items:center;flex:1;min-width:80px}
+.stat-pill-val{font-size:18px;font-weight:800;letter-spacing:-0.5px}
+.stat-pill-label{font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.5px;margin-top:1px}
+
+/* Progress — thin */
+.progress-wrap{margin-bottom:16px}
+.progress-text{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:4px}
+.progress-bar{height:3px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.progress-fill{height:3px;background:#1ec6a4;border-radius:99px}
+
+/* Blocks grid — compact pills */
+.blocks-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.block-pill{font-size:11px;padding:5px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.5)}
+.block-pill.mine{background:rgba(30,198,164,0.08);border-color:rgba(30,198,164,0.2);color:#1ec6a4}
+.block-count{font-size:10px;color:rgba(255,255,255,0.25);margin-left:4px}
+
+/* Issues — table-like rows */
+.issue-row{display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:6px;cursor:pointer}
+.issue-row:hover{background:rgba(255,255,255,0.03)}
+.issue-status{width:8px;height:8px;border-radius:99px;flex-shrink:0}
+.issue-status.open{background:#fbbf24}
+.issue-status.resolved{background:#4ade80}
+.issue-body{flex:1;min-width:0}
+.issue-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.issue-meta{font-size:10px;color:rgba(255,255,255,0.25);margin-top:1px}
+.issue-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.issue-supporters{font-size:11px;color:rgba(255,255,255,0.3)}
+.support-btn{font-size:10px;font-weight:700;color:#1ec6a4;background:rgba(30,198,164,0.08);border:1px solid rgba(30,198,164,0.15);padding:3px 8px;border-radius:5px;cursor:pointer}
+.support-btn:hover{background:rgba(30,198,164,0.15)}
+
+/* Activity feed — minimal */
+.activity-row{display:flex;align-items:start;gap:8px;padding:6px 0;font-size:12px;color:rgba(255,255,255,0.45)}
+.activity-dot{width:6px;height:6px;border-radius:99px;flex-shrink:0;margin-top:6px}
+.activity-dot.g{background:#1ec6a4}
+.activity-dot.a{background:#fbbf24}
+.activity-dot.b{background:#60a5fa}
+.activity-time{font-size:10px;color:rgba(255,255,255,0.2);margin-left:auto;flex-shrink:0}
+
+/* Invite — inline banner */
+.invite-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:10px;background:rgba(30,198,164,0.06);border:1px solid rgba(30,198,164,0.15)}
+.invite-row p{font-size:12px;color:rgba(255,255,255,0.4)}
+.invite-row strong{color:#fff}
+.invite-btn{background:#1ec6a4;color:#0f1f3d;font-weight:700;font-size:12px;padding:7px 16px;border-radius:8px;border:none;cursor:pointer;flex-shrink:0}
+
+/* SC quick view */
+.sc-quick{display:flex;gap:8px;margin-bottom:8px}
+.sc-stat{flex:1;background:#132847;border-radius:8px;padding:10px;text-align:center}
+.sc-val{font-size:16px;font-weight:800}
+.sc-label{font-size:9px;color:rgba(255,255,255,0.3);margin-top:1px}
+.sc-chart{height:80px;background:rgba(255,255,255,0.02);border-radius:8px;display:flex;align-items:end;justify-content:center;gap:12px;padding:8px 16px}
+.sc-bar{width:40px;border-radius:4px 4px 0 0;background:#1ec6a4;opacity:0.6}
+
+/* Feedback */
+.feedback-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);margin-top:8px}
+.feedback-row input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:12px}
+.feedback-row input::placeholder{color:rgba(255,255,255,0.2)}
+.feedback-send{font-size:11px;font-weight:700;color:#1ec6a4;cursor:pointer;flex-shrink:0}
+</style>
+<script>
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-tab="'+name+'"]').classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+</script>
+</head><body>
+<nav class="nav"><span class="logo">BlockVoice</span><div class="nav-r"><a href="#">Rafael Haq</a><span style="color:rgba(255,255,255,0.15)">·</span><a href="#">Sign Out</a></div></nav>
+<div class="wrap">
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+<div class="page-title">Vista, Chelsea Bridge</div>
+<div class="page-meta">
+<span>SW11 8BY</span><span class="dot"></span>
+<span>456 units</span><span class="dot"></span>
+<span>Sophora House</span><span class="dot"></span>
+<span>Flat 33</span><span class="dot"></span>
+<span>Owner</span>
+</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+<div class="tab active" data-tab="overview" onclick="switchTab('overview')">Overview</div>
+<div class="tab" data-tab="charges" onclick="switchTab('charges')">Service Charges <span class="count">BETA</span></div>
+<div class="tab" data-tab="documents" onclick="switchTab('documents')">Documents</div>
+<div class="tab" data-tab="settings" onclick="switchTab('settings')">Settings</div>
+</div>
+
+<!-- ==================== OVERVIEW TAB ==================== -->
+<div class="tab-content active" id="tab-overview">
+
+<!-- QUICK STATS -->
+<div class="stat-row">
+<div class="stat-pill"><div class="stat-pill-val">16</div><div class="stat-pill-label">Apartments</div></div>
+<div class="stat-pill"><div class="stat-pill-val">3</div><div class="stat-pill-label">Issues</div></div>
+<div class="stat-pill"><div class="stat-pill-val">£9.77</div><div class="stat-pill-label">£/sqft</div></div>
+<div class="stat-pill"><div class="stat-pill-val" style="color:#fbbf24">★ 2.0</div><div class="stat-pill-label">Agent</div></div>
+</div>
+
+<div class="progress-wrap">
+<div class="progress-text"><span>16 of ~456 apartments signed up</span><span>4%</span></div>
+<div class="progress-bar"><div class="progress-fill" style="width:4%"></div></div>
+</div>
+
+<!-- PROPERTIES — Notion-style -->
+<div class="section">
+<div class="section-title">Building details</div>
+<div class="props">
+<div class="prop-row"><span class="prop-key">Managing agent</span><div class="prop-val"><strong>RMG</strong><span class="tag tag-green">Confirmed</span><span class="stars">★★☆☆☆</span><span class="stars-text">2.0</span></div></div>
+<div class="prop-row"><span class="prop-key">Agent phone</span><div class="prop-val"><a class="link" href="tel:03450024444">0345 002 4444</a></div></div>
+<div class="prop-row"><span class="prop-key">Agent email</span><div class="prop-val"><a class="link" href="#">customerservice@rmguk.com</a></div></div>
+<div class="prop-row"><span class="prop-key">Freeholder</span><div class="prop-val"><strong>Harland (PC) Ltd</strong><span class="tag tag-green">Confirmed</span></div></div>
+<div class="prop-row"><span class="prop-key">Parent company</span><div class="prop-val">Landmark Investments</div></div>
+<div class="prop-row"><span class="prop-key">Developer</span><div class="prop-val">St James (Berkeley Group)</div></div>
+<div class="prop-row"><span class="prop-key">Service charge</span><div class="prop-val"><strong>£12,214</strong>/yr<span style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:6px">£1,018/mo · £9.77/sqft</span><span class="tag tag-red" style="margin-left:6px">+15.9% YoY</span></div></div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- BLOCKS -->
+<div class="section">
+<div class="section-title">Blocks</div>
+<div class="blocks-grid">
+<div class="block-pill mine">Sophora House<span class="block-count">· 150</span></div>
+<div class="block-pill">Altissima House<span class="block-count">· 70</span></div>
+<div class="block-pill">Camellia House<span class="block-count">· 56</span></div>
+<div class="block-pill">Cascade Court<span class="block-count">· 120</span></div>
+<div class="block-pill">Valetta House<span class="block-count">· 60</span></div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISSUES -->
+<div class="section">
+<div class="section-title">Open issues <span class="section-action" onclick="alert('Report issue modal')">+ Report issue</span></div>
+<div class="issue-row">
+<div class="issue-status open"></div>
+<div class="issue-body"><div class="issue-title">Lift frequently out of service in Sophora House</div><div class="issue-meta">Maintenance · 3 days ago · Sophora House</div></div>
+<div class="issue-right"><span class="issue-supporters">5</span><button class="support-btn">Support</button></div>
+</div>
+<div class="issue-row">
+<div class="issue-status open"></div>
+<div class="issue-body"><div class="issue-title">Water ingress in underground car park</div><div class="issue-meta">Building fabric · 1 week ago</div></div>
+<div class="issue-right"><span class="issue-supporters">3</span><button class="support-btn">Support</button></div>
+</div>
+<div class="issue-row">
+<div class="issue-status open"></div>
+<div class="issue-body"><div class="issue-title">Concierge response times have worsened</div><div class="issue-meta">Management · 2 weeks ago</div></div>
+<div class="issue-right"><span class="issue-supporters">8</span><button class="support-btn">Support</button></div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SERVICE CHARGE SNAPSHOT -->
+<div class="section">
+<div class="section-title">Service charge trend <span class="section-action" onclick="switchTab('charges')">See full analysis →</span></div>
+<div class="sc-quick">
+<div class="sc-stat"><div class="sc-val">£12,214</div><div class="sc-label">Annual 25/26</div></div>
+<div class="sc-stat"><div class="sc-val">£1,018</div><div class="sc-label">Monthly</div></div>
+<div class="sc-stat"><div class="sc-val">£9.77</div><div class="sc-label">Per sqft</div></div>
+<div class="sc-stat"><div class="sc-val" style="color:#ef4444">+15.9%</div><div class="sc-label">YoY</div></div>
+</div>
+<div class="sc-chart">
+<div class="sc-bar" style="height:50%"></div>
+<div class="sc-bar" style="height:62%"></div>
+<div class="sc-bar" style="height:65%"></div>
+<div class="sc-bar" style="height:75%;opacity:1"></div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ACTIVITY -->
+<div class="section">
+<div class="section-title">Recent activity</div>
+<div class="activity-row"><div class="activity-dot a"></div><span>New issue: <strong style="color:#fff">Lift out of service</strong> · 5 supporters</span><span class="activity-time">3d ago</span></div>
+<div class="activity-row"><div class="activity-dot g"></div><span><strong style="color:#fff">Valerie J.</strong> joined from Altissima House</span><span class="activity-time">5d ago</span></div>
+<div class="activity-row"><div class="activity-dot b"></div><span><strong style="color:#fff">4 residents</strong> rated RMG · avg 2.0/5</span><span class="activity-time">1w ago</span></div>
+<div class="activity-row"><div class="activity-dot g"></div><span><strong style="color:#fff">Sri M.</strong> joined from Altissima House</span><span class="activity-time">1w ago</span></div>
+<div class="activity-row"><div class="activity-dot g"></div><span><strong style="color:#fff">Barbara C.</strong> joined from Valetta House</span><span class="activity-time">2w ago</span></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- INVITE -->
+<div class="section">
+<div class="invite-row">
+<div><strong>16 apartments joined</strong> — help us reach 50<p>More residents = stronger data, louder voice</p></div>
+<button class="invite-btn">Invite neighbours</button>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- RATE -->
+<div class="section">
+<div class="section-title">Rate your building management</div>
+<div style="display:flex;gap:10px">
+<a class="support-btn" style="flex:1;text-align:center;padding:8px" href="#">★ Rate RMG</a>
+<a class="support-btn" style="flex:1;text-align:center;padding:8px" href="#">★ Rate Harland (PC) Ltd</a>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FEEDBACK -->
+<div class="section">
+<div class="section-title">Feedback</div>
+<div class="feedback-row">
+<input type="text" placeholder="What should we build next? Tell us..." />
+<span class="feedback-send">Send</span>
+</div>
+</div>
+
+</div>
+
+<!-- ==================== CHARGES TAB ==================== -->
+<div class="tab-content" id="tab-charges">
+<div style="padding:40px 0;text-align:center;color:rgba(255,255,255,0.3)">
+<p style="font-size:15px;font-weight:600;margin-bottom:6px">Full service charge analysis</p>
+<p style="font-size:12px">Upload your service charge documents to see the full breakdown, trends, and comparison.</p>
+</div>
+</div>
+
+<!-- ==================== DOCUMENTS TAB ==================== -->
+<div class="tab-content" id="tab-documents">
+<div style="padding:40px 0;text-align:center;color:rgba(255,255,255,0.3)">
+<p style="font-size:15px;font-weight:600;margin-bottom:6px">Document analysis — coming soon</p>
+<p style="font-size:12px">Upload your lease, service charge statements, and notices. AI will break them down in plain English.</p>
+</div>
+</div>
+
+<!-- ==================== SETTINGS TAB ==================== -->
+<div class="tab-content" id="tab-settings">
+<div style="padding:20px 0">
+<div class="section">
+<div class="section-title">Profile</div>
+<div class="props">
+<div class="prop-row"><span class="prop-key">Name</span><div class="prop-val">Rafael Haq</div></div>
+<div class="prop-row"><span class="prop-key">Email</span><div class="prop-val">rafael.haq@icloud.com</div></div>
+<div class="prop-row"><span class="prop-key">Block</span><div class="prop-val">Sophora House</div></div>
+<div class="prop-row"><span class="prop-key">Flat</span><div class="prop-val">33</div></div>
+<div class="prop-row"><span class="prop-key">Status</span><div class="prop-val">Owner</div></div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</body></html>

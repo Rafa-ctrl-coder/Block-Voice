@@ -2,10 +2,53 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { SYNTHETIC_INDEX, SYNTHETIC_WEIGHTED, SYNTHETIC_YEARS, LONDON_ACTUALS_WEIGHTED, ACTUALS_YEARS, getIndexChartData } from "./service-charges/data";
 
 interface Candidate { slug: string; name: string; totalUnits: number }
 interface Address { line_1: string; line_2: string; building_name: string; sub_building_name: string; thoroughfare: string; post_town: string }
 interface ScStats { hasData: boolean; avgPerSqft?: number; avgMonthly?: number; lastYoYPct?: number | null; trend?: string }
+interface YearData { year: string; perSqft: number; monthly: number }
+
+function PerSqftChart() {
+  const [data, setData] = useState<YearData[]>([]);
+  useEffect(() => {
+    fetch("/api/sc-stats?detail=true").then(r => r.json()).then(d => {
+      if (d.yearlyData) setData(d.yearlyData);
+    }).catch(() => {});
+  }, []);
+
+  if (data.length < 2) return null;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <p className="text-[10px] uppercase font-semibold tracking-wider mb-2" style={{ color: "var(--t3)" }}>Price per sqft — annualised</p>
+        <ResponsiveContainer width="100%" height={160}>
+          <LineChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `£${v}`} />
+            <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }} formatter={(v) => [`£${Number(v).toFixed(2)}`, "per sqft"]} />
+            <Line type="monotone" dataKey="perSqft" stroke="#1ec6a4" strokeWidth={2.5} dot={{ r: 3, fill: "#1ec6a4" }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      <div>
+        <p className="text-[10px] uppercase font-semibold tracking-wider mb-2" style={{ color: "var(--t3)" }}>Average monthly charge</p>
+        <ResponsiveContainer width="100%" height={160}>
+          <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `£${v}`} />
+            <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }} formatter={(v) => [`£${Number(v).toFixed(0)}`, "monthly"]} />
+            <Bar dataKey="monthly" fill="#1ec6a4" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const router = useRouter();
@@ -160,46 +203,135 @@ export default function Home() {
         )}
       </section>
 
-      {/* SERVICE CHARGE BETA BANNER */}
-      <div className="px-[6%] py-8">
-        <div className="max-w-[720px] mx-auto rounded-[14px] p-6"
-          style={{ background: "linear-gradient(135deg, rgba(30,198,164,0.1) 0%, rgba(30,198,164,0.02) 100%)", border: "1px solid rgba(30,198,164,0.25)" }}>
-          <div className="flex gap-4">
-            <div className="flex-shrink-0 w-11 h-11 rounded-[10px] flex items-center justify-center text-xl"
-              style={{ background: "rgba(30,198,164,0.15)" }}>📊</div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-[17px] font-bold text-white">Service charge analysis is live</span>
-                <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
-              </div>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
-                Upload your service charge and instantly see your cost per sqft, how it&apos;s changing year on year, and how your building compares to others in Battersea.
-              </p>
-              {scStats?.hasData && (
-              <div className="flex items-center gap-6 mb-5">
-                <div>
-                  <div className="text-2xl font-extrabold" style={{ color: teal }}>£{scStats.avgPerSqft?.toFixed(2)}</div>
-                  <div className="text-[10px]" style={{ color: "var(--t3)" }}>avg per sqft / year</div>
+      {/* SERVICE CHARGE INDEX TEASER */}
+      <div className="px-[6%] py-10">
+        <div className="max-w-[760px] mx-auto">
+          <p className="text-[11px] uppercase font-semibold tracking-[1.2px] mb-3 text-center" style={{ color: teal }}>BlockVoice Service Charge Index</p>
+          <h2 className="text-xl font-bold text-white text-center mb-2">London service charges are up +56% in 5 years</h2>
+          <p className="text-[13px] text-center max-w-[520px] mx-auto mb-6 leading-relaxed" style={{ color: "var(--t2)" }}>
+            We track the 7 cost components that make up your service charge — and forecast what&apos;s coming next. Here&apos;s what&apos;s driving your bill.
+          </p>
+
+          {/* Mini stacked bar showing the mix */}
+          <div className="rounded-[14px] p-5 mb-4" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+            <div className="flex h-6 rounded overflow-hidden mb-4">
+              {[
+                { pct: 22, color: "#3b82f6", label: "Staff" },
+                { pct: 17, color: "#f59e0b", label: "Insurance" },
+                { pct: 12, color: "#14b8a6", label: "Amenities" },
+                { pct: 10, color: "#ec4899", label: "Repairs" },
+                { pct: 9, color: "#6366f1", label: "Reserve" },
+                { pct: 8, color: "#ef4444", label: "Electricity" },
+                { pct: 7, color: "#8b5cf6", label: "Mgmt fees" },
+                { pct: 6, color: "#22c55e", label: "Cleaning" },
+                { pct: 9, color: "#64748b", label: "Other" },
+              ].map((s, i) => (
+                <div key={i} className="relative group" style={{ width: `${s.pct}%`, background: s.color }}>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block text-[9px] px-1.5 py-0.5 rounded whitespace-nowrap"
+                    style={{ background: "#0f1f3d", border: "1px solid #1e3a5f", color: "#fff" }}>{s.label} {s.pct}%</div>
                 </div>
-                <div className="w-px h-10" style={{ background: "var(--border)" }} />
-                {scStats.lastYoYPct != null && (
-                <>
-                <div>
-                  <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>{scStats.lastYoYPct > 0 ? "+" : ""}{scStats.lastYoYPct.toFixed(1)}%</div>
-                  <div className="text-[10px]" style={{ color: "var(--t3)" }}>last year&apos;s increase</div>
-                </div>
-                <div className="w-px h-10" style={{ background: "var(--border)" }} />
-                <div className="text-[13px] leading-snug" style={{ color: "var(--t2)" }}>
-                  Charges in Battersea<br/>are <strong className={scStats.trend === "accelerating" ? "text-red-400" : "text-amber-400"}>{scStats.trend || "changing"}</strong>
-                </div>
-                </>
-                )}
-              </div>
-              )}
-              <Link href="/signup" className="inline-block font-bold text-[14px] px-7 py-3 rounded-[10px] text-white" style={{ background: teal }}>
-                Join free to analyse your charges
-              </Link>
+              ))}
             </div>
+
+            {/* Top movers */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="rounded-lg p-3 text-center" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)" }}>
+                <div className="text-lg font-extrabold text-amber-400">+140%</div>
+                <div className="text-[10px]" style={{ color: "var(--t3)" }}>Insurance since 2021</div>
+              </div>
+              <div className="rounded-lg p-3 text-center" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                <div className="text-lg font-extrabold text-red-400">+65%</div>
+                <div className="text-[10px]" style={{ color: "var(--t3)" }}>Electricity peak (2023)</div>
+              </div>
+              <div className="rounded-lg p-3 text-center" style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)" }}>
+                <div className="text-lg font-extrabold text-blue-400">+37%</div>
+                <div className="text-[10px]" style={{ color: "var(--t3)" }}>Staff costs (NLW)</div>
+              </div>
+            </div>
+
+            {/* Synthetic index chart */}
+            <div className="mb-4">
+              <p className="text-[10px] uppercase font-semibold tracking-wider mb-2" style={{ color: "var(--t3)" }}>Market-expected growth by component (base 2021 = 100)</p>
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={getIndexChartData(SYNTHETIC_INDEX, SYNTHETIC_WEIGHTED, SYNTHETIC_YEARS)} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} domain={[80, 200]} />
+                  <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }} />
+                  {SYNTHETIC_INDEX.map(row => (
+                    <Line key={row.component} type="monotone" dataKey={row.component} stroke={row.color} strokeWidth={1.5} dot={{ r: 2 }} />
+                  ))}
+                  <Line type="monotone" dataKey="Weighted Index" stroke="#1ec6a4" strokeWidth={2.5} dot={{ r: 3, fill: "#1ec6a4" }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Actuals vs Synthetic comparison */}
+            <div className="mb-4">
+              <p className="text-[10px] uppercase font-semibold tracking-wider mb-2" style={{ color: "var(--t3)" }}>What residents actually paid vs market expectation</p>
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={ACTUALS_YEARS.map(y => ({ year: y, "What residents paid": LONDON_ACTUALS_WEIGHTED[y], "Market expectation": SYNTHETIC_WEIGHTED[y] }))} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} domain={[90, 170]} />
+                  <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }} />
+                  <Legend wrapperStyle={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }} />
+                  <Line type="monotone" dataKey="What residents paid" stroke="#ef4444" strokeWidth={2.5} dot={{ r: 3, fill: "#ef4444" }} />
+                  <Line type="monotone" dataKey="Market expectation" stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} strokeDasharray="6 4" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+              <p className="text-[10px] text-center mt-1" style={{ color: "var(--t3)" }}>
+                Actual costs exceeded market expectations from 2023 — driven by insurance (+140%) and delayed energy contract renewals
+              </p>
+            </div>
+
+            {/* Forecast teaser */}
+            <div className="rounded-lg p-3" style={{ background: "rgba(30,198,164,0.06)", border: "1px solid rgba(30,198,164,0.15)" }}>
+              <p className="text-[12px] leading-relaxed" style={{ color: "var(--t2)" }}>
+                <strong style={{ color: teal }}>2026/27 forecast:</strong> We expect a further <strong className="text-amber-400">+3–4%</strong> increase, driven by insurance (reinsurance withdrawal) and staff costs (NLW to ~£12.50). Electricity is stabilising.
+              </p>
+            </div>
+          </div>
+
+          {/* Real resident data — stats + charts */}
+          {scStats?.hasData && (
+          <div className="rounded-[14px] p-5 mb-4" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+            <p className="text-[10px] uppercase font-semibold tracking-wider mb-3" style={{ color: "var(--t3)" }}>From real resident data in Battersea & Nine Elms</p>
+            <div className="flex items-center justify-center gap-8 mb-5">
+              <div className="text-center">
+                <div className="text-2xl font-extrabold" style={{ color: teal }}>£{scStats.avgPerSqft?.toFixed(2)}</div>
+                <div className="text-[10px]" style={{ color: "var(--t3)" }}>avg per sqft / year</div>
+              </div>
+              {scStats.lastYoYPct != null && (
+              <>
+              <div className="w-px h-10" style={{ background: "var(--border)" }} />
+              <div className="text-center">
+                <div className={`text-2xl font-extrabold ${scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}`}>{scStats.lastYoYPct > 0 ? "+" : ""}{scStats.lastYoYPct.toFixed(1)}%</div>
+                <div className="text-[10px]" style={{ color: "var(--t3)" }}>last year&apos;s increase</div>
+              </div>
+              <div className="w-px h-10" style={{ background: "var(--border)" }} />
+              <div className="text-center">
+                <div className="text-[13px] leading-snug" style={{ color: "var(--t2)" }}>
+                  Charges are<br/><strong className={scStats.trend === "accelerating" ? "text-red-400" : "text-amber-400"}>{scStats.trend || "changing"}</strong>
+                </div>
+              </div>
+              </>
+              )}
+            </div>
+
+            {/* Per sqft trend chart */}
+            <PerSqftChart />
+          </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/service-charges" className="font-bold text-[14px] px-7 py-3 rounded-[10px] text-white" style={{ background: teal }}>
+              See the full Service Charge Index
+            </Link>
+            <Link href="/signup" className="font-bold text-[13px] px-6 py-3 rounded-[10px]"
+              style={{ color: teal, border: "1px solid rgba(30,198,164,0.3)" }}>
+              Upload yours to compare
+            </Link>
           </div>
         </div>
       </div>

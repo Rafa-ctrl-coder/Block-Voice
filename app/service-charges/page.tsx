@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SYNTHETIC_INDEX, SYNTHETIC_WEIGHTED, SYNTHETIC_YEARS, LONDON_ACTUALS_INDEX, LONDON_ACTUALS_WEIGHTED, ACTUALS_YEARS, ESTATES, TRIBUNAL_CASES } from "./data";
-import { SyntheticIndexSection, LondonActualsSection, EstateBreakdownSection, TribunalAdjustmentsSection } from "./components";
+import { SYNTHETIC_INDEX, SYNTHETIC_WEIGHTED, SYNTHETIC_YEARS, LONDON_ACTUALS_INDEX, LONDON_ACTUALS_WEIGHTED, ACTUALS_YEARS, TRIBUNAL_CASES } from "./data";
+import { SyntheticIndexSection, LondonActualsSection, TribunalAdjustmentsSection } from "./components";
 
 export const metadata: Metadata = {
   title: "London Service Charge Index 2025 — Cost Trends & Benchmarks | BlockVoice",
@@ -75,7 +75,6 @@ export default function ServiceChargesPage() {
       {/* SECTIONS */}
       <SyntheticIndexSection index={SYNTHETIC_INDEX} weighted={SYNTHETIC_WEIGHTED} years={SYNTHETIC_YEARS} />
       <LondonActualsSection index={LONDON_ACTUALS_INDEX} weighted={LONDON_ACTUALS_WEIGHTED} years={ACTUALS_YEARS} syntheticWeighted={SYNTHETIC_WEIGHTED} />
-      <EstateBreakdownSection estates={ESTATES} />
       <TribunalAdjustmentsSection cases={TRIBUNAL_CASES} />
 
       {/* CTA */}

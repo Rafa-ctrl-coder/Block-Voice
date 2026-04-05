@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Option A: Sectioned Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f1f3d;color:#fff;font-family:system-ui,-apple-system,sans-serif;line-height:1.6}
+.nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:56px;background:#0f1f3d;border-bottom:1px solid rgba(255,255,255,0.08)}
+.logo{font-weight:800;font-size:17px;color:#1ec6a4}
+.nav-r{display:flex;align-items:center;gap:16px}
+.nav-r a{font-size:13px;color:rgba(255,255,255,0.5);text-decoration:none}
+.nav-r .btn{background:#1ec6a4;color:#0f1f3d;font-weight:700;font-size:12px;padding:7px 16px;border-radius:8px;text-decoration:none}
+.wrap{max-width:900px;margin:0 auto;padding:24px 24px 60px}
+.section{margin-bottom:40px}
+.section-line{height:1px;background:rgba(255,255,255,0.06);margin-bottom:32px}
+.section-hdr{margin-bottom:20px}
+.section-hdr h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#1ec6a4;margin-bottom:4px}
+.section-hdr p{font-size:13px;color:rgba(255,255,255,0.4)}
+.card{background:#162d50;border:1px solid #1e3a5f;border-radius:14px;padding:22px;margin-bottom:12px}
+.overview-card{padding:28px}
+.overview-card h1{font-size:24px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
+.overview-meta{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px}
+.progress-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.progress-label{font-size:13px;color:rgba(255,255,255,0.5)}
+.progress-pct{font-size:14px;font-weight:700;color:#1ec6a4}
+.progress-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.progress-fill{height:6px;background:linear-gradient(90deg,#1ec6a4,#25d4b0);border-radius:99px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat-card{background:#132847;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:center}
+.stat-val{font-size:22px;font-weight:800;color:#fff}
+.stat-label{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+.stat-sub{font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px}
+.growth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.growth-card{background:#132847;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:center}
+.growth-val{font-size:20px;font-weight:800}
+.growth-val.up{color:#ef4444}
+.growth-label{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px}
+.agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.agent-name{font-size:16px;font-weight:700;margin-bottom:2px}
+.badge{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:99px;margin-left:6px}
+.badge-green{background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.2)}
+.agent-sub{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:8px}
+.agent-contact{font-size:13px;color:#1ec6a4;text-decoration:none;display:block;margin-bottom:4px}
+.rating-row{display:flex;align-items:center;gap:6px;margin-top:8px}
+.rating-val{font-size:14px;font-weight:700;color:#fbbf24}
+.rating-label{font-size:11px;color:rgba(255,255,255,0.35)}
+.rate-btn{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:#1ec6a4;padding:6px 14px;border:1px solid rgba(30,198,164,0.3);border-radius:8px;cursor:pointer;background:none;text-decoration:none}
+.issue-card{display:flex;align-items:start;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.issue-card:last-child{border-bottom:none}
+.issue-title{font-size:14px;font-weight:600}
+.issue-meta{font-size:11px;color:rgba(255,255,255,0.3);margin-top:3px}
+.issue-cat{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:rgba(30,198,164,0.12);color:#1ec6a4;border:1px solid rgba(30,198,164,0.25)}
+.issue-supporters{font-size:11px;color:rgba(255,255,255,0.4);white-space:nowrap}
+.invite-card{background:linear-gradient(135deg,rgba(30,198,164,0.1),rgba(30,198,164,0.02));border:1px solid rgba(30,198,164,0.25);border-radius:14px;padding:28px;text-align:center}
+.invite-card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.invite-card p{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px}
+.invite-btn{display:inline-block;background:#1ec6a4;color:#0f1f3d;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;border:none;cursor:pointer}
+.chart-placeholder{height:140px;background:rgba(255,255,255,0.03);border-radius:10px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.15);font-size:12px;margin-top:12px}
+</style>
+</head><body>
+<nav class="nav"><span class="logo">BlockVoice</span><div class="nav-r"><a href="#">Sign Out</a></div></nav>
+<div class="wrap">
+
+<!-- SECTION: YOUR BUILDING -->
+<div class="section">
+<div class="card overview-card">
+<div class="section-hdr"><h2>Your Building</h2></div>
+<h1>Vista, Chelsea Bridge</h1>
+<div class="overview-meta">SW11 8BY · 456 units · St James (Berkeley Group)</div>
+<div class="progress-row"><span class="progress-label">16 of ~456 apartments signed up</span><span class="progress-pct">4%</span></div>
+<div class="progress-bar"><div class="progress-fill" style="width:4%"></div></div>
+</div>
+</div>
+
+<div class="section-line"></div>
+
+<!-- SECTION: SERVICE CHARGES -->
+<div class="section">
+<div class="section-hdr">
+<h2>Service Charges</h2>
+<p>Track your costs and compare with similar buildings</p>
+</div>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-val">£12,214</div><div class="stat-label">Annual charge</div><div class="stat-sub">2025/26 FY</div></div>
+<div class="stat-card"><div class="stat-val">£1,018</div><div class="stat-label">Monthly cost</div><div class="stat-sub">per month</div></div>
+<div class="stat-card"><div class="stat-val">£9.77</div><div class="stat-label">Per square foot</div><div class="stat-sub">£0.81/sqft/month</div></div>
+</div>
+<div class="growth-grid">
+<div class="growth-card"><div class="growth-val up">+15.9%</div><div class="growth-label">Year-on-year growth · 2024/25 → 2025/26</div></div>
+<div class="growth-card"><div class="growth-val up">+£140</div><div class="growth-label">Monthly increase · £878/mo → £1,018/mo</div></div>
+</div>
+<div class="chart-placeholder">[ Service charge trend chart ]</div>
+</div>
+
+<div class="section-line"></div>
+
+<!-- SECTION: WHO RUNS YOUR BUILDING -->
+<div class="section">
+<div class="section-hdr">
+<h2>Who Runs Your Building</h2>
+<p>Your managing agent and freeholder details</p>
+</div>
+<div class="agent-grid">
+<div class="card">
+<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-bottom:10px">Managing Agent</div>
+<div class="agent-name">RMG <span class="badge badge-green">Confirmed</span></div>
+<div class="agent-sub">Source: Resident confirmation</div>
+<a class="agent-contact" href="#">0345 002 4444</a>
+<a class="agent-contact" href="#">customerservice@rmguk.com</a>
+<div class="rating-row"><span class="rating-val">★ 2.0</span><span class="rating-label">/ 5.0 (4 ratings)</span></div>
+<a class="rate-btn" href="#">★ Rate this agent</a>
+</div>
+<div class="card">
+<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-bottom:10px">Freeholder</div>
+<div class="agent-name">Harland (PC) Ltd <span class="badge badge-green">Confirmed</span></div>
+<div class="agent-sub">Part of Landmark Investments</div>
+<div class="agent-sub">Source: chelseabridgewharf.org.uk</div>
+<div class="rating-row"><span class="rating-label">No ratings yet — be the first!</span></div>
+<a class="rate-btn" href="#">★ Rate this freeholder</a>
+</div>
+</div>
+</div>
+
+<div class="section-line"></div>
+
+<!-- SECTION: BUILDING ISSUES -->
+<div class="section">
+<div class="section-hdr">
+<h2>Building Issues</h2>
+<p>What residents are reporting — support issues that affect you</p>
+</div>
+<div class="card">
+<div class="issue-card">
+<div><div class="issue-title">Lift frequently out of service in Sophora House</div><div class="issue-meta"><span class="issue-cat">Maintenance</span> · Reported 3 days ago · Sophora House</div></div>
+<div class="issue-supporters">5 supporters</div>
+</div>
+<div class="issue-card">
+<div><div class="issue-title">Water ingress in underground car park</div><div class="issue-meta"><span class="issue-cat">Building fabric</span> · Reported 1 week ago</div></div>
+<div class="issue-supporters">3 supporters</div>
+</div>
+<div class="issue-card">
+<div><div class="issue-title">Concierge response times have worsened</div><div class="issue-meta"><span class="issue-cat">Management</span> · Reported 2 weeks ago</div></div>
+<div class="issue-supporters">8 supporters</div>
+</div>
+<div style="margin-top:14px"><a class="rate-btn" href="#">+ Report an issue</a></div>
+</div>
+</div>
+
+<div class="section-line"></div>
+
+<!-- SECTION: GROW YOUR COMMUNITY -->
+<div class="section">
+<div class="section-hdr">
+<h2>Grow Your Community</h2>
+<p>Invite neighbours to strengthen your building's voice</p>
+</div>
+<div class="invite-card">
+<h3>16 apartments have joined — help us reach 50</h3>
+<p>The more residents who join, the stronger the data and the louder the voice.</p>
+<button class="invite-btn">👥 Invite your neighbours</button>
+</div>
+</div>
+
+</div>
+</body></html>

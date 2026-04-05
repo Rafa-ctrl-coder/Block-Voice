@@ -138,6 +138,14 @@ export async function GET(req: NextRequest) {
       else trend = "stable";
     }
 
+    // Build yearly detail if requested
+    const detail = req.nextUrl.searchParams.get("detail");
+    const yearlyData = detail ? years.map(y => ({
+      year: y,
+      perSqft: Math.round(avg(yearData[y].perSqfts) * 100) / 100,
+      monthly: Math.round(avg(yearData[y].monthlies)),
+    })).filter(d => d.perSqft > 0) : undefined;
+
     return NextResponse.json({
       hasData: true,
       avgPerSqft: Math.round(avgPerSqft * 100) / 100,
@@ -146,6 +154,7 @@ export async function GET(req: NextRequest) {
       trend,
       periods: years.length,
       residents: profileIds.length,
+      ...(yearlyData ? { yearlyData } : {}),
     });
   } catch (err) {
     console.error("SC stats error:", err);
