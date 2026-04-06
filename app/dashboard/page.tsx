@@ -3,6 +3,16 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
+} from "recharts";
+import {
+  SYNTHETIC_INDEX,
+  SYNTHETIC_WEIGHTED,
+  SYNTHETIC_YEARS,
+  LONDON_ACTUALS_WEIGHTED,
+  ACTUALS_YEARS,
+} from "../service-charges/data";
 import type {
   Development,
   Block,
@@ -12,6 +22,8 @@ import type {
   ConfidenceLevel,
   IssueStatus,
   IssueCategory,
+  ServiceChargeAnnual,
+  PropertySize,
 } from "../lib/database.types";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -135,6 +147,7 @@ export default function Dashboard() {
   const [fhComment, setFhComment] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [buildingDetailsOpen, setBuildingDetailsOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackSent, setFeedbackSent] = useState(false);
@@ -148,7 +161,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   // service charge summary (overview tile)
-  const [scSummary, setScSummary] = useState<{ perSqft: number | null; lastYoY: number | null; latestYear: string | null } | null>(null);
+  const [scSummary, setScSummary] = useState<{ perSqft: number | null; lastYoY: number | null; latestYear: string | null; yearly: { year: string; perSqft: number; monthly: number }[] } | null>(null);
 
   // corrections
   const [showCorrection, setShowCorrection] = useState(false);
@@ -275,7 +288,18 @@ export default function Dashboard() {
         lastYoY = ((latestAnnualised - prevAnnualised) / prevAnnualised) * 100;
       }
     }
-    setScSummary({ perSqft: latestPerSqft, lastYoY, latestYear: latest.year });
+
+    // Build yearly chart data for the overview mini-chart
+    const yearly = sorted.map(a => {
+      const ann = annualise(a as Annual);
+      return {
+        year: a.year,
+        perSqft: sqft > 0 ? ann / sqft : 0,
+        monthly: ann / 12,
+      };
+    });
+
+    setScSummary({ perSqft: latestPerSqft, lastYoY, latestYear: latest.year, yearly });
   }
 
   async function loadIssues(devId: string, uid: string) {
@@ -637,189 +661,152 @@ export default function Dashboard() {
         {activeTab === "overview" && (
           <div>
 
-        {/* ── Verification Banner ── */}
+        {/* ── Verification Banner (compact) ── */}
         {verificationStatus !== "verified" && (
-          <Link href="/verify" className="flex items-center justify-between bg-[#132847] border border-amber-900/30 rounded-lg px-4 py-2.5 hover:border-[#1ec6a4]/30 transition-colors mb-5">
+          <Link href="/verify" className="flex items-center justify-between bg-[#132847] border border-amber-900/30 rounded-lg px-3 py-2 hover:border-[#1ec6a4]/30 transition-colors mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-base">{verificationStatus === "pending" ? "⏳" : "🔒"}</span>
-              <div>
-                <p className="text-[12px] font-semibold">{verificationStatus === "pending" ? "Verification in progress" : "Verify your identity"}</p>
-                <p className="text-[10px] text-[rgba(255,255,255,0.3)]">{verificationStatus === "pending" ? "We're reviewing your documents" : "Verified residents carry more weight"}</p>
-              </div>
+              <span className="text-sm">{verificationStatus === "pending" ? "⏳" : "🔒"}</span>
+              <p className="text-[11px] font-semibold">{verificationStatus === "pending" ? "Verification in progress" : "Verify your identity"}</p>
             </div>
             <span className="text-[11px] text-[#1ec6a4]">→</span>
           </Link>
         )}
 
-        {/* ── Quick Stats ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{memberCount}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Apartments</div></div>
-          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{issues.length}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Issues</div></div>
-          <button onClick={() => setActiveTab("charges")} className="bg-[#132847] rounded-lg p-3 text-center hover:bg-[#1a345c] transition-colors">
-            <div className="text-[18px] font-extrabold tracking-[-0.5px]">{scSummary?.perSqft ? `£${scSummary.perSqft.toFixed(2)}` : "—"}</div>
-            <div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">£/sqft</div>
-          </button>
-          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className={`text-[18px] font-extrabold tracking-[-0.5px] ${agentAvg ? (agentAvg >= 3 ? "text-green-400" : "text-amber-400") : ""}`}>{agentAvg ? `★ ${agentAvg.toFixed(1)}` : "—"}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Agent</div></div>
+        {/* ── INVITE STRIP (top, compact, obvious) ── */}
+        <div className="mb-4 rounded-lg overflow-hidden" style={{ background: "linear-gradient(90deg, rgba(30,198,164,0.12) 0%, rgba(30,198,164,0.04) 100%)", border: "1px solid rgba(30,198,164,0.3)" }}>
+          <div className="flex items-center justify-between px-4 py-2.5 gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-base">👥</span>
+              <div className="min-w-0">
+                <p className="text-[12px] font-bold text-white truncate">
+                  {memberCount} of ~{dev.total_units} apartments joined
+                </p>
+                <div className="h-[2px] bg-[rgba(255,255,255,0.08)] rounded-full overflow-hidden mt-1">
+                  <div className="h-[2px] bg-[#1ec6a4] rounded-full" style={{ width: `${Math.max(pct, 1)}%` }} />
+                </div>
+              </div>
+            </div>
+            <button onClick={() => setInviteOpen(!inviteOpen)} className="bg-[#1ec6a4] text-[#0f1f3d] font-bold text-[11px] px-3 py-1.5 rounded-md flex-shrink-0">
+              Invite
+            </button>
+          </div>
+          {inviteOpen && (
+            <div className="px-4 pb-3 pt-1 space-y-2 border-t border-[rgba(30,198,164,0.15)]">
+              <div className="flex items-center gap-2">
+                <input readOnly value={`blockvoice.co.uk/join/${dev.slug}`} className="flex-1 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-1.5 text-[11px] text-[rgba(255,255,255,0.6)] outline-none" />
+                <button onClick={() => { navigator.clipboard.writeText(`https://blockvoice.co.uk/join/${dev.slug}`); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
+                  className="bg-[#1ec6a4] text-[#0f1f3d] font-bold text-[11px] px-3 py-1.5 rounded-md flex-shrink-0">
+                  {linkCopied ? "Copied!" : "Copy link"}
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <a href={`https://wa.me/?text=${encodeURIComponent(`Hey! I've joined BlockVoice for ${dev.name}. Join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
+                  target="_blank" rel="noopener noreferrer" className="flex-1 text-center text-[11px] font-bold text-green-400 border border-green-400/30 rounded-md py-1.5">WhatsApp</a>
+                <a href={`mailto:?subject=Join ${dev.name} on BlockVoice&body=Hey, I've joined BlockVoice for ${dev.name}. Join here: https://blockvoice.co.uk/join/${dev.slug}`}
+                  className="flex-1 text-center text-[11px] font-bold text-blue-400 border border-blue-400/30 rounded-md py-1.5">Email</a>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* ── Service Charge Summary (large feature card) ── */}
-        <div className="mb-6 rounded-2xl overflow-hidden"
+        {/* ── SERVICE CHARGE ANALYSIS (most real estate) ── */}
+        <div className="mb-5 rounded-2xl overflow-hidden"
           style={{ background: "linear-gradient(135deg, rgba(30,198,164,0.08) 0%, rgba(30,198,164,0.02) 100%)", border: "1px solid rgba(30,198,164,0.25)" }}>
           {/* Header */}
-          <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+          <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(30,198,164,0.12)", border: "1px solid rgba(30,198,164,0.25)" }}>
-                <span className="text-xl">📊</span>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(30,198,164,0.12)", border: "1px solid rgba(30,198,164,0.25)" }}>
+                <span className="text-lg">📊</span>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="text-[16px] font-bold text-white">BlockVoice Service Charge Index</h3>
+                  <h3 className="text-[15px] font-bold text-white">BlockVoice Service Charge Index</h3>
                   <span className="text-[8px] font-extrabold uppercase px-1.5 py-[2px] rounded" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
                 </div>
                 <p className="text-[11px] text-[rgba(255,255,255,0.45)]">
-                  {scSummary ? "Your charges vs the London market — and what's coming next year" : "Upload to see how your charges compare to the London market"}
+                  {scSummary ? "Your charges vs the London market" : "Upload to compare your charges"}
                 </p>
               </div>
             </div>
             <button onClick={() => setActiveTab("charges")} className="text-[11px] font-bold text-[#1ec6a4] hover:underline whitespace-nowrap mt-1">
-              Open analysis →
+              Full analysis →
             </button>
           </div>
 
-          {scSummary ? (
+          {scSummary && scSummary.yearly && scSummary.yearly.length > 0 ? (
             <>
               {/* Stats row */}
-              <div className="grid grid-cols-3 gap-2 px-5 pb-4">
-                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
-                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Per sqft</div>
-                  <div className="text-[22px] font-black text-[#1ec6a4]">{scSummary.perSqft ? `£${scSummary.perSqft.toFixed(2)}` : "—"}</div>
-                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">per year</div>
+              <div className="grid grid-cols-3 gap-2 px-4 pb-3">
+                <div className="rounded-lg p-2.5 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[8px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Per sqft</div>
+                  <div className="text-[18px] font-black text-[#1ec6a4]">{scSummary.perSqft ? `£${scSummary.perSqft.toFixed(2)}` : "—"}</div>
+                  <div className="text-[8px] text-[rgba(255,255,255,0.3)]">per year</div>
                 </div>
-                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
-                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Last year</div>
-                  <div className={`text-[22px] font-black ${scSummary.lastYoY != null ? (scSummary.lastYoY > 5 ? "text-red-400" : scSummary.lastYoY > 0 ? "text-amber-400" : "text-[#1ec6a4]") : "text-white"}`}>
+                <div className="rounded-lg p-2.5 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[8px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Last year</div>
+                  <div className={`text-[18px] font-black ${scSummary.lastYoY != null ? (scSummary.lastYoY > 5 ? "text-red-400" : scSummary.lastYoY > 0 ? "text-amber-400" : "text-[#1ec6a4]") : "text-white"}`}>
                     {scSummary.lastYoY != null ? `${scSummary.lastYoY >= 0 ? "+" : ""}${scSummary.lastYoY.toFixed(1)}%` : "—"}
                   </div>
-                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">year on year</div>
+                  <div className="text-[8px] text-[rgba(255,255,255,0.3)]">year on year</div>
                 </div>
-                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
-                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">2026/27 forecast</div>
-                  <div className="text-[22px] font-black text-amber-400">+3–4%</div>
-                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">market signal</div>
+                <div className="rounded-lg p-2.5 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[8px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">2026/27 forecast</div>
+                  <div className="text-[18px] font-black text-amber-400">+3–4%</div>
+                  <div className="text-[8px] text-[rgba(255,255,255,0.3)]">market signal</div>
                 </div>
               </div>
 
-              {/* Cost mix mini bar */}
-              <div className="px-5 pb-5">
-                <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1.5">Where the average £ goes</div>
-                <div className="flex h-2.5 rounded-sm overflow-hidden mb-2">
-                  {SYNTHETIC_INDEX.map(c => (
-                    <div key={c.component} title={`${c.component} ${(c.weight * 100).toFixed(0)}%`}
-                      style={{ width: `${c.weight * 100}%`, background: c.color }} />
-                  ))}
+              {/* Two charts side by side: per-sqft trend + cost mix */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-4 pb-4">
+                {/* Per-sqft trend chart */}
+                <div className="rounded-lg p-3" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <p className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-2">Your £/sqft trend</p>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <LineChart data={scSummary.yearly} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                      <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 9 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 8 }} axisLine={false} tickLine={false} tickFormatter={v => `£${v.toFixed(0)}`} />
+                      <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }}
+                        formatter={(v) => [`£${Number(v).toFixed(2)}/sqft`, "Per sqft"]} />
+                      <Line type="monotone" dataKey="perSqft" stroke="#1ec6a4" strokeWidth={2.5} dot={{ fill: "#1ec6a4", r: 3 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px]">
-                  {SYNTHETIC_INDEX.slice(0, 5).map(c => (
-                    <div key={c.component} className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-sm flex-shrink-0" style={{ background: c.color }} />
-                      <span className="text-[rgba(255,255,255,0.55)]">{c.component}</span>
-                      <span className="text-[rgba(255,255,255,0.3)]">{(c.weight * 100).toFixed(0)}%</span>
-                    </div>
-                  ))}
-                  <span className="text-[rgba(255,255,255,0.3)] italic">+ 4 more →</span>
+
+                {/* Cost mix bar chart */}
+                <div className="rounded-lg p-3" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <p className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-2">Where the average £ goes</p>
+                  <div className="flex h-3 rounded-sm overflow-hidden mb-2">
+                    {SYNTHETIC_INDEX.map(c => (
+                      <div key={c.component} title={`${c.component} ${(c.weight * 100).toFixed(0)}%`}
+                        style={{ width: `${c.weight * 100}%`, background: c.color }} />
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px]">
+                    {SYNTHETIC_INDEX.slice(0, 6).map(c => (
+                      <div key={c.component} className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-sm flex-shrink-0" style={{ background: c.color }} />
+                        <span className="text-[rgba(255,255,255,0.55)] truncate">{c.component}</span>
+                        <span className="text-[rgba(255,255,255,0.3)] ml-auto">{(c.weight * 100).toFixed(0)}%</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </>
           ) : (
             <div className="px-5 pb-5">
-              <ul className="text-[12px] text-[rgba(255,255,255,0.55)] space-y-1.5 mb-4">
+              <ul className="text-[11px] text-[rgba(255,255,255,0.55)] space-y-1 mb-3">
                 <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> See the 9-component cost mix that makes up every service charge</li>
                 <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> Compare your £/sqft against the London average</li>
                 <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> Get a 2026/27 forecast based on market signals</li>
               </ul>
-              <button onClick={() => setActiveTab("charges")} className="font-bold text-[12px] px-5 py-2 rounded-lg text-white" style={{ background: "#1ec6a4" }}>
+              <button onClick={() => setActiveTab("charges")} className="font-bold text-[12px] px-4 py-2 rounded-lg text-white" style={{ background: "#1ec6a4" }}>
                 Upload your service charge →
               </button>
             </div>
           )}
         </div>
-
-        {/* ── Progress ── */}
-        <div className="mb-5">
-          <div className="flex justify-between text-[11px] text-[rgba(255,255,255,0.3)] mb-1">
-            <span>{memberCount} of ~{dev.total_units} apartments signed up</span><span>{pct}%</span>
-          </div>
-          <div className="h-[3px] bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
-            <div className="h-[3px] bg-[#1ec6a4] rounded-full" style={{ width: `${Math.max(pct, 1)}%` }} />
-          </div>
-        </div>
-
-        {/* ── Building Details (Notion-style props) ── */}
-        <div className="mb-5">
-          <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-2">Building details</div>
-          <div className="space-y-0">
-            {/* Agent */}
-            <div className="flex items-center py-[5px] text-[13px] hover:bg-[rgba(255,255,255,0.02)] rounded px-1">
-              <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Managing agent</span>
-              <div className="flex items-center gap-[6px]">
-                <strong>{agent?.name || "Unknown"}</strong>
-                {link && confidenceBadge(link.agent_confidence)}
-                {agentAvg && <><span className="text-[12px] text-amber-400">{"★".repeat(Math.round(agentAvg))}</span><span className="text-[11px] text-[rgba(255,255,255,0.3)]">{agentAvg.toFixed(1)}</span></>}
-              </div>
-            </div>
-            {agent?.phone && (
-              <div className="flex items-center py-[5px] text-[13px] px-1">
-                <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Agent phone</span>
-                <a href={`tel:${agent.phone}`} className="text-[#1ec6a4]">{agent.phone}</a>
-              </div>
-            )}
-            {agent?.email && (
-              <div className="flex items-center py-[5px] text-[13px] px-1">
-                <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Agent email</span>
-                <a href={`mailto:${agent.email}`} className="text-[#1ec6a4]">{agent.email}</a>
-              </div>
-            )}
-            {/* Freeholder */}
-            <div className="flex items-center py-[5px] text-[13px] hover:bg-[rgba(255,255,255,0.02)] rounded px-1">
-              <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Freeholder</span>
-              <div className="flex items-center gap-[6px]">
-                <strong>{freeholder?.name || "Unknown"}</strong>
-                {link && confidenceBadge(link.freeholder_confidence)}
-              </div>
-            </div>
-            {freeholder?.parent_company && (
-              <div className="flex items-center py-[5px] text-[13px] px-1">
-                <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Parent company</span>
-                <span>{freeholder.parent_company}</span>
-              </div>
-            )}
-            {dev.developer && (
-              <div className="flex items-center py-[5px] text-[13px] px-1">
-                <span className="w-[130px] flex-shrink-0 text-[12px] text-[rgba(255,255,255,0.3)]">Developer</span>
-                <span>{dev.developer}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
-
-        {/* ── Blocks ── */}
-        {blocks.length > 0 && (
-          <div className="mb-5">
-            <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-2">Blocks</div>
-            <div className="flex flex-wrap gap-[6px]">
-              {blocks.map(b => (
-                <span key={b.id} className={`text-[11px] py-[5px] px-[10px] rounded-md border ${b.id === userBlockId ? "bg-[rgba(30,198,164,0.08)] border-[rgba(30,198,164,0.2)] text-[#1ec6a4]" : "bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.5)]"}`}>
-                  {b.name}{b.total_units > 0 && <span className="text-[10px] text-[rgba(255,255,255,0.25)] ml-1">· {b.total_units}</span>}
-                  {issuesByBlock[b.id] && <span className="ml-1 text-[9px] text-amber-400">({issuesByBlock[b.id]})</span>}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
 
         {/* ── Open Issues ── */}
         <div className="mb-5">
@@ -935,53 +922,89 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
+        <div className="h-px bg-[rgba(255,255,255,0.04)] my-4" />
 
-        {/* ── Invite ── */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between p-[14px] rounded-[10px] bg-[rgba(30,198,164,0.06)] border border-[rgba(30,198,164,0.15)]">
-            <div>
-              <strong>{memberCount} apartments joined</strong> — help us reach 50
-              <p className="text-[12px] text-[rgba(255,255,255,0.4)] mt-[2px]">More residents = stronger data, louder voice</p>
-            </div>
-            <button onClick={() => setInviteOpen(!inviteOpen)} className="bg-[#1ec6a4] text-[#0f1f3d] font-bold text-[12px] px-4 py-[7px] rounded-lg flex-shrink-0">
-              Invite neighbours
-            </button>
-          </div>
-          {inviteOpen && (
-            <div className="bg-[#132847] rounded-lg border border-[#1e3a5f] p-4 mt-2 space-y-3">
-              <div className="flex items-center gap-2">
-                <input readOnly value={`blockvoice.co.uk/join/${dev.slug}`} className="flex-1 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-[rgba(255,255,255,0.6)] outline-none" />
-                <button onClick={() => { navigator.clipboard.writeText(`https://blockvoice.co.uk/join/${dev.slug}`); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
-                  className="bg-[#1ec6a4] text-[#0f1f3d] font-bold text-[11px] px-3 py-2 rounded-lg flex-shrink-0">
-                  {linkCopied ? "Copied!" : "Copy"}
-                </button>
+        {/* ── BUILDING DETAILS (compact, expandable) ── */}
+        <div className="mb-4">
+          <button onClick={() => setBuildingDetailsOpen(!buildingDetailsOpen)} className="w-full flex items-center justify-between text-left">
+            <div className="text-[11px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.3)]">Your building</div>
+            <span className="text-[10px] text-[rgba(255,255,255,0.3)]">{buildingDetailsOpen ? "Hide" : "Show"} details</span>
+          </button>
+          {/* Always show: agent + freeholder one-liners with rate buttons */}
+          <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="flex items-center justify-between bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-lg px-3 py-2">
+              <div className="min-w-0">
+                <div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-wider">Managing agent</div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <strong className="text-[12px] truncate">{agent?.name || "Unknown"}</strong>
+                  {agentAvg && <span className="text-[10px] text-amber-400">★{agentAvg.toFixed(1)}</span>}
+                </div>
               </div>
-              <div className="flex gap-2">
-                <a href={`https://wa.me/?text=${encodeURIComponent(`Hey! I've joined BlockVoice for ${dev.name}. Join here: https://blockvoice.co.uk/join/${dev.slug}`)}`}
-                  target="_blank" rel="noopener noreferrer" className="flex-1 text-center text-[12px] font-bold text-green-400 border border-green-400/30 rounded-lg py-2">WhatsApp</a>
-                <a href={`mailto:?subject=Join ${dev.name} on BlockVoice&body=Hey, I've joined BlockVoice for ${dev.name}. Join here: https://blockvoice.co.uk/join/${dev.slug}`}
-                  className="flex-1 text-center text-[12px] font-bold text-blue-400 border border-blue-400/30 rounded-lg py-2">Email</a>
+              <button onClick={() => setShowAgentRating(!showAgentRating)} className="text-[10px] font-bold text-[#1ec6a4] hover:underline flex-shrink-0 ml-2">
+                Rate
+              </button>
+            </div>
+            <div className="flex items-center justify-between bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-lg px-3 py-2">
+              <div className="min-w-0">
+                <div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-wider">Freeholder</div>
+                <strong className="text-[12px] truncate block mt-0.5">{freeholder?.name || "Unknown"}</strong>
+              </div>
+              <button onClick={() => setShowFhRating(!showFhRating)} className="text-[10px] font-bold text-[#1ec6a4] hover:underline flex-shrink-0 ml-2">
+                Rate
+              </button>
+            </div>
+          </div>
+
+          {/* Expanded details */}
+          {buildingDetailsOpen && (
+            <div className="mt-2 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)] rounded-lg p-3 space-y-1">
+              {agent?.phone && (
+                <div className="flex items-center text-[12px]">
+                  <span className="w-[110px] flex-shrink-0 text-[10px] text-[rgba(255,255,255,0.3)]">Agent phone</span>
+                  <a href={`tel:${agent.phone}`} className="text-[#1ec6a4]">{agent.phone}</a>
+                </div>
+              )}
+              {agent?.email && (
+                <div className="flex items-center text-[12px]">
+                  <span className="w-[110px] flex-shrink-0 text-[10px] text-[rgba(255,255,255,0.3)]">Agent email</span>
+                  <a href={`mailto:${agent.email}`} className="text-[#1ec6a4] truncate">{agent.email}</a>
+                </div>
+              )}
+              {freeholder?.parent_company && (
+                <div className="flex items-center text-[12px]">
+                  <span className="w-[110px] flex-shrink-0 text-[10px] text-[rgba(255,255,255,0.3)]">Parent</span>
+                  <span>{freeholder.parent_company}</span>
+                </div>
+              )}
+              {dev.developer && (
+                <div className="flex items-center text-[12px]">
+                  <span className="w-[110px] flex-shrink-0 text-[10px] text-[rgba(255,255,255,0.3)]">Developer</span>
+                  <span>{dev.developer}</span>
+                </div>
+              )}
+              {blocks.length > 0 && (
+                <div className="pt-2 mt-2 border-t border-[rgba(255,255,255,0.05)]">
+                  <div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-wider mb-1">Blocks</div>
+                  <div className="flex flex-wrap gap-1">
+                    {blocks.map(b => (
+                      <span key={b.id} className={`text-[10px] py-[3px] px-[7px] rounded-md border ${b.id === userBlockId ? "bg-[rgba(30,198,164,0.08)] border-[rgba(30,198,164,0.2)] text-[#1ec6a4]" : "bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.5)]"}`}>
+                        {b.name}{b.total_units > 0 && <span className="text-[9px] text-[rgba(255,255,255,0.25)] ml-1">· {b.total_units}</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="pt-2 mt-2 border-t border-[rgba(255,255,255,0.05)] flex items-center justify-between">
+                <span className="text-[10px] text-[rgba(255,255,255,0.3)]">Something wrong?</span>
+                <button onClick={() => setShowCorrection(!showCorrection)} className="text-[10px] font-semibold text-[#1ec6a4] hover:underline">Suggest a correction</button>
               </div>
             </div>
           )}
         </div>
 
-        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
+        {/* Rate forms (still inline, just collapsed by default) */}
+        <div className="mb-3">
 
-        {/* ── Rate ── */}
-        <div className="mb-5">
-          <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-2">Rate your building management</div>
-          <div className="flex gap-[10px]">
-            <button onClick={() => setShowAgentRating(!showAgentRating)}
-              className="flex-1 text-center text-[12px] font-bold text-[#1ec6a4] bg-[rgba(30,198,164,0.08)] border border-[rgba(30,198,164,0.15)] rounded-lg py-2 hover:bg-[rgba(30,198,164,0.12)]">
-              ★ Rate {agent?.name || "Agent"}
-            </button>
-            <button onClick={() => setShowFhRating(!showFhRating)}
-              className="flex-1 text-center text-[12px] font-bold text-[#1ec6a4] bg-[rgba(30,198,164,0.08)] border border-[rgba(30,198,164,0.15)] rounded-lg py-2 hover:bg-[rgba(30,198,164,0.12)]">
-              ★ Rate {freeholder?.name || "Freeholder"}
-            </button>
-          </div>
 
           {/* Agent rating form */}
           {showAgentRating && (
@@ -1028,60 +1051,51 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
-
-        {/* ── Corrections ── */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)]">Something wrong?</div>
-            <button onClick={() => setShowCorrection(!showCorrection)} className="text-[11px] font-semibold text-[#1ec6a4] hover:underline">Suggest correction</button>
+        {/* ── Corrections form (only when triggered from building details) ── */}
+        {showCorrection && (
+          <div className="mb-3 bg-[#132847] rounded-lg border border-[#1e3a5f] p-3 space-y-2">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[rgba(255,255,255,0.4)]">Suggest a correction</div>
+            <select value={corrField} onChange={e => setCorrField(e.target.value)}
+              className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-1.5 text-[11px] text-white outline-none">
+              <option value="">What needs correcting?</option>
+              {CORRECTION_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+            </select>
+            {corrField && (
+              <>
+                {corrField !== "other" && getCurrentValue(corrField) && (
+                  <p className="text-[10px] text-[rgba(255,255,255,0.35)]">Current: {getCurrentValue(corrField)}</p>
+                )}
+                <input type="text" placeholder="What should it be?" value={corrValue} onChange={e => setCorrValue(e.target.value)}
+                  className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-1.5 text-[11px] text-white outline-none" />
+                <button onClick={submitCorrection} disabled={submittingCorr}
+                  className="w-full bg-[#1ec6a4] text-white font-bold text-[11px] py-1.5 rounded-lg disabled:opacity-40">
+                  {submittingCorr ? "Submitting..." : "Submit Correction"}
+                </button>
+              </>
+            )}
           </div>
-          {corrSuccess && <p className="text-[12px] text-green-400 mb-2">Correction submitted — thank you!</p>}
-          {showCorrection && (
-            <div className="bg-[#132847] rounded-lg border border-[#1e3a5f] p-4 space-y-3">
-              <select value={corrField} onChange={e => setCorrField(e.target.value)}
-                className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-white outline-none">
-                <option value="">What needs correcting?</option>
-                {CORRECTION_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
-              </select>
-              {corrField && (
-                <>
-                  {corrField !== "other" && getCurrentValue(corrField) && (
-                    <p className="text-[11px] text-[rgba(255,255,255,0.35)]">Current: {getCurrentValue(corrField)}</p>
-                  )}
-                  <input type="text" placeholder="What should it be?" value={corrValue} onChange={e => setCorrValue(e.target.value)}
-                    className="w-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-2 text-[12px] text-white outline-none" />
-                  <button onClick={submitCorrection} disabled={submittingCorr}
-                    className="w-full bg-[#1ec6a4] text-white font-bold text-[12px] py-2 rounded-lg disabled:opacity-40">
-                    {submittingCorr ? "Submitting..." : "Submit Correction"}
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+        )}
+        {corrSuccess && <p className="text-[12px] text-green-400 mb-3">Correction submitted — thank you!</p>}
 
-        <div className="h-px bg-[rgba(255,255,255,0.04)] my-5" />
-
-        {/* ── Feedback ── */}
-        <div className="mb-5">
-          <div className="text-[12px] font-bold uppercase tracking-[1px] text-[rgba(255,255,255,0.2)] mb-2">Feedback</div>
+        {/* ── Feedback (compact) ── */}
+        <div className="mb-3">
           {feedbackSent ? (
-            <p className="text-[12px] text-green-400">Thanks for your feedback!</p>
+            <p className="text-[11px] text-green-400 text-center">Thanks for your feedback!</p>
           ) : (
-            <div className="flex items-center gap-[10px] p-[10px] rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)]">
-              <input type="text" placeholder="What should we build next? Tell us..." value={feedbackText}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)]">
+              <span className="text-[10px] text-[rgba(255,255,255,0.3)] flex-shrink-0">💡</span>
+              <input type="text" placeholder="What should we build next?" value={feedbackText}
                 onChange={e => setFeedbackText(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && feedbackText.trim()) {
                   fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, feedback: feedbackText, developmentId: dev.id }) });
                   setFeedbackText(""); setFeedbackSent(true); setTimeout(() => setFeedbackSent(false), 3000);
                 }}}
-                className="flex-1 bg-transparent border-none outline-none text-[12px] text-white placeholder:text-[rgba(255,255,255,0.2)]" />
+                className="flex-1 bg-transparent border-none outline-none text-[11px] text-white placeholder:text-[rgba(255,255,255,0.2)]" />
               <button onClick={() => {
                 if (!feedbackText.trim()) return;
                 fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, feedback: feedbackText, developmentId: dev.id }) });
                 setFeedbackText(""); setFeedbackSent(true); setTimeout(() => setFeedbackSent(false), 3000);
-              }} className="text-[11px] font-bold text-[#1ec6a4] flex-shrink-0">Send</button>
+              }} className="text-[10px] font-bold text-[#1ec6a4] flex-shrink-0">Send</button>
             </div>
           )}
         </div>
@@ -1142,18 +1156,6 @@ function Card({ title, badge, children }: { title: string; badge?: React.ReactNo
 }
 
 // ─── Service Charges Section ───────────────────────────────────────────────
-
-import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
-} from "recharts";
-import type { ServiceChargeAnnual, PropertySize } from "../lib/database.types";
-import {
-  SYNTHETIC_INDEX,
-  SYNTHETIC_WEIGHTED,
-  SYNTHETIC_YEARS,
-  LONDON_ACTUALS_WEIGHTED,
-  ACTUALS_YEARS,
-} from "../service-charges/data";
 
 // ─── BlockVoice Service Charge Index panel ────────────────────────────────
 // Reusable: shows the public index analysis. Optionally overlays the user's
@@ -1487,23 +1489,24 @@ function ServiceChargesSection({
   if (annuals.length === 0 && !extracting) {
     return (
       <div className="space-y-4">
-        <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}>
-          <div className="text-center py-8 border border-dashed border-[#1e3a5f] rounded-lg">
-            <span className="text-3xl mb-3 block">💷</span>
-            <p className="text-sm text-white font-semibold mb-1">Upload your service charge documents</p>
-            <p className="text-xs text-[rgba(255,255,255,0.4)] mb-4 max-w-sm mx-auto leading-relaxed">
-              Upload your service charge documents and our AI will work out how to allocate them across periods, track your costs, and overlay your trend on the index below.
-            </p>
-            <label className="inline-block cursor-pointer px-5 py-2.5 bg-[#1ec6a4] text-white text-sm font-bold rounded-lg hover:bg-[#25d4b0] transition-colors">
-              Upload your service charge
-              <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} multiple />
-            </label>
-            <p className="text-[10px] text-[rgba(255,255,255,0.25)] mt-2">Takes 30 seconds. We extract the data automatically.</p>
-            {(uploading || uploadProgress) && <p className="text-sm text-[#1ec6a4] mt-3">{uploadProgress || "Uploading..."}</p>}
-            {extracting && <p className="text-sm text-[#1ec6a4] mt-3">Analysing your document...</p>}
-            {uploadError && <p className="text-sm text-red-400 mt-3">{uploadError}</p>}
+        {/* Compact upload strip */}
+        <div className="rounded-lg border border-dashed border-[#1e3a5f] bg-[#0f1f3d] px-4 py-3 flex items-center gap-3">
+          <span className="text-xl flex-shrink-0">💷</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[12px] text-white font-semibold">Upload your service charge to compare</p>
+            <p className="text-[10px] text-[rgba(255,255,255,0.35)]">AI extracts everything in 30 seconds. Your data stays private.</p>
           </div>
-        </Card>
+          <label className="cursor-pointer flex-shrink-0 px-3 py-1.5 bg-[#1ec6a4] text-white text-[11px] font-bold rounded-md hover:bg-[#25d4b0] transition-colors">
+            Upload
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} multiple />
+          </label>
+        </div>
+        {(uploading || uploadProgress || uploadError) && (
+          <div className="text-center text-[11px]">
+            {(uploading || uploadProgress) && <span className="text-[#1ec6a4]">{uploadProgress || "Uploading..."}</span>}
+            {uploadError && <span className="text-red-400">{uploadError}</span>}
+          </div>
+        )}
         {/* Public BlockVoice Index — visible even before upload */}
         <BlockVoiceIndexPanel />
       </div>
