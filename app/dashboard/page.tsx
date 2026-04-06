@@ -147,6 +147,9 @@ export default function Dashboard() {
   // tabs
   const [activeTab, setActiveTab] = useState("overview");
 
+  // service charge summary (overview tile)
+  const [scSummary, setScSummary] = useState<{ perSqft: number | null; lastYoY: number | null; latestYear: string | null } | null>(null);
+
   // corrections
   const [showCorrection, setShowCorrection] = useState(false);
   const [corrField, setCorrField] = useState("");
@@ -231,11 +234,48 @@ export default function Dashboard() {
 
       // ratings
       await loadRatings(devData.id, user.id);
+
+      // service charge summary (for the Overview Quick Stats tile)
+      await loadScSummary(user.id, profile.building_id);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function loadScSummary(uid: string, buildingId: string) {
+    const [{ data: annuals }, { data: size }] = await Promise.all([
+      supabase.from("service_charge_annuals").select("year,annual_total,h1_total,h2_total,is_half_yearly,has_both_halves,quarter_count")
+        .eq("profile_id", uid).eq("building_id", buildingId).order("year"),
+      supabase.from("property_sizes").select("sqft").eq("profile_id", uid).eq("building_id", buildingId).maybeSingle(),
+    ]);
+    if (!annuals || annuals.length === 0) {
+      setScSummary(null);
+      return;
+    }
+    const sqft = size?.sqft || 0;
+    type Annual = { year: string; annual_total: number; h1_total: number | null; h2_total: number | null; is_half_yearly: boolean | null; has_both_halves: boolean | null; quarter_count: number | null };
+    const annualise = (a: Annual) => {
+      const total = Number(a.annual_total) || 0;
+      if (a.quarter_count && a.quarter_count > 0 && a.quarter_count < 4) return (total / a.quarter_count) * 4;
+      if (a.is_half_yearly && !a.has_both_halves) return total * 2;
+      return total;
+    };
+    const sorted = [...annuals].sort((a, b) => a.year.localeCompare(b.year));
+    const latest = sorted[sorted.length - 1];
+    const latestAnnualised = annualise(latest as Annual);
+    const latestPerSqft = sqft > 0 ? latestAnnualised / sqft : null;
+
+    let lastYoY: number | null = null;
+    if (sorted.length >= 2) {
+      const prev = sorted[sorted.length - 2];
+      const prevAnnualised = annualise(prev as Annual);
+      if (prevAnnualised > 0) {
+        lastYoY = ((latestAnnualised - prevAnnualised) / prevAnnualised) * 100;
+      }
+    }
+    setScSummary({ perSqft: latestPerSqft, lastYoY, latestYear: latest.year });
   }
 
   async function loadIssues(devId: string, uid: string) {
@@ -615,9 +655,42 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
           <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{memberCount}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Apartments</div></div>
           <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{issues.length}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Issues</div></div>
-          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{"—"}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">£/sqft</div></div>
+          <button onClick={() => setActiveTab("charges")} className="bg-[#132847] rounded-lg p-3 text-center hover:bg-[#1a345c] transition-colors">
+            <div className="text-[18px] font-extrabold tracking-[-0.5px]">{scSummary?.perSqft ? `£${scSummary.perSqft.toFixed(2)}` : "—"}</div>
+            <div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">£/sqft</div>
+          </button>
           <div className="bg-[#132847] rounded-lg p-3 text-center"><div className={`text-[18px] font-extrabold tracking-[-0.5px] ${agentAvg ? (agentAvg >= 3 ? "text-green-400" : "text-amber-400") : ""}`}>{agentAvg ? `★ ${agentAvg.toFixed(1)}` : "—"}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Agent</div></div>
         </div>
+
+        {/* ── Service Charge Summary ── */}
+        <button onClick={() => setActiveTab("charges")}
+          className="w-full text-left rounded-lg p-3 mb-5 hover:bg-[rgba(30,198,164,0.08)] transition-colors flex items-center justify-between gap-3"
+          style={{ background: "rgba(30,198,164,0.04)", border: "1px solid rgba(30,198,164,0.18)" }}>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-base flex-shrink-0">📊</span>
+            <div className="min-w-0">
+              {scSummary ? (
+                <>
+                  <p className="text-[12px] font-semibold truncate">
+                    Service charge: <strong className="text-white">{scSummary.perSqft ? `£${scSummary.perSqft.toFixed(2)}/sqft` : "—"}</strong>
+                    {scSummary.lastYoY != null && (
+                      <span className={`ml-2 text-[11px] font-bold ${scSummary.lastYoY > 5 ? "text-red-400" : scSummary.lastYoY > 0 ? "text-amber-400" : "text-[#1ec6a4]"}`}>
+                        {scSummary.lastYoY >= 0 ? "+" : ""}{scSummary.lastYoY.toFixed(1)}% YoY
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-[10px] text-[rgba(255,255,255,0.4)] mt-[1px]">Compare to the BlockVoice Index and see your forecast for next year</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[12px] font-semibold">Upload your service charge to see how you compare</p>
+                  <p className="text-[10px] text-[rgba(255,255,255,0.4)] mt-[1px]">7-component cost mix · Index comparison · Next-year forecast</p>
+                </>
+              )}
+            </div>
+          </div>
+          <span className="text-[11px] text-[#1ec6a4] flex-shrink-0">→</span>
+        </button>
 
         {/* ── Progress ── */}
         <div className="mb-5">
@@ -1019,9 +1092,16 @@ function Card({ title, badge, children }: { title: string; badge?: React.ReactNo
 // ─── Service Charges Section ───────────────────────────────────────────────
 
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from "recharts";
 import type { ServiceChargeAnnual, PropertySize } from "../lib/database.types";
+import {
+  SYNTHETIC_INDEX,
+  SYNTHETIC_WEIGHTED,
+  SYNTHETIC_YEARS,
+  LONDON_ACTUALS_WEIGHTED,
+  ACTUALS_YEARS,
+} from "../service-charges/data";
 
 const SIZE_RANGES = [
   { label: "400–500", mid: 450 },
@@ -1437,6 +1517,86 @@ function ServiceChargesSection({
                   <Bar dataKey="monthly" fill="rgba(30,198,164,0.6)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* ─── BlockVoice Service Charge Index ─── */}
+        {chartData.length > 0 && (
+          <div className="mt-6 rounded-xl p-5 border" style={{ background: "rgba(30,198,164,0.04)", borderColor: "rgba(30,198,164,0.18)" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-[10px] uppercase font-extrabold tracking-[1.2px] text-[#1ec6a4]">BlockVoice Service Charge Index</p>
+              <span className="text-[8px] font-extrabold uppercase px-1.5 py-[2px] rounded" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
+            </div>
+            <p className="text-[12px] text-[rgba(255,255,255,0.55)] leading-relaxed mb-4">
+              How your charges compare to the wider London market and what we expect next year, based on the 9 cost components that make up every service charge.
+            </p>
+
+            {/* Cost mix breakdown */}
+            <div className="mb-5">
+              <p className="text-[10px] uppercase font-semibold tracking-wider mb-2 text-[rgba(255,255,255,0.4)]">Where the average £ goes (London new-build mix)</p>
+              <div className="flex h-5 rounded overflow-hidden mb-2">
+                {SYNTHETIC_INDEX.map(c => (
+                  <div key={c.component} title={`${c.component} ${(c.weight * 100).toFixed(0)}%`}
+                    style={{ width: `${c.weight * 100}%`, background: c.color }} />
+                ))}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1">
+                {SYNTHETIC_INDEX.map(c => (
+                  <div key={c.component} className="flex items-center gap-1.5 text-[10px]">
+                    <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: c.color }} />
+                    <span className="text-[rgba(255,255,255,0.6)] truncate">{c.component}</span>
+                    <span className="text-[rgba(255,255,255,0.3)] ml-auto">{(c.weight * 100).toFixed(0)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Your trend vs index */}
+            <div className="mb-5">
+              <p className="text-[10px] uppercase font-semibold tracking-wider mb-2 text-[rgba(255,255,255,0.4)]">Your charges vs the London average (base 2021 = 100)</p>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={(() => {
+                  // Build comparison: your annualised vs synthetic vs actuals, all rebased to 100 at the user's first year
+                  const baseYr = chartData[0];
+                  const baseSqft = baseYr.perSqft || 1;
+                  return SYNTHETIC_YEARS.map(yr => {
+                    const userPoint = chartData.find(c => c.year.startsWith(yr));
+                    return {
+                      year: yr,
+                      "Your building": userPoint ? Math.round((userPoint.perSqft / baseSqft) * 100) : null,
+                      "Market expectation": SYNTHETIC_WEIGHTED[yr] ?? null,
+                      "London actuals": ACTUALS_YEARS.includes(yr) ? LONDON_ACTUALS_WEIGHTED[yr] : null,
+                    };
+                  });
+                })()} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }} />
+                  <Legend wrapperStyle={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }} />
+                  <Line type="monotone" dataKey="Your building" stroke="#1ec6a4" strokeWidth={3} dot={{ r: 4, fill: "#1ec6a4" }} connectNulls />
+                  <Line type="monotone" dataKey="Market expectation" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} strokeDasharray="6 4" dot={false} />
+                  <Line type="monotone" dataKey="London actuals" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Forecast card */}
+            <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <p className="text-[10px] uppercase font-bold tracking-wide text-[#1ec6a4] mb-1.5">2026/27 Forecast</p>
+              <p className="text-[12px] text-[rgba(255,255,255,0.65)] leading-relaxed mb-2">
+                Based on current market signals, we expect a further <strong className="text-amber-400">+3 to 4%</strong> in 2026/27 — driven by{" "}
+                <strong className="text-white">insurance</strong> (reinsurance withdrawal continues),{" "}
+                <strong className="text-white">staff costs</strong> (NLW rising to ~£12.50), and{" "}
+                <strong className="text-white">repairs &amp; maintenance</strong> (construction inflation).
+                {sqft > 0 && lastYoY && (
+                  <> If your building tracks the index, that&apos;s about <strong className="text-white">£{fmt2(perSqft * 1.035)}/sqft</strong> next year.</>
+                )}
+              </p>
+              <Link href="/service-charges" className="text-[11px] font-semibold text-[#1ec6a4] hover:underline">
+                See the full Service Charge Index →
+              </Link>
             </div>
           </div>
         )}
