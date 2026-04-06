@@ -83,6 +83,9 @@ interface IssueRow {
   block_id: string | null;
   supporter_count: number;
   user_supported: boolean;
+  agent_response: string | null;
+  agent_responded_at: string | null;
+  agent_name: string | null;
 }
 
 type AgentRating = Record<(typeof AGENT_CATS)[number], number> & { id?: string; comment?: string };
@@ -240,7 +243,6 @@ export default function Dashboard() {
       .from("issues")
       .select("id, title, description, category, status, created_at, raised_by, block_id")
       .eq("development_id", devId)
-      .neq("status", "resolved")
       .order("created_at", { ascending: false });
 
     if (!issueData) return;
@@ -257,10 +259,45 @@ export default function Dashboard() {
           .eq("issue_id", issue.id)
           .eq("user_id", uid)
           .limit(1);
+
+        // Fetch the latest agent response for this issue (if any)
+        const { data: respData } = await supabase
+          .from("agent_responses")
+          .select("response_text, created_at, agent_token_id")
+          .eq("issue_id", issue.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        let agent_response: string | null = null;
+        let agent_responded_at: string | null = null;
+        let agent_name: string | null = null;
+
+        if (respData && respData.length > 0) {
+          agent_response = respData[0].response_text;
+          agent_responded_at = respData[0].created_at;
+          // Look up the agent name via the token
+          const { data: tokenRow } = await supabase
+            .from("agent_tokens")
+            .select("managing_agent_id")
+            .eq("id", respData[0].agent_token_id)
+            .single();
+          if (tokenRow?.managing_agent_id) {
+            const { data: agentRow } = await supabase
+              .from("managing_agents")
+              .select("name")
+              .eq("id", tokenRow.managing_agent_id)
+              .single();
+            agent_name = agentRow?.name || null;
+          }
+        }
+
         return {
           ...issue,
           supporter_count: (sc || 0) + 1,
           user_supported: (userSup && userSup.length > 0) || issue.raised_by === uid,
+          agent_response,
+          agent_responded_at,
+          agent_name,
         } as IssueRow;
       })
     );
@@ -703,23 +740,71 @@ export default function Dashboard() {
             <p className="text-[12px] text-[rgba(255,255,255,0.25)] py-2">No open issues. Be the first to report one.</p>
           ) : (
             filtered.map(issue => (
-              <div key={issue.id} className="flex items-center gap-[10px] py-2 px-[6px] rounded-md hover:bg-[rgba(255,255,255,0.03)] cursor-pointer"
-                onClick={() => { setExpandedIssue(expandedIssue === issue.id ? null : issue.id); if (!supporters[issue.id]) loadSupporters(issue.id); }}>
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${issue.status === "resolved" ? "bg-green-400" : "bg-amber-400"}`} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold truncate">{issue.title}</div>
-                  <div className="text-[10px] text-[rgba(255,255,255,0.25)] mt-[1px]">
-                    {issue.category.replace(/_/g, " ")} · {new Date(issue.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                    {blocks.find(b => b.id === issue.block_id)?.name && ` · ${blocks.find(b => b.id === issue.block_id)?.name}`}
+              <div key={issue.id}>
+                <div className="flex items-center gap-[10px] py-2 px-[6px] rounded-md hover:bg-[rgba(255,255,255,0.03)] cursor-pointer"
+                  onClick={() => { setExpandedIssue(expandedIssue === issue.id ? null : issue.id); if (!supporters[issue.id]) loadSupporters(issue.id); }}>
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${issue.status === "resolved" ? "bg-green-400" : "bg-amber-400"}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-semibold truncate">{issue.title}</div>
+                    <div className="text-[10px] text-[rgba(255,255,255,0.25)] mt-[1px]">
+                      {issue.category.replace(/_/g, " ")} · {new Date(issue.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      {blocks.find(b => b.id === issue.block_id)?.name && ` · ${blocks.find(b => b.id === issue.block_id)?.name}`}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {issue.agent_response && (
+                      <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-[2px] rounded-full"
+                        style={{ background: "rgba(30,198,164,0.15)", color: "#1ec6a4", border: "1px solid rgba(30,198,164,0.3)" }}>
+                        💬 Replied
+                      </span>
+                    )}
+                    <span className="text-[11px] text-[rgba(255,255,255,0.3)]">{issue.supporter_count}</span>
+                    <button onClick={e => { e.stopPropagation(); toggleSupport(issue.id, issue.user_supported); }}
+                      className={`text-[10px] font-bold px-2 py-[3px] rounded-[5px] ${issue.user_supported ? "bg-[rgba(30,198,164,0.15)] text-[#1ec6a4] border border-[#1ec6a4]" : "bg-[rgba(30,198,164,0.08)] text-[#1ec6a4] border border-[rgba(30,198,164,0.15)]"}`}>
+                      {issue.user_supported ? "Supported" : "Support"}
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-[11px] text-[rgba(255,255,255,0.3)]">{issue.supporter_count}</span>
-                  <button onClick={e => { e.stopPropagation(); toggleSupport(issue.id, issue.user_supported); }}
-                    className={`text-[10px] font-bold px-2 py-[3px] rounded-[5px] ${issue.user_supported ? "bg-[rgba(30,198,164,0.15)] text-[#1ec6a4] border border-[#1ec6a4]" : "bg-[rgba(30,198,164,0.08)] text-[#1ec6a4] border border-[rgba(30,198,164,0.15)]"}`}>
-                    {issue.user_supported ? "Supported" : "Support"}
-                  </button>
-                </div>
+
+                {/* Expanded panel */}
+                {expandedIssue === issue.id && (
+                  <div className="ml-[18px] mb-2 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    {issue.description && (
+                      <p className="text-[12px] mb-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>{issue.description}</p>
+                    )}
+                    {supporters[issue.id] && supporters[issue.id].length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-[9px] uppercase font-semibold tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>
+                          Supported by
+                        </p>
+                        <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                          {supporters[issue.id].map(s => `${s.first_name} ${s.last_name?.charAt(0) || ""}.`).join(", ")}
+                        </p>
+                      </div>
+                    )}
+                    {issue.agent_response ? (
+                      <div className="rounded-lg p-3" style={{ background: "rgba(30,198,164,0.06)", border: "1px solid rgba(30,198,164,0.18)" }}>
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: "#1ec6a4" }}>
+                            Response from {issue.agent_name || "Managing Agent"}
+                          </span>
+                          {issue.agent_responded_at && (
+                            <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                              {new Date(issue.agent_responded_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
+                          {issue.agent_response}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.25)" }}>
+                        No response from the managing agent yet.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           )}

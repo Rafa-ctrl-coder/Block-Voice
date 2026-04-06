@@ -1,10 +1,12 @@
 -- Agent portal: magic link tokens and responses
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE IF NOT EXISTS agent_tokens (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   managing_agent_id uuid NOT NULL REFERENCES managing_agents(id),
   development_id uuid NOT NULL REFERENCES developments(id),
-  token text NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(32), 'hex'),
+  token text NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(32), 'hex'),
   email text NOT NULL,
   expires_at timestamptz NOT NULL DEFAULT now() + interval '30 days',
   created_at timestamptz DEFAULT now()

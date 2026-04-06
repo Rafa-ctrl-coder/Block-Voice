@@ -16,11 +16,12 @@ interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
-  profileId?: string;
+  profileId?: string | null;
   emailType?: string;
+  metadata?: Record<string, unknown>;
 }
 
-export async function sendEmail({ to, subject, html, profileId, emailType }: SendEmailParams) {
+export async function sendEmail({ to, subject, html, profileId, emailType, metadata }: SendEmailParams) {
   try {
     const { data, error } = await getResend().emails.send({
       from: "BlockVoice <hello@blockvoice.co.uk>",
@@ -29,14 +30,15 @@ export async function sendEmail({ to, subject, html, profileId, emailType }: Sen
       html,
     });
 
-    // Log the send attempt
-    if (profileId && emailType) {
+    if (emailType) {
       await getSupabaseAdmin().from("email_log").insert({
-        profile_id: profileId,
+        profile_id: profileId ?? null,
+        recipient_email: to,
         email_type: emailType,
         subject,
         status: error ? "failed" : "sent",
-      }); // don't fail if logging fails
+        metadata: metadata ?? null,
+      });
     }
 
     if (error) {
@@ -48,12 +50,14 @@ export async function sendEmail({ to, subject, html, profileId, emailType }: Sen
   } catch (err) {
     console.error("Email send exception:", err);
 
-    if (profileId && emailType) {
+    if (emailType) {
       await getSupabaseAdmin().from("email_log").insert({
-        profile_id: profileId,
+        profile_id: profileId ?? null,
+        recipient_email: to,
         email_type: emailType,
         subject,
         status: "failed",
+        metadata: metadata ?? null,
       });
     }
 

@@ -21,11 +21,19 @@ interface PortalData {
   error?: string;
 }
 
+const STATUS_OPTIONS = [
+  { value: "", label: "— No change —" },
+  { value: "acknowledged", label: "Acknowledged" },
+  { value: "in_progress", label: "In progress" },
+  { value: "resolved", label: "Resolved (closes the issue)" },
+];
+
 export default function AgentPortal() {
   const { token } = useParams<{ token: string }>();
   const [data, setData] = useState<PortalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [responses, setResponses] = useState<Record<string, string>>({});
+  const [statuses, setStatuses] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState<Set<string>>(new Set());
 
@@ -45,11 +53,17 @@ export default function AgentPortal() {
       const r = await fetch("/api/agent-portal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, issueId, response: text }),
+        body: JSON.stringify({
+          token,
+          issueId,
+          response: text,
+          newStatus: statuses[issueId] || null,
+        }),
       });
       if (r.ok) {
         setSubmitted(prev => new Set(prev).add(issueId));
         setResponses(prev => ({ ...prev, [issueId]: "" }));
+        setStatuses(prev => ({ ...prev, [issueId]: "" }));
       }
     } catch { /* ignore */ }
     finally { setSubmitting(null); }
@@ -163,13 +177,32 @@ export default function AgentPortal() {
                         className="w-full rounded-lg px-3 py-2.5 text-[13px] text-white resize-none outline-none"
                         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
                       />
-                      <button
-                        onClick={() => submitResponse(issue.id)}
-                        disabled={!responses[issue.id]?.trim() || submitting === issue.id}
-                        className="mt-2 font-bold text-[13px] px-5 py-2 rounded-lg text-white disabled:opacity-40"
-                        style={{ background: "var(--teal)" }}>
-                        {submitting === issue.id ? "Submitting..." : "Submit Response"}
-                      </button>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <label className="text-[10px] uppercase font-semibold tracking-wider" style={{ color: "var(--t3)" }}>
+                          Update status
+                        </label>
+                        <select
+                          value={statuses[issue.id] || ""}
+                          onChange={e => setStatuses(prev => ({ ...prev, [issue.id]: e.target.value }))}
+                          className="rounded-lg px-2.5 py-1.5 text-[12px] text-white outline-none"
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                          {STATUS_OPTIONS.map(o => (
+                            <option key={o.value} value={o.value} style={{ background: "#0f1f3d" }}>{o.label}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => submitResponse(issue.id)}
+                          disabled={!responses[issue.id]?.trim() || submitting === issue.id}
+                          className="ml-auto font-bold text-[13px] px-5 py-2 rounded-lg text-white disabled:opacity-40"
+                          style={{ background: "var(--teal)" }}>
+                          {submitting === issue.id ? "Submitting..." : "Submit Response"}
+                        </button>
+                      </div>
+                      {statuses[issue.id] === "resolved" && (
+                        <p className="mt-2 text-[11px]" style={{ color: "#fbbf24" }}>
+                          ⚠ Marking as resolved will close this issue for residents.
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>

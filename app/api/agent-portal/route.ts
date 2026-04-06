@@ -75,12 +75,24 @@ export async function GET(req: NextRequest) {
   });
 }
 
+const VALID_STATUSES = ["acknowledged", "in_progress", "resolved", "escalated"] as const;
+type ValidStatus = typeof VALID_STATUSES[number];
+
 // POST: Submit a response to an issue
 export async function POST(req: NextRequest) {
-  const { token, issueId, response } = await req.json();
+  const { token, issueId, response, newStatus } = await req.json();
 
   if (!token || !issueId || !response?.trim()) {
     return NextResponse.json({ error: "missing fields" }, { status: 400 });
+  }
+
+  // Validate status if provided
+  let validStatus: ValidStatus | null = null;
+  if (newStatus && newStatus.trim() !== "") {
+    if (!VALID_STATUSES.includes(newStatus as ValidStatus)) {
+      return NextResponse.json({ error: "invalid status" }, { status: 400 });
+    }
+    validStatus = newStatus as ValidStatus;
   }
 
   // Verify token
@@ -105,18 +117,29 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (existing && existing.length > 0) {
-    // Update existing response
     await supabase
       .from("agent_responses")
-      .update({ response_text: response.trim() })
+      .update({ response_text: response.trim(), new_status: validStatus })
       .eq("id", existing[0].id);
   } else {
-    // Insert new response
     await supabase.from("agent_responses").insert({
       issue_id: issueId,
       agent_token_id: tokenData.id,
       response_text: response.trim(),
+      new_status: validStatus,
     });
+  }
+
+  // Apply the status change to the issue itself
+  if (validStatus) {
+    const updates: Record<string, string | null> = {
+      status: validStatus,
+      updated_at: new Date().toISOString(),
+    };
+    if (validStatus === "resolved") {
+      updates.resolved_at = new Date().toISOString();
+    }
+    await supabase.from("issues").update(updates).eq("id", issueId);
   }
 
   return NextResponse.json({ success: true });
