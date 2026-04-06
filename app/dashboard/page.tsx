@@ -1155,6 +1155,100 @@ import {
   ACTUALS_YEARS,
 } from "../service-charges/data";
 
+// ─── BlockVoice Service Charge Index panel ────────────────────────────────
+// Reusable: shows the public index analysis. Optionally overlays the user's
+// own data when provided. Visible to ALL users regardless of upload status.
+function BlockVoiceIndexPanel({ userChartData, userPerSqft, userLastYoYPct }: {
+  userChartData?: { year: string; perSqft: number }[];
+  userPerSqft?: number;
+  userLastYoYPct?: number;
+}) {
+  const hasUserData = userChartData && userChartData.length > 0;
+  return (
+    <div className="rounded-xl p-5 border" style={{ background: "rgba(30,198,164,0.04)", borderColor: "rgba(30,198,164,0.18)" }}>
+      <div className="flex items-center gap-2 mb-2">
+        <p className="text-[10px] uppercase font-extrabold tracking-[1.2px] text-[#1ec6a4]">BlockVoice Service Charge Index</p>
+        <span className="text-[8px] font-extrabold uppercase px-1.5 py-[2px] rounded" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
+      </div>
+      <p className="text-[12px] text-[rgba(255,255,255,0.55)] leading-relaxed mb-4">
+        How London service charges are growing — and what we expect next year. Based on the 9 cost components that make up every service charge.
+      </p>
+
+      {/* Cost mix breakdown — always visible */}
+      <div className="mb-5">
+        <p className="text-[10px] uppercase font-semibold tracking-wider mb-2 text-[rgba(255,255,255,0.4)]">Where the average £ goes (London new-build mix)</p>
+        <div className="flex h-5 rounded overflow-hidden mb-2">
+          {SYNTHETIC_INDEX.map(c => (
+            <div key={c.component} title={`${c.component} ${(c.weight * 100).toFixed(0)}%`}
+              style={{ width: `${c.weight * 100}%`, background: c.color }} />
+          ))}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1">
+          {SYNTHETIC_INDEX.map(c => (
+            <div key={c.component} className="flex items-center gap-1.5 text-[10px]">
+              <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: c.color }} />
+              <span className="text-[rgba(255,255,255,0.6)] truncate">{c.component}</span>
+              <span className="text-[rgba(255,255,255,0.3)] ml-auto">{(c.weight * 100).toFixed(0)}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Index trend chart — always visible. User line overlaid only if data exists. */}
+      <div className="mb-5">
+        <p className="text-[10px] uppercase font-semibold tracking-wider mb-2 text-[rgba(255,255,255,0.4)]">
+          {hasUserData ? "Your charges vs the London market (base 2021 = 100)" : "London charges over time (base 2021 = 100)"}
+        </p>
+        <ResponsiveContainer width="100%" height={200}>
+          <LineChart data={(() => {
+            const baseSqft = hasUserData && userChartData![0].perSqft > 0 ? userChartData![0].perSqft : 1;
+            return SYNTHETIC_YEARS.map(yr => {
+              const userPoint = hasUserData ? userChartData!.find(c => c.year.startsWith(yr)) : null;
+              return {
+                year: yr,
+                ...(hasUserData ? { "Your building": userPoint ? Math.round((userPoint.perSqft / baseSqft) * 100) : null } : {}),
+                "Market expectation": SYNTHETIC_WEIGHTED[yr] ?? null,
+                "London actuals": ACTUALS_YEARS.includes(yr) ? LONDON_ACTUALS_WEIGHTED[yr] : null,
+              };
+            });
+          })()} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }} />
+            {hasUserData && <Line type="monotone" dataKey="Your building" stroke="#1ec6a4" strokeWidth={3} dot={{ r: 4, fill: "#1ec6a4" }} connectNulls />}
+            <Line type="monotone" dataKey="Market expectation" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} strokeDasharray="6 4" dot={false} />
+            <Line type="monotone" dataKey="London actuals" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} />
+          </LineChart>
+        </ResponsiveContainer>
+        {!hasUserData && (
+          <p className="text-[10px] text-[rgba(255,255,255,0.35)] mt-1 text-center italic">
+            Upload your service charge to overlay your own building&apos;s trend on this chart.
+          </p>
+        )}
+      </div>
+
+      {/* Forecast card — always visible */}
+      <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <p className="text-[10px] uppercase font-bold tracking-wide text-[#1ec6a4] mb-1.5">2026/27 Forecast</p>
+        <p className="text-[12px] text-[rgba(255,255,255,0.65)] leading-relaxed mb-2">
+          Based on current market signals, we expect a further <strong className="text-amber-400">+3 to 4%</strong> in 2026/27 — driven by{" "}
+          <strong className="text-white">insurance</strong> (reinsurance withdrawal continues),{" "}
+          <strong className="text-white">staff costs</strong> (NLW rising to ~£12.50), and{" "}
+          <strong className="text-white">repairs &amp; maintenance</strong> (construction inflation).
+          {hasUserData && userPerSqft && userPerSqft > 0 && userLastYoYPct != null && (
+            <> If your building tracks the index, that&apos;s about <strong className="text-white">£{(userPerSqft * 1.035).toFixed(2)}/sqft</strong> next year.</>
+          )}
+        </p>
+        <Link href="/service-charges" className="text-[11px] font-semibold text-[#1ec6a4] hover:underline">
+          See the full Service Charge Index →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 const SIZE_RANGES = [
   { label: "400–500", mid: 450 },
   { label: "500–600", mid: 550 },
@@ -1392,23 +1486,27 @@ function ServiceChargesSection({
   // Empty state — no data yet
   if (annuals.length === 0 && !extracting) {
     return (
-      <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}>
-        <div className="text-center py-8 border border-dashed border-[#1e3a5f] rounded-lg">
-          <span className="text-3xl mb-3 block">💷</span>
-          <p className="text-sm text-white font-semibold mb-1">Upload your service charge documents</p>
-          <p className="text-xs text-[rgba(255,255,255,0.4)] mb-4 max-w-sm mx-auto leading-relaxed">
-            Upload your service charge documents and our AI will work out how to allocate them across periods and track your costs.
-          </p>
-          <label className="inline-block cursor-pointer px-5 py-2.5 bg-[#1ec6a4] text-white text-sm font-bold rounded-lg hover:bg-[#25d4b0] transition-colors">
-            Upload your service charge
-            <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} multiple />
-          </label>
-          <p className="text-[10px] text-[rgba(255,255,255,0.25)] mt-2">Takes 30 seconds. We extract the data automatically.</p>
-          {(uploading || uploadProgress) && <p className="text-sm text-[#1ec6a4] mt-3">{uploadProgress || "Uploading..."}</p>}
-          {extracting && <p className="text-sm text-[#1ec6a4] mt-3">Analysing your document...</p>}
-          {uploadError && <p className="text-sm text-red-400 mt-3">{uploadError}</p>}
-        </div>
-      </Card>
+      <div className="space-y-4">
+        <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}>
+          <div className="text-center py-8 border border-dashed border-[#1e3a5f] rounded-lg">
+            <span className="text-3xl mb-3 block">💷</span>
+            <p className="text-sm text-white font-semibold mb-1">Upload your service charge documents</p>
+            <p className="text-xs text-[rgba(255,255,255,0.4)] mb-4 max-w-sm mx-auto leading-relaxed">
+              Upload your service charge documents and our AI will work out how to allocate them across periods, track your costs, and overlay your trend on the index below.
+            </p>
+            <label className="inline-block cursor-pointer px-5 py-2.5 bg-[#1ec6a4] text-white text-sm font-bold rounded-lg hover:bg-[#25d4b0] transition-colors">
+              Upload your service charge
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} multiple />
+            </label>
+            <p className="text-[10px] text-[rgba(255,255,255,0.25)] mt-2">Takes 30 seconds. We extract the data automatically.</p>
+            {(uploading || uploadProgress) && <p className="text-sm text-[#1ec6a4] mt-3">{uploadProgress || "Uploading..."}</p>}
+            {extracting && <p className="text-sm text-[#1ec6a4] mt-3">Analysing your document...</p>}
+            {uploadError && <p className="text-sm text-red-400 mt-3">{uploadError}</p>}
+          </div>
+        </Card>
+        {/* Public BlockVoice Index — visible even before upload */}
+        <BlockVoiceIndexPanel />
+      </div>
     );
   }
 
@@ -1574,84 +1672,13 @@ function ServiceChargesSection({
         )}
 
         {/* ─── BlockVoice Service Charge Index ─── */}
-        {chartData.length > 0 && (
-          <div className="mt-6 rounded-xl p-5 border" style={{ background: "rgba(30,198,164,0.04)", borderColor: "rgba(30,198,164,0.18)" }}>
-            <div className="flex items-center gap-2 mb-2">
-              <p className="text-[10px] uppercase font-extrabold tracking-[1.2px] text-[#1ec6a4]">BlockVoice Service Charge Index</p>
-              <span className="text-[8px] font-extrabold uppercase px-1.5 py-[2px] rounded" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
-            </div>
-            <p className="text-[12px] text-[rgba(255,255,255,0.55)] leading-relaxed mb-4">
-              How your charges compare to the wider London market and what we expect next year, based on the 9 cost components that make up every service charge.
-            </p>
-
-            {/* Cost mix breakdown */}
-            <div className="mb-5">
-              <p className="text-[10px] uppercase font-semibold tracking-wider mb-2 text-[rgba(255,255,255,0.4)]">Where the average £ goes (London new-build mix)</p>
-              <div className="flex h-5 rounded overflow-hidden mb-2">
-                {SYNTHETIC_INDEX.map(c => (
-                  <div key={c.component} title={`${c.component} ${(c.weight * 100).toFixed(0)}%`}
-                    style={{ width: `${c.weight * 100}%`, background: c.color }} />
-                ))}
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1">
-                {SYNTHETIC_INDEX.map(c => (
-                  <div key={c.component} className="flex items-center gap-1.5 text-[10px]">
-                    <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: c.color }} />
-                    <span className="text-[rgba(255,255,255,0.6)] truncate">{c.component}</span>
-                    <span className="text-[rgba(255,255,255,0.3)] ml-auto">{(c.weight * 100).toFixed(0)}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Your trend vs index */}
-            <div className="mb-5">
-              <p className="text-[10px] uppercase font-semibold tracking-wider mb-2 text-[rgba(255,255,255,0.4)]">Your charges vs the London average (base 2021 = 100)</p>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={(() => {
-                  // Build comparison: your annualised vs synthetic vs actuals, all rebased to 100 at the user's first year
-                  const baseYr = chartData[0];
-                  const baseSqft = baseYr.perSqft || 1;
-                  return SYNTHETIC_YEARS.map(yr => {
-                    const userPoint = chartData.find(c => c.year.startsWith(yr));
-                    return {
-                      year: yr,
-                      "Your building": userPoint ? Math.round((userPoint.perSqft / baseSqft) * 100) : null,
-                      "Market expectation": SYNTHETIC_WEIGHTED[yr] ?? null,
-                      "London actuals": ACTUALS_YEARS.includes(yr) ? LONDON_ACTUALS_WEIGHTED[yr] : null,
-                    };
-                  });
-                })()} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }} />
-                  <Legend wrapperStyle={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }} />
-                  <Line type="monotone" dataKey="Your building" stroke="#1ec6a4" strokeWidth={3} dot={{ r: 4, fill: "#1ec6a4" }} connectNulls />
-                  <Line type="monotone" dataKey="Market expectation" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} strokeDasharray="6 4" dot={false} />
-                  <Line type="monotone" dataKey="London actuals" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Forecast card */}
-            <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <p className="text-[10px] uppercase font-bold tracking-wide text-[#1ec6a4] mb-1.5">2026/27 Forecast</p>
-              <p className="text-[12px] text-[rgba(255,255,255,0.65)] leading-relaxed mb-2">
-                Based on current market signals, we expect a further <strong className="text-amber-400">+3 to 4%</strong> in 2026/27 — driven by{" "}
-                <strong className="text-white">insurance</strong> (reinsurance withdrawal continues),{" "}
-                <strong className="text-white">staff costs</strong> (NLW rising to ~£12.50), and{" "}
-                <strong className="text-white">repairs &amp; maintenance</strong> (construction inflation).
-                {sqft > 0 && lastYoY && (
-                  <> If your building tracks the index, that&apos;s about <strong className="text-white">£{fmt2(perSqft * 1.035)}/sqft</strong> next year.</>
-                )}
-              </p>
-              <Link href="/service-charges" className="text-[11px] font-semibold text-[#1ec6a4] hover:underline">
-                See the full Service Charge Index →
-              </Link>
-            </div>
-          </div>
-        )}
+        <div className="mt-6">
+          <BlockVoiceIndexPanel
+            userChartData={chartData.length > 0 ? chartData : undefined}
+            userPerSqft={perSqft}
+            userLastYoYPct={lastYoY?.pct}
+          />
+        </div>
 
         {/* Key insights */}
         {lastYoY && (
