@@ -38,11 +38,12 @@ export async function GET(req: NextRequest) {
     .eq("id", tokenData.development_id)
     .single();
 
-  // Get issues for this development
+  // Get OPEN issues for this development (exclude resolved)
   const { data: issues } = await supabase
     .from("issues")
     .select("id, title, category, description, status, created_at")
     .eq("development_id", tokenData.development_id)
+    .neq("status", "resolved")
     .order("created_at", { ascending: false });
 
   // Get supporter counts and existing responses
