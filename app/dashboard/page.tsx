@@ -662,35 +662,87 @@ export default function Dashboard() {
           <div className="bg-[#132847] rounded-lg p-3 text-center"><div className={`text-[18px] font-extrabold tracking-[-0.5px] ${agentAvg ? (agentAvg >= 3 ? "text-green-400" : "text-amber-400") : ""}`}>{agentAvg ? `★ ${agentAvg.toFixed(1)}` : "—"}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Agent</div></div>
         </div>
 
-        {/* ── Service Charge Summary ── */}
-        <button onClick={() => setActiveTab("charges")}
-          className="w-full text-left rounded-lg p-3 mb-5 hover:bg-[rgba(30,198,164,0.08)] transition-colors flex items-center justify-between gap-3"
-          style={{ background: "rgba(30,198,164,0.04)", border: "1px solid rgba(30,198,164,0.18)" }}>
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="text-base flex-shrink-0">📊</span>
-            <div className="min-w-0">
-              {scSummary ? (
-                <>
-                  <p className="text-[12px] font-semibold truncate">
-                    Service charge: <strong className="text-white">{scSummary.perSqft ? `£${scSummary.perSqft.toFixed(2)}/sqft` : "—"}</strong>
-                    {scSummary.lastYoY != null && (
-                      <span className={`ml-2 text-[11px] font-bold ${scSummary.lastYoY > 5 ? "text-red-400" : scSummary.lastYoY > 0 ? "text-amber-400" : "text-[#1ec6a4]"}`}>
-                        {scSummary.lastYoY >= 0 ? "+" : ""}{scSummary.lastYoY.toFixed(1)}% YoY
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-[10px] text-[rgba(255,255,255,0.4)] mt-[1px]">Compare to the BlockVoice Index and see your forecast for next year</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-[12px] font-semibold">Upload your service charge to see how you compare</p>
-                  <p className="text-[10px] text-[rgba(255,255,255,0.4)] mt-[1px]">7-component cost mix · Index comparison · Next-year forecast</p>
-                </>
-              )}
+        {/* ── Service Charge Summary (large feature card) ── */}
+        <div className="mb-6 rounded-2xl overflow-hidden"
+          style={{ background: "linear-gradient(135deg, rgba(30,198,164,0.08) 0%, rgba(30,198,164,0.02) 100%)", border: "1px solid rgba(30,198,164,0.25)" }}>
+          {/* Header */}
+          <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(30,198,164,0.12)", border: "1px solid rgba(30,198,164,0.25)" }}>
+                <span className="text-xl">📊</span>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="text-[16px] font-bold text-white">BlockVoice Service Charge Index</h3>
+                  <span className="text-[8px] font-extrabold uppercase px-1.5 py-[2px] rounded" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
+                </div>
+                <p className="text-[11px] text-[rgba(255,255,255,0.45)]">
+                  {scSummary ? "Your charges vs the London market — and what's coming next year" : "Upload to see how your charges compare to the London market"}
+                </p>
+              </div>
             </div>
+            <button onClick={() => setActiveTab("charges")} className="text-[11px] font-bold text-[#1ec6a4] hover:underline whitespace-nowrap mt-1">
+              Open analysis →
+            </button>
           </div>
-          <span className="text-[11px] text-[#1ec6a4] flex-shrink-0">→</span>
-        </button>
+
+          {scSummary ? (
+            <>
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-2 px-5 pb-4">
+                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Per sqft</div>
+                  <div className="text-[22px] font-black text-[#1ec6a4]">{scSummary.perSqft ? `£${scSummary.perSqft.toFixed(2)}` : "—"}</div>
+                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">per year</div>
+                </div>
+                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Last year</div>
+                  <div className={`text-[22px] font-black ${scSummary.lastYoY != null ? (scSummary.lastYoY > 5 ? "text-red-400" : scSummary.lastYoY > 0 ? "text-amber-400" : "text-[#1ec6a4]") : "text-white"}`}>
+                    {scSummary.lastYoY != null ? `${scSummary.lastYoY >= 0 ? "+" : ""}${scSummary.lastYoY.toFixed(1)}%` : "—"}
+                  </div>
+                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">year on year</div>
+                </div>
+                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">2026/27 forecast</div>
+                  <div className="text-[22px] font-black text-amber-400">+3–4%</div>
+                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">market signal</div>
+                </div>
+              </div>
+
+              {/* Cost mix mini bar */}
+              <div className="px-5 pb-5">
+                <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1.5">Where the average £ goes</div>
+                <div className="flex h-2.5 rounded-sm overflow-hidden mb-2">
+                  {SYNTHETIC_INDEX.map(c => (
+                    <div key={c.component} title={`${c.component} ${(c.weight * 100).toFixed(0)}%`}
+                      style={{ width: `${c.weight * 100}%`, background: c.color }} />
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px]">
+                  {SYNTHETIC_INDEX.slice(0, 5).map(c => (
+                    <div key={c.component} className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-sm flex-shrink-0" style={{ background: c.color }} />
+                      <span className="text-[rgba(255,255,255,0.55)]">{c.component}</span>
+                      <span className="text-[rgba(255,255,255,0.3)]">{(c.weight * 100).toFixed(0)}%</span>
+                    </div>
+                  ))}
+                  <span className="text-[rgba(255,255,255,0.3)] italic">+ 4 more →</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="px-5 pb-5">
+              <ul className="text-[12px] text-[rgba(255,255,255,0.55)] space-y-1.5 mb-4">
+                <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> See the 9-component cost mix that makes up every service charge</li>
+                <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> Compare your £/sqft against the London average</li>
+                <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> Get a 2026/27 forecast based on market signals</li>
+              </ul>
+              <button onClick={() => setActiveTab("charges")} className="font-bold text-[12px] px-5 py-2 rounded-lg text-white" style={{ background: "#1ec6a4" }}>
+                Upload your service charge →
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* ── Progress ── */}
         <div className="mb-5">
