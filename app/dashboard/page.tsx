@@ -83,6 +83,9 @@ interface IssueRow {
   block_id: string | null;
   supporter_count: number;
   user_supported: boolean;
+  agent_response: string | null;
+  agent_responded_at: string | null;
+  agent_name: string | null;
 }
 
 type AgentRating = Record<(typeof AGENT_CATS)[number], number> & { id?: string; comment?: string };
@@ -143,6 +146,9 @@ export default function Dashboard() {
 
   // tabs
   const [activeTab, setActiveTab] = useState("overview");
+
+  // service charge summary (overview tile)
+  const [scSummary, setScSummary] = useState<{ perSqft: number | null; lastYoY: number | null; latestYear: string | null } | null>(null);
 
   // corrections
   const [showCorrection, setShowCorrection] = useState(false);
@@ -228,6 +234,9 @@ export default function Dashboard() {
 
       // ratings
       await loadRatings(devData.id, user.id);
+
+      // service charge summary (for the Overview Quick Stats tile)
+      await loadScSummary(user.id, profile.building_id);
     } catch (err) {
       console.error(err);
     } finally {
@@ -235,12 +244,45 @@ export default function Dashboard() {
     }
   }
 
+  async function loadScSummary(uid: string, buildingId: string) {
+    const [{ data: annuals }, { data: size }] = await Promise.all([
+      supabase.from("service_charge_annuals").select("year,annual_total,h1_total,h2_total,is_half_yearly,has_both_halves,quarter_count")
+        .eq("profile_id", uid).eq("building_id", buildingId).order("year"),
+      supabase.from("property_sizes").select("sqft").eq("profile_id", uid).eq("building_id", buildingId).maybeSingle(),
+    ]);
+    if (!annuals || annuals.length === 0) {
+      setScSummary(null);
+      return;
+    }
+    const sqft = size?.sqft || 0;
+    type Annual = { year: string; annual_total: number; h1_total: number | null; h2_total: number | null; is_half_yearly: boolean | null; has_both_halves: boolean | null; quarter_count: number | null };
+    const annualise = (a: Annual) => {
+      const total = Number(a.annual_total) || 0;
+      if (a.quarter_count && a.quarter_count > 0 && a.quarter_count < 4) return (total / a.quarter_count) * 4;
+      if (a.is_half_yearly && !a.has_both_halves) return total * 2;
+      return total;
+    };
+    const sorted = [...annuals].sort((a, b) => a.year.localeCompare(b.year));
+    const latest = sorted[sorted.length - 1];
+    const latestAnnualised = annualise(latest as Annual);
+    const latestPerSqft = sqft > 0 ? latestAnnualised / sqft : null;
+
+    let lastYoY: number | null = null;
+    if (sorted.length >= 2) {
+      const prev = sorted[sorted.length - 2];
+      const prevAnnualised = annualise(prev as Annual);
+      if (prevAnnualised > 0) {
+        lastYoY = ((latestAnnualised - prevAnnualised) / prevAnnualised) * 100;
+      }
+    }
+    setScSummary({ perSqft: latestPerSqft, lastYoY, latestYear: latest.year });
+  }
+
   async function loadIssues(devId: string, uid: string) {
     const { data: issueData } = await supabase
       .from("issues")
       .select("id, title, description, category, status, created_at, raised_by, block_id")
       .eq("development_id", devId)
-      .neq("status", "resolved")
       .order("created_at", { ascending: false });
 
     if (!issueData) return;
@@ -257,10 +299,45 @@ export default function Dashboard() {
           .eq("issue_id", issue.id)
           .eq("user_id", uid)
           .limit(1);
+
+        // Fetch the latest agent response for this issue (if any)
+        const { data: respData } = await supabase
+          .from("agent_responses")
+          .select("response_text, created_at, agent_token_id")
+          .eq("issue_id", issue.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        let agent_response: string | null = null;
+        let agent_responded_at: string | null = null;
+        let agent_name: string | null = null;
+
+        if (respData && respData.length > 0) {
+          agent_response = respData[0].response_text;
+          agent_responded_at = respData[0].created_at;
+          // Look up the agent name via the token
+          const { data: tokenRow } = await supabase
+            .from("agent_tokens")
+            .select("managing_agent_id")
+            .eq("id", respData[0].agent_token_id)
+            .single();
+          if (tokenRow?.managing_agent_id) {
+            const { data: agentRow } = await supabase
+              .from("managing_agents")
+              .select("name")
+              .eq("id", tokenRow.managing_agent_id)
+              .single();
+            agent_name = agentRow?.name || null;
+          }
+        }
+
         return {
           ...issue,
           supporter_count: (sc || 0) + 1,
           user_supported: (userSup && userSup.length > 0) || issue.raised_by === uid,
+          agent_response,
+          agent_responded_at,
+          agent_name,
         } as IssueRow;
       })
     );
@@ -578,8 +655,93 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
           <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{memberCount}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Apartments</div></div>
           <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{issues.length}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Issues</div></div>
-          <div className="bg-[#132847] rounded-lg p-3 text-center"><div className="text-[18px] font-extrabold tracking-[-0.5px]">{"—"}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">£/sqft</div></div>
+          <button onClick={() => setActiveTab("charges")} className="bg-[#132847] rounded-lg p-3 text-center hover:bg-[#1a345c] transition-colors">
+            <div className="text-[18px] font-extrabold tracking-[-0.5px]">{scSummary?.perSqft ? `£${scSummary.perSqft.toFixed(2)}` : "—"}</div>
+            <div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">£/sqft</div>
+          </button>
           <div className="bg-[#132847] rounded-lg p-3 text-center"><div className={`text-[18px] font-extrabold tracking-[-0.5px] ${agentAvg ? (agentAvg >= 3 ? "text-green-400" : "text-amber-400") : ""}`}>{agentAvg ? `★ ${agentAvg.toFixed(1)}` : "—"}</div><div className="text-[9px] uppercase text-[rgba(255,255,255,0.3)] tracking-[0.5px]">Agent</div></div>
+        </div>
+
+        {/* ── Service Charge Summary (large feature card) ── */}
+        <div className="mb-6 rounded-2xl overflow-hidden"
+          style={{ background: "linear-gradient(135deg, rgba(30,198,164,0.08) 0%, rgba(30,198,164,0.02) 100%)", border: "1px solid rgba(30,198,164,0.25)" }}>
+          {/* Header */}
+          <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(30,198,164,0.12)", border: "1px solid rgba(30,198,164,0.25)" }}>
+                <span className="text-xl">📊</span>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="text-[16px] font-bold text-white">BlockVoice Service Charge Index</h3>
+                  <span className="text-[8px] font-extrabold uppercase px-1.5 py-[2px] rounded" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
+                </div>
+                <p className="text-[11px] text-[rgba(255,255,255,0.45)]">
+                  {scSummary ? "Your charges vs the London market — and what's coming next year" : "Upload to see how your charges compare to the London market"}
+                </p>
+              </div>
+            </div>
+            <button onClick={() => setActiveTab("charges")} className="text-[11px] font-bold text-[#1ec6a4] hover:underline whitespace-nowrap mt-1">
+              Open analysis →
+            </button>
+          </div>
+
+          {scSummary ? (
+            <>
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-2 px-5 pb-4">
+                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Per sqft</div>
+                  <div className="text-[22px] font-black text-[#1ec6a4]">{scSummary.perSqft ? `£${scSummary.perSqft.toFixed(2)}` : "—"}</div>
+                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">per year</div>
+                </div>
+                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Last year</div>
+                  <div className={`text-[22px] font-black ${scSummary.lastYoY != null ? (scSummary.lastYoY > 5 ? "text-red-400" : scSummary.lastYoY > 0 ? "text-amber-400" : "text-[#1ec6a4]") : "text-white"}`}>
+                    {scSummary.lastYoY != null ? `${scSummary.lastYoY >= 0 ? "+" : ""}${scSummary.lastYoY.toFixed(1)}%` : "—"}
+                  </div>
+                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">year on year</div>
+                </div>
+                <div className="rounded-lg p-3 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+                  <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">2026/27 forecast</div>
+                  <div className="text-[22px] font-black text-amber-400">+3–4%</div>
+                  <div className="text-[9px] text-[rgba(255,255,255,0.3)]">market signal</div>
+                </div>
+              </div>
+
+              {/* Cost mix mini bar */}
+              <div className="px-5 pb-5">
+                <div className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1.5">Where the average £ goes</div>
+                <div className="flex h-2.5 rounded-sm overflow-hidden mb-2">
+                  {SYNTHETIC_INDEX.map(c => (
+                    <div key={c.component} title={`${c.component} ${(c.weight * 100).toFixed(0)}%`}
+                      style={{ width: `${c.weight * 100}%`, background: c.color }} />
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px]">
+                  {SYNTHETIC_INDEX.slice(0, 5).map(c => (
+                    <div key={c.component} className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-sm flex-shrink-0" style={{ background: c.color }} />
+                      <span className="text-[rgba(255,255,255,0.55)]">{c.component}</span>
+                      <span className="text-[rgba(255,255,255,0.3)]">{(c.weight * 100).toFixed(0)}%</span>
+                    </div>
+                  ))}
+                  <span className="text-[rgba(255,255,255,0.3)] italic">+ 4 more →</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="px-5 pb-5">
+              <ul className="text-[12px] text-[rgba(255,255,255,0.55)] space-y-1.5 mb-4">
+                <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> See the 9-component cost mix that makes up every service charge</li>
+                <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> Compare your £/sqft against the London average</li>
+                <li className="flex items-start gap-2"><span className="text-[#1ec6a4] flex-shrink-0">✓</span> Get a 2026/27 forecast based on market signals</li>
+              </ul>
+              <button onClick={() => setActiveTab("charges")} className="font-bold text-[12px] px-5 py-2 rounded-lg text-white" style={{ background: "#1ec6a4" }}>
+                Upload your service charge →
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Progress ── */}
@@ -703,23 +865,71 @@ export default function Dashboard() {
             <p className="text-[12px] text-[rgba(255,255,255,0.25)] py-2">No open issues. Be the first to report one.</p>
           ) : (
             filtered.map(issue => (
-              <div key={issue.id} className="flex items-center gap-[10px] py-2 px-[6px] rounded-md hover:bg-[rgba(255,255,255,0.03)] cursor-pointer"
-                onClick={() => { setExpandedIssue(expandedIssue === issue.id ? null : issue.id); if (!supporters[issue.id]) loadSupporters(issue.id); }}>
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${issue.status === "resolved" ? "bg-green-400" : "bg-amber-400"}`} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold truncate">{issue.title}</div>
-                  <div className="text-[10px] text-[rgba(255,255,255,0.25)] mt-[1px]">
-                    {issue.category.replace(/_/g, " ")} · {new Date(issue.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                    {blocks.find(b => b.id === issue.block_id)?.name && ` · ${blocks.find(b => b.id === issue.block_id)?.name}`}
+              <div key={issue.id}>
+                <div className="flex items-center gap-[10px] py-2 px-[6px] rounded-md hover:bg-[rgba(255,255,255,0.03)] cursor-pointer"
+                  onClick={() => { setExpandedIssue(expandedIssue === issue.id ? null : issue.id); if (!supporters[issue.id]) loadSupporters(issue.id); }}>
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${issue.status === "resolved" ? "bg-green-400" : "bg-amber-400"}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-semibold truncate">{issue.title}</div>
+                    <div className="text-[10px] text-[rgba(255,255,255,0.25)] mt-[1px]">
+                      {issue.category.replace(/_/g, " ")} · {new Date(issue.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      {blocks.find(b => b.id === issue.block_id)?.name && ` · ${blocks.find(b => b.id === issue.block_id)?.name}`}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {issue.agent_response && (
+                      <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-[2px] rounded-full"
+                        style={{ background: "rgba(30,198,164,0.15)", color: "#1ec6a4", border: "1px solid rgba(30,198,164,0.3)" }}>
+                        💬 Replied
+                      </span>
+                    )}
+                    <span className="text-[11px] text-[rgba(255,255,255,0.3)]">{issue.supporter_count}</span>
+                    <button onClick={e => { e.stopPropagation(); toggleSupport(issue.id, issue.user_supported); }}
+                      className={`text-[10px] font-bold px-2 py-[3px] rounded-[5px] ${issue.user_supported ? "bg-[rgba(30,198,164,0.15)] text-[#1ec6a4] border border-[#1ec6a4]" : "bg-[rgba(30,198,164,0.08)] text-[#1ec6a4] border border-[rgba(30,198,164,0.15)]"}`}>
+                      {issue.user_supported ? "Supported" : "Support"}
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-[11px] text-[rgba(255,255,255,0.3)]">{issue.supporter_count}</span>
-                  <button onClick={e => { e.stopPropagation(); toggleSupport(issue.id, issue.user_supported); }}
-                    className={`text-[10px] font-bold px-2 py-[3px] rounded-[5px] ${issue.user_supported ? "bg-[rgba(30,198,164,0.15)] text-[#1ec6a4] border border-[#1ec6a4]" : "bg-[rgba(30,198,164,0.08)] text-[#1ec6a4] border border-[rgba(30,198,164,0.15)]"}`}>
-                    {issue.user_supported ? "Supported" : "Support"}
-                  </button>
-                </div>
+
+                {/* Expanded panel */}
+                {expandedIssue === issue.id && (
+                  <div className="ml-[18px] mb-2 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    {issue.description && (
+                      <p className="text-[12px] mb-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>{issue.description}</p>
+                    )}
+                    {supporters[issue.id] && supporters[issue.id].length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-[9px] uppercase font-semibold tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>
+                          Supported by
+                        </p>
+                        <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                          {supporters[issue.id].map(s => `${s.first_name} ${s.last_name?.charAt(0) || ""}.`).join(", ")}
+                        </p>
+                      </div>
+                    )}
+                    {issue.agent_response ? (
+                      <div className="rounded-lg p-3" style={{ background: "rgba(30,198,164,0.06)", border: "1px solid rgba(30,198,164,0.18)" }}>
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: "#1ec6a4" }}>
+                            Response from {issue.agent_name || "Managing Agent"}
+                          </span>
+                          {issue.agent_responded_at && (
+                            <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                              {new Date(issue.agent_responded_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
+                          {issue.agent_response}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.25)" }}>
+                        No response from the managing agent yet.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -934,9 +1144,110 @@ function Card({ title, badge, children }: { title: string; badge?: React.ReactNo
 // ─── Service Charges Section ───────────────────────────────────────────────
 
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from "recharts";
 import type { ServiceChargeAnnual, PropertySize } from "../lib/database.types";
+import {
+  SYNTHETIC_INDEX,
+  SYNTHETIC_WEIGHTED,
+  SYNTHETIC_YEARS,
+  LONDON_ACTUALS_WEIGHTED,
+  ACTUALS_YEARS,
+} from "../service-charges/data";
+
+// ─── BlockVoice Service Charge Index panel ────────────────────────────────
+// Reusable: shows the public index analysis. Optionally overlays the user's
+// own data when provided. Visible to ALL users regardless of upload status.
+function BlockVoiceIndexPanel({ userChartData, userPerSqft, userLastYoYPct }: {
+  userChartData?: { year: string; perSqft: number }[];
+  userPerSqft?: number;
+  userLastYoYPct?: number;
+}) {
+  const hasUserData = userChartData && userChartData.length > 0;
+  return (
+    <div className="rounded-xl p-5 border" style={{ background: "rgba(30,198,164,0.04)", borderColor: "rgba(30,198,164,0.18)" }}>
+      <div className="flex items-center gap-2 mb-2">
+        <p className="text-[10px] uppercase font-extrabold tracking-[1.2px] text-[#1ec6a4]">BlockVoice Service Charge Index</p>
+        <span className="text-[8px] font-extrabold uppercase px-1.5 py-[2px] rounded" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
+      </div>
+      <p className="text-[12px] text-[rgba(255,255,255,0.55)] leading-relaxed mb-4">
+        How London service charges are growing — and what we expect next year. Based on the 9 cost components that make up every service charge.
+      </p>
+
+      {/* Cost mix breakdown — always visible */}
+      <div className="mb-5">
+        <p className="text-[10px] uppercase font-semibold tracking-wider mb-2 text-[rgba(255,255,255,0.4)]">Where the average £ goes (London new-build mix)</p>
+        <div className="flex h-5 rounded overflow-hidden mb-2">
+          {SYNTHETIC_INDEX.map(c => (
+            <div key={c.component} title={`${c.component} ${(c.weight * 100).toFixed(0)}%`}
+              style={{ width: `${c.weight * 100}%`, background: c.color }} />
+          ))}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1">
+          {SYNTHETIC_INDEX.map(c => (
+            <div key={c.component} className="flex items-center gap-1.5 text-[10px]">
+              <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: c.color }} />
+              <span className="text-[rgba(255,255,255,0.6)] truncate">{c.component}</span>
+              <span className="text-[rgba(255,255,255,0.3)] ml-auto">{(c.weight * 100).toFixed(0)}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Index trend chart — always visible. User line overlaid only if data exists. */}
+      <div className="mb-5">
+        <p className="text-[10px] uppercase font-semibold tracking-wider mb-2 text-[rgba(255,255,255,0.4)]">
+          {hasUserData ? "Your charges vs the London market (base 2021 = 100)" : "London charges over time (base 2021 = 100)"}
+        </p>
+        <ResponsiveContainer width="100%" height={200}>
+          <LineChart data={(() => {
+            const baseSqft = hasUserData && userChartData![0].perSqft > 0 ? userChartData![0].perSqft : 1;
+            return SYNTHETIC_YEARS.map(yr => {
+              const userPoint = hasUserData ? userChartData!.find(c => c.year.startsWith(yr)) : null;
+              return {
+                year: yr,
+                ...(hasUserData ? { "Your building": userPoint ? Math.round((userPoint.perSqft / baseSqft) * 100) : null } : {}),
+                "Market expectation": SYNTHETIC_WEIGHTED[yr] ?? null,
+                "London actuals": ACTUALS_YEARS.includes(yr) ? LONDON_ACTUALS_WEIGHTED[yr] : null,
+              };
+            });
+          })()} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }} />
+            {hasUserData && <Line type="monotone" dataKey="Your building" stroke="#1ec6a4" strokeWidth={3} dot={{ r: 4, fill: "#1ec6a4" }} connectNulls />}
+            <Line type="monotone" dataKey="Market expectation" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} strokeDasharray="6 4" dot={false} />
+            <Line type="monotone" dataKey="London actuals" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} />
+          </LineChart>
+        </ResponsiveContainer>
+        {!hasUserData && (
+          <p className="text-[10px] text-[rgba(255,255,255,0.35)] mt-1 text-center italic">
+            Upload your service charge to overlay your own building&apos;s trend on this chart.
+          </p>
+        )}
+      </div>
+
+      {/* Forecast card — always visible */}
+      <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <p className="text-[10px] uppercase font-bold tracking-wide text-[#1ec6a4] mb-1.5">2026/27 Forecast</p>
+        <p className="text-[12px] text-[rgba(255,255,255,0.65)] leading-relaxed mb-2">
+          Based on current market signals, we expect a further <strong className="text-amber-400">+3 to 4%</strong> in 2026/27 — driven by{" "}
+          <strong className="text-white">insurance</strong> (reinsurance withdrawal continues),{" "}
+          <strong className="text-white">staff costs</strong> (NLW rising to ~£12.50), and{" "}
+          <strong className="text-white">repairs &amp; maintenance</strong> (construction inflation).
+          {hasUserData && userPerSqft && userPerSqft > 0 && userLastYoYPct != null && (
+            <> If your building tracks the index, that&apos;s about <strong className="text-white">£{(userPerSqft * 1.035).toFixed(2)}/sqft</strong> next year.</>
+          )}
+        </p>
+        <Link href="/service-charges" className="text-[11px] font-semibold text-[#1ec6a4] hover:underline">
+          See the full Service Charge Index →
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 const SIZE_RANGES = [
   { label: "400–500", mid: 450 },
@@ -1175,23 +1486,27 @@ function ServiceChargesSection({
   // Empty state — no data yet
   if (annuals.length === 0 && !extracting) {
     return (
-      <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}>
-        <div className="text-center py-8 border border-dashed border-[#1e3a5f] rounded-lg">
-          <span className="text-3xl mb-3 block">💷</span>
-          <p className="text-sm text-white font-semibold mb-1">Upload your service charge documents</p>
-          <p className="text-xs text-[rgba(255,255,255,0.4)] mb-4 max-w-sm mx-auto leading-relaxed">
-            Upload your service charge documents and our AI will work out how to allocate them across periods and track your costs.
-          </p>
-          <label className="inline-block cursor-pointer px-5 py-2.5 bg-[#1ec6a4] text-white text-sm font-bold rounded-lg hover:bg-[#25d4b0] transition-colors">
-            Upload your service charge
-            <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} multiple />
-          </label>
-          <p className="text-[10px] text-[rgba(255,255,255,0.25)] mt-2">Takes 30 seconds. We extract the data automatically.</p>
-          {(uploading || uploadProgress) && <p className="text-sm text-[#1ec6a4] mt-3">{uploadProgress || "Uploading..."}</p>}
-          {extracting && <p className="text-sm text-[#1ec6a4] mt-3">Analysing your document...</p>}
-          {uploadError && <p className="text-sm text-red-400 mt-3">{uploadError}</p>}
-        </div>
-      </Card>
+      <div className="space-y-4">
+        <Card title="Service Charges" badge={<span className="text-[9px] font-extrabold bg-[#fbbf24] text-[#412402] px-2 py-0.5 rounded-full">BETA</span>}>
+          <div className="text-center py-8 border border-dashed border-[#1e3a5f] rounded-lg">
+            <span className="text-3xl mb-3 block">💷</span>
+            <p className="text-sm text-white font-semibold mb-1">Upload your service charge documents</p>
+            <p className="text-xs text-[rgba(255,255,255,0.4)] mb-4 max-w-sm mx-auto leading-relaxed">
+              Upload your service charge documents and our AI will work out how to allocate them across periods, track your costs, and overlay your trend on the index below.
+            </p>
+            <label className="inline-block cursor-pointer px-5 py-2.5 bg-[#1ec6a4] text-white text-sm font-bold rounded-lg hover:bg-[#25d4b0] transition-colors">
+              Upload your service charge
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} multiple />
+            </label>
+            <p className="text-[10px] text-[rgba(255,255,255,0.25)] mt-2">Takes 30 seconds. We extract the data automatically.</p>
+            {(uploading || uploadProgress) && <p className="text-sm text-[#1ec6a4] mt-3">{uploadProgress || "Uploading..."}</p>}
+            {extracting && <p className="text-sm text-[#1ec6a4] mt-3">Analysing your document...</p>}
+            {uploadError && <p className="text-sm text-red-400 mt-3">{uploadError}</p>}
+          </div>
+        </Card>
+        {/* Public BlockVoice Index — visible even before upload */}
+        <BlockVoiceIndexPanel />
+      </div>
     );
   }
 
@@ -1355,6 +1670,15 @@ function ServiceChargesSection({
             </div>
           </div>
         )}
+
+        {/* ─── BlockVoice Service Charge Index ─── */}
+        <div className="mt-6">
+          <BlockVoiceIndexPanel
+            userChartData={chartData.length > 0 ? chartData : undefined}
+            userPerSqft={perSqft}
+            userLastYoYPct={lastYoY?.pct}
+          />
+        </div>
 
         {/* Key insights */}
         {lastYoY && (
