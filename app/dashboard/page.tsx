@@ -25,6 +25,7 @@ import type {
   ServiceChargeAnnual,
   PropertySize,
 } from "../lib/database.types";
+import CommunityDocumentsSection from "./community-documents";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -1111,11 +1112,13 @@ export default function Dashboard() {
         )}
 
         {/* ════════════════════ DOCUMENTS TAB ════════════════════ */}
-        {activeTab === "documents" && (
-          <div className="py-10 text-center">
-            <p className="text-[15px] font-semibold text-[rgba(255,255,255,0.4)] mb-2">Document analysis — coming soon</p>
-            <p className="text-[12px] text-[rgba(255,255,255,0.25)]">Upload your lease, service charge statements, and notices. AI will break them down in plain English.</p>
-          </div>
+        {activeTab === "documents" && dev && (
+          <CommunityDocumentsSection
+            profileId={userId}
+            buildingId={userBuildingId}
+            developmentName={dev.name}
+            firstName={userName.split(" ")[0] || "there"}
+          />
         )}
 
         {/* ════════════════════ SETTINGS TAB ════════════════════ */}

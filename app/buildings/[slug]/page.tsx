@@ -444,6 +444,34 @@ export default function BuildingPage() {
         </div>
         )}
 
+        {/* ── Community Champions teaser ─────────────────────────────── */}
+        {!authed && (
+        <div className="rounded-xl p-5 mb-5" style={{ background: "linear-gradient(135deg, rgba(30,198,164,0.1) 0%, rgba(30,198,164,0.02) 100%)", border: "1px solid rgba(30,198,164,0.25)" }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--teal)" }}>Community champions</span>
+          </div>
+          <h3 className="text-[15px] font-bold text-white mb-1.5">
+            Residents at {dev.name} share documents securely
+          </h3>
+          <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.6)" }}>
+            Your neighbours upload leases, insurance, fire safety reports, and service charges.
+            BlockVoice strips personal details and shares a summary with the whole building.
+            Your original document never leaves your account — and you stay anonymous as &quot;Resident A&quot;.
+          </p>
+          <div className="flex flex-wrap gap-1.5 mb-3.5">
+            {["Service charges", "Leases", "Insurance", "Fire safety", "Section 20", "Agent letters", "Annual accounts"].map((t) => (
+              <span key={t} className="text-[10px] px-2.5 py-1 rounded-full" style={{ background: "rgba(30,198,164,0.08)", border: "1px solid rgba(30,198,164,0.2)", color: "var(--teal)" }}>
+                {t}
+              </span>
+            ))}
+          </div>
+          <Link href={`/signup?building=${slug}`}
+            className="inline-block text-[12px] font-semibold" style={{ color: "var(--teal)" }}>
+            Sign up to see what your neighbours have shared →
+          </Link>
+        </div>
+        )}
+
         {/* ── Join in 30 seconds CTA ─────────────────────────────────── */}
         {!authed && (
         <div className="rounded-xl p-5 mb-5 text-center" style={{ background: "#1e293b", border: "1px solid #1e3a5f" }}>

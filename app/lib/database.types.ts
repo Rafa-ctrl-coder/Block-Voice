@@ -177,6 +177,50 @@ export interface ServiceChargeBenchmark {
   calculated_at: string;
 }
 
+// =========================================================================
+// Community documents
+// =========================================================================
+export type CommunityDocType =
+  | 'service_charge'
+  | 'lease'
+  | 'buildings_insurance'
+  | 'fire_safety'
+  | 'section_20'
+  | 'agent_letter'
+  | 'annual_accounts';
+
+export type CommunityDocStatus = 'analysing' | 'ready' | 'failed';
+
+export interface CommunityDocumentType {
+  id: CommunityDocType;
+  label: string;
+  description: string | null;
+  sort_order: number;
+  icon: string | null;
+}
+
+export interface CommunityDocument {
+  id: string;
+  profile_id: string;
+  building_id: string;
+  development_name: string;
+  doc_type: CommunityDocType;
+  original_filename: string;
+  storage_path: string;
+  file_size_bytes: number | null;
+  mime_type: string | null;
+  status: CommunityDocStatus;
+  analysis_error: string | null;
+  personal_analysis: Record<string, unknown> | null;
+  community_summary: Record<string, unknown> | null;
+  is_shared: boolean;
+  shared_at: string | null;
+  champion_handle: string | null;
+  document_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Joined types for common queries
 export interface DevelopmentWithLinks extends Development {
   development_links: (DevelopmentLink & {
