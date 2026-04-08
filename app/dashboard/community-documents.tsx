@@ -49,7 +49,16 @@ interface Props {
   profileId: string;
   buildingId: string;
   developmentName: string;
+  developmentSlug: string;
   firstName: string;
+  onOpenChargesTab?: () => void;
+}
+
+interface ScStatsResponse {
+  hasData: boolean;
+  residents?: number;
+  avgPerSqft?: number;
+  lastYoYPct?: number | null;
 }
 
 // -----------------------------------------------------------------------------
@@ -64,9 +73,12 @@ export default function CommunityDocumentsSection({
   profileId,
   buildingId,
   developmentName,
+  developmentSlug,
   firstName,
+  onOpenChargesTab,
 }: Props) {
   const [data, setData] = useState<FeedResponse | null>(null);
+  const [scStats, setScStats] = useState<ScStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -76,6 +88,7 @@ export default function CommunityDocumentsSection({
   const [reviewingDoc, setReviewingDoc] = useState<CommunityDocument | null>(null);
   const [sharing, setSharing] = useState(false);
   const [dismissedReviews, setDismissedReviews] = useState<Set<string>>(new Set());
+  const [isDragging, setIsDragging] = useState(false);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -108,6 +121,15 @@ export default function CommunityDocumentsSection({
     };
   }, [loadData]);
 
+  // Fetch existing service-charge aggregates for the cross-reference banner
+  useEffect(() => {
+    if (!developmentSlug) return;
+    fetch(`/api/sc-stats?slug=${encodeURIComponent(developmentSlug)}`)
+      .then((r) => r.json())
+      .then((json) => setScStats(json as ScStatsResponse))
+      .catch(() => setScStats(null));
+  }, [developmentSlug]);
+
   // Poll while any document is still analysing
   useEffect(() => {
     if (!data) return;
@@ -120,23 +142,18 @@ export default function CommunityDocumentsSection({
     };
   }, [data, loadData]);
 
-  // ---- Upload handler ----
-  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  // ---- Upload handler (shared between file picker and drag-and-drop) ----
+  async function uploadFile(file: File) {
     setUploadError(null);
 
     if (file.size > 10 * 1024 * 1024) {
       setUploadError("File too large. Max 10MB.");
-      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     const allowed = ["application/pdf", "image/png", "image/jpeg"];
     if (!allowed.includes(file.type)) {
       setUploadError("Unsupported file type. Please upload a PDF, PNG, or JPG.");
-      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
@@ -165,6 +182,32 @@ export default function CommunityDocumentsSection({
     } finally {
       setUploading(false);
     }
+  }
+
+  function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadFile(file);
+  }
+
+  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!uploading) setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (uploading) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) uploadFile(file);
   }
 
   // ---- Share / dismiss handlers ----
@@ -258,48 +301,161 @@ export default function CommunityDocumentsSection({
       </div>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* UPLOAD BAR */}
+      {/* CROSS-REFERENCE BANNER — existing SC data from other residents  */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <div className="rounded-xl p-4 mb-5" style={cardStyle}>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex-1 w-full">
-            <label className="block text-[10px] uppercase font-semibold tracking-wider mb-2" style={{ color: "var(--t3)" }}>
-              Upload a document
-            </label>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <select
-                value={selectedDocType}
-                onChange={(e) => setSelectedDocType(e.target.value)}
-                className="rounded-lg px-3 py-2 text-[13px] text-white outline-none w-full sm:w-auto"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                {types.map((t) => (
-                  <option key={t.id} value={t.id} style={{ background: "#0f1f3d" }}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="application/pdf,image/png,image/jpeg"
-                onChange={handleFileSelect}
-                disabled={uploading}
-                className="text-[12px] text-white flex-1"
-                style={{ color: "var(--t2)" }}
-              />
-            </div>
+      {scStats?.hasData && scStats.residents && scStats.residents > 0 && (
+        <div
+          className="rounded-xl p-4 mb-5 flex items-start gap-3"
+          style={{
+            background: "linear-gradient(135deg, rgba(30,198,164,0.1) 0%, rgba(30,198,164,0.02) 100%)",
+            border: "1px solid rgba(30,198,164,0.25)",
+          }}>
+          <div
+            className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(30,198,164,0.12)", border: "1px solid rgba(30,198,164,0.25)" }}>
+            <span className="text-lg">📊</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-bold text-white mb-0.5">
+              {scStats.residents} {scStats.residents === 1 ? "resident has" : "residents have"} already
+              shared service charge data at {developmentName}
+            </p>
+            <p className="text-[11px] leading-relaxed" style={{ color: "var(--t2)" }}>
+              {scStats.avgPerSqft && (
+                <>
+                  Average is <strong className="text-white">£{scStats.avgPerSqft.toFixed(2)}/sqft</strong>
+                  {scStats.lastYoYPct != null && (
+                    <>
+                      {" "}— up <strong className={scStats.lastYoYPct > 5 ? "text-red-400" : "text-amber-400"}>
+                        {scStats.lastYoYPct >= 0 ? "+" : ""}{scStats.lastYoYPct.toFixed(1)}%
+                      </strong>{" "}year on year.
+                    </>
+                  )}
+                  {" "}
+                </>
+              )}
+              See the aggregated trends and cost-mix analysis in the Service Charges tab.
+            </p>
+          </div>
+          {onOpenChargesTab && (
+            <button
+              onClick={onOpenChargesTab}
+              className="text-[11px] font-bold whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-lg"
+              style={{
+                background: "var(--teal)",
+                color: "#0f1f3d",
+              }}>
+              View analysis →
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* UPLOAD ZONE */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <div className="rounded-xl p-5 mb-5" style={cardStyle}>
+        {/* Step 1: pick doc type as pill buttons */}
+        <div className="mb-4">
+          <p className="text-[10px] uppercase font-semibold tracking-wider mb-2" style={{ color: "var(--t3)" }}>
+            1. What are you uploading?
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {types.map((t) => {
+              const active = selectedDocType === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setSelectedDocType(t.id)}
+                  disabled={uploading}
+                  className="text-[11px] font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50"
+                  style={{
+                    background: active ? "var(--teal)" : "rgba(255,255,255,0.04)",
+                    color: active ? "#0f1f3d" : "var(--t2)",
+                    border: `1px solid ${active ? "var(--teal)" : "rgba(255,255,255,0.08)"}`,
+                  }}>
+                  {t.label}
+                </button>
+              );
+            })}
           </div>
         </div>
-        {uploading && (
-          <p className="text-[12px] mt-3" style={{ color: "var(--teal)" }}>
-            Uploading… Gemini will analyse your document in about 20 seconds.
-          </p>
-        )}
+
+        {/* Step 2: drop zone / picker */}
+        <p className="text-[10px] uppercase font-semibold tracking-wider mb-2" style={{ color: "var(--t3)" }}>
+          2. Drop your file or choose it
+        </p>
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => !uploading && fileInputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if ((e.key === "Enter" || e.key === " ") && !uploading) {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          className="rounded-xl px-5 py-8 text-center cursor-pointer transition-colors select-none"
+          style={{
+            background: isDragging
+              ? "rgba(30,198,164,0.1)"
+              : uploading
+              ? "rgba(255,255,255,0.02)"
+              : "rgba(255,255,255,0.02)",
+            border: `2px dashed ${isDragging ? "var(--teal)" : "rgba(255,255,255,0.15)"}`,
+            opacity: uploading ? 0.6 : 1,
+          }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf,image/png,image/jpeg"
+            onChange={handleFileInputChange}
+            disabled={uploading}
+            className="hidden"
+          />
+
+          {uploading ? (
+            <>
+              <div className="text-2xl mb-2">⏳</div>
+              <p className="text-[14px] font-bold text-white mb-1">Uploading and analysing…</p>
+              <p className="text-[11px]" style={{ color: "var(--t2)" }}>
+                Gemini is reading your document. This usually takes about 20 seconds.
+              </p>
+            </>
+          ) : isDragging ? (
+            <>
+              <div className="text-2xl mb-2">📥</div>
+              <p className="text-[14px] font-bold" style={{ color: "var(--teal)" }}>
+                Drop your file to upload
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="text-2xl mb-2">📄</div>
+              <p className="text-[14px] font-bold text-white mb-1">
+                Drag and drop your file here
+              </p>
+              <p className="text-[11px] mb-3" style={{ color: "var(--t2)" }}>
+                or click anywhere in this box to browse
+              </p>
+              <span
+                className="inline-block text-[12px] font-bold px-4 py-2 rounded-lg"
+                style={{ background: "var(--teal)", color: "#0f1f3d" }}>
+                Choose file
+              </span>
+            </>
+          )}
+        </div>
+
         {uploadError && (
           <p className="text-[12px] mt-3 text-red-400">{uploadError}</p>
         )}
-        <p className="text-[11px] mt-2" style={{ color: "var(--t3)" }}>
-          PDF, PNG, or JPG. Max 10MB. 10 uploads per day.
+        <p className="text-[11px] mt-3 text-center" style={{ color: "var(--t3)" }}>
+          PDF, PNG, or JPG · Max 10MB · 10 uploads per day
         </p>
       </div>
 
