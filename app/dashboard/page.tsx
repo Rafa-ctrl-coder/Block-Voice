@@ -25,6 +25,7 @@ import type {
   ServiceChargeAnnual,
   PropertySize,
 } from "../lib/database.types";
+import CommunityDocumentsSection from "./community-documents";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -161,7 +162,14 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   // service charge summary (overview tile)
-  const [scSummary, setScSummary] = useState<{ perSqft: number | null; lastYoY: number | null; latestYear: string | null; yearly: { year: string; perSqft: number; monthly: number }[] } | null>(null);
+  const [scSummary, setScSummary] = useState<{
+    perSqft: number | null;
+    lastYoY: number | null;
+    latestYear: string | null;
+    yearly: { year: string; perSqft: number; monthly: number }[];
+    isBuildingAverage: boolean;
+    residentCount?: number;
+  } | null>(null);
 
   // corrections
   const [showCorrection, setShowCorrection] = useState(false);
@@ -249,7 +257,8 @@ export default function Dashboard() {
       await loadRatings(devData.id, user.id);
 
       // service charge summary (for the Overview Quick Stats tile)
-      await loadScSummary(user.id, profile.building_id);
+      // Falls back to building-level average if the user has no personal data.
+      await loadScSummary(user.id, profile.building_id, devData.slug);
     } catch (err) {
       console.error(err);
     } finally {
@@ -257,49 +266,77 @@ export default function Dashboard() {
     }
   }
 
-  async function loadScSummary(uid: string, buildingId: string) {
+  async function loadScSummary(uid: string, buildingId: string, devSlug: string) {
+    // 1. Try the current user's own uploads first
     const [{ data: annuals }, { data: size }] = await Promise.all([
       supabase.from("service_charge_annuals").select("year,annual_total,h1_total,h2_total,is_half_yearly,has_both_halves,quarter_count")
         .eq("profile_id", uid).eq("building_id", buildingId).order("year"),
       supabase.from("property_sizes").select("sqft").eq("profile_id", uid).eq("building_id", buildingId).maybeSingle(),
     ]);
-    if (!annuals || annuals.length === 0) {
-      setScSummary(null);
+
+    const hasOwnData = !!(annuals && annuals.length > 0 && (size?.sqft || 0) > 0);
+
+    if (hasOwnData) {
+      const sqft = size!.sqft;
+      type Annual = { year: string; annual_total: number; h1_total: number | null; h2_total: number | null; is_half_yearly: boolean | null; has_both_halves: boolean | null; quarter_count: number | null };
+      const annualise = (a: Annual) => {
+        const total = Number(a.annual_total) || 0;
+        if (a.quarter_count && a.quarter_count > 0 && a.quarter_count < 4) return (total / a.quarter_count) * 4;
+        if (a.is_half_yearly && !a.has_both_halves) return total * 2;
+        return total;
+      };
+      const sorted = [...annuals!].sort((a, b) => a.year.localeCompare(b.year));
+      const latest = sorted[sorted.length - 1];
+      const latestAnnualised = annualise(latest as Annual);
+      const latestPerSqft = latestAnnualised / sqft;
+
+      let lastYoY: number | null = null;
+      if (sorted.length >= 2) {
+        const prev = sorted[sorted.length - 2];
+        const prevAnnualised = annualise(prev as Annual);
+        if (prevAnnualised > 0) {
+          lastYoY = ((latestAnnualised - prevAnnualised) / prevAnnualised) * 100;
+        }
+      }
+
+      const yearly = sorted.map(a => {
+        const ann = annualise(a as Annual);
+        return { year: a.year, perSqft: ann / sqft, monthly: ann / 12 };
+      });
+
+      setScSummary({
+        perSqft: latestPerSqft,
+        lastYoY,
+        latestYear: latest.year,
+        yearly,
+        isBuildingAverage: false,
+      });
       return;
     }
-    const sqft = size?.sqft || 0;
-    type Annual = { year: string; annual_total: number; h1_total: number | null; h2_total: number | null; is_half_yearly: boolean | null; has_both_halves: boolean | null; quarter_count: number | null };
-    const annualise = (a: Annual) => {
-      const total = Number(a.annual_total) || 0;
-      if (a.quarter_count && a.quarter_count > 0 && a.quarter_count < 4) return (total / a.quarter_count) * 4;
-      if (a.is_half_yearly && !a.has_both_halves) return total * 2;
-      return total;
-    };
-    const sorted = [...annuals].sort((a, b) => a.year.localeCompare(b.year));
-    const latest = sorted[sorted.length - 1];
-    const latestAnnualised = annualise(latest as Annual);
-    const latestPerSqft = sqft > 0 ? latestAnnualised / sqft : null;
 
-    let lastYoY: number | null = null;
-    if (sorted.length >= 2) {
-      const prev = sorted[sorted.length - 2];
-      const prevAnnualised = annualise(prev as Annual);
-      if (prevAnnualised > 0) {
-        lastYoY = ((latestAnnualised - prevAnnualised) / prevAnnualised) * 100;
+    // 2. Fall back to building-level aggregate from other residents
+    try {
+      const res = await fetch(`/api/sc-stats?slug=${encodeURIComponent(devSlug)}&detail=true`);
+      if (!res.ok) { setScSummary(null); return; }
+      const d = await res.json();
+      if (!d.hasData || !d.yearlyData || d.yearlyData.length === 0) {
+        setScSummary(null);
+        return;
       }
+      const yearly = (d.yearlyData as { year: string; perSqft: number; monthly: number }[])
+        .filter(y => y.perSqft > 0);
+      if (yearly.length === 0) { setScSummary(null); return; }
+      setScSummary({
+        perSqft: d.avgPerSqft ?? null,
+        lastYoY: d.lastYoYPct ?? null,
+        latestYear: yearly[yearly.length - 1].year,
+        yearly,
+        isBuildingAverage: true,
+        residentCount: d.residents || undefined,
+      });
+    } catch {
+      setScSummary(null);
     }
-
-    // Build yearly chart data for the overview mini-chart
-    const yearly = sorted.map(a => {
-      const ann = annualise(a as Annual);
-      return {
-        year: a.year,
-        perSqft: sqft > 0 ? ann / sqft : 0,
-        monthly: ann / 12,
-      };
-    });
-
-    setScSummary({ perSqft: latestPerSqft, lastYoY, latestYear: latest.year, yearly });
   }
 
   async function loadIssues(devId: string, uid: string) {
@@ -724,7 +761,11 @@ export default function Dashboard() {
                   <span className="text-[8px] font-extrabold uppercase px-1.5 py-[2px] rounded" style={{ background: "#fbbf24", color: "#412402" }}>BETA</span>
                 </div>
                 <p className="text-[11px] text-[rgba(255,255,255,0.45)]">
-                  {scSummary ? "Your charges vs the London market" : "Upload to compare your charges"}
+                  {scSummary
+                    ? (scSummary.isBuildingAverage
+                        ? `${dev.name} average${scSummary.residentCount ? ` · from ${scSummary.residentCount} resident${scSummary.residentCount === 1 ? "" : "s"}` : ""}`
+                        : "Your charges vs the London market")
+                    : "Upload to compare your charges"}
                 </p>
               </div>
             </div>
@@ -738,7 +779,9 @@ export default function Dashboard() {
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-2 px-4 pb-3">
                 <div className="rounded-lg p-2.5 text-center" style={{ background: "rgba(0,0,0,0.2)" }}>
-                  <div className="text-[8px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">Per sqft</div>
+                  <div className="text-[8px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-1">
+                    {scSummary.isBuildingAverage ? "Building avg /sqft" : "Per sqft"}
+                  </div>
                   <div className="text-[18px] font-black text-[#1ec6a4]">{scSummary.perSqft ? `£${scSummary.perSqft.toFixed(2)}` : "—"}</div>
                   <div className="text-[8px] text-[rgba(255,255,255,0.3)]">per year</div>
                 </div>
@@ -760,14 +803,16 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-4 pb-4">
                 {/* Per-sqft trend chart */}
                 <div className="rounded-lg p-3" style={{ background: "rgba(0,0,0,0.2)" }}>
-                  <p className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-2">Your £/sqft trend</p>
+                  <p className="text-[9px] uppercase tracking-wider text-[rgba(255,255,255,0.4)] mb-2">
+                    {scSummary.isBuildingAverage ? "Building £/sqft trend" : "Your £/sqft trend"}
+                  </p>
                   <ResponsiveContainer width="100%" height={140}>
                     <LineChart data={scSummary.yearly} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                       <XAxis dataKey="year" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 9 }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 8 }} axisLine={false} tickLine={false} tickFormatter={v => `£${v.toFixed(0)}`} />
                       <Tooltip contentStyle={{ background: "#0f1f3d", border: "1px solid #1e3a5f", borderRadius: 8, color: "#fff", fontSize: 11 }}
-                        formatter={(v) => [`£${Number(v).toFixed(2)}/sqft`, "Per sqft"]} />
+                        formatter={(v) => [`£${Number(v).toFixed(2)}/sqft`, scSummary.isBuildingAverage ? "Building avg" : "Per sqft"]} />
                       <Line type="monotone" dataKey="perSqft" stroke="#1ec6a4" strokeWidth={2.5} dot={{ fill: "#1ec6a4", r: 3 }} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -1111,11 +1156,15 @@ export default function Dashboard() {
         )}
 
         {/* ════════════════════ DOCUMENTS TAB ════════════════════ */}
-        {activeTab === "documents" && (
-          <div className="py-10 text-center">
-            <p className="text-[15px] font-semibold text-[rgba(255,255,255,0.4)] mb-2">Document analysis — coming soon</p>
-            <p className="text-[12px] text-[rgba(255,255,255,0.25)]">Upload your lease, service charge statements, and notices. AI will break them down in plain English.</p>
-          </div>
+        {activeTab === "documents" && dev && (
+          <CommunityDocumentsSection
+            profileId={userId}
+            buildingId={userBuildingId}
+            developmentName={dev.name}
+            developmentSlug={dev.slug}
+            firstName={userName.split(" ")[0] || "there"}
+            onOpenChargesTab={() => setActiveTab("charges")}
+          />
         )}
 
         {/* ════════════════════ SETTINGS TAB ════════════════════ */}

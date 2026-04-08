@@ -336,6 +336,52 @@ export default function Home() {
         </div>
       </div>
 
+      {/* COMMUNITY CHAMPIONS */}
+      <section className="px-[6%] py-12">
+        <div className="max-w-[760px] mx-auto">
+          <p className="text-[11px] uppercase font-semibold tracking-[1.2px] mb-3 text-center" style={{ color: teal }}>
+            Community champions
+          </p>
+          <h2 className="text-xl font-bold text-white text-center mb-2">
+            Your building, fully understood — by you and your neighbours
+          </h2>
+          <p className="text-[13px] text-center max-w-[560px] mx-auto mb-6 leading-relaxed" style={{ color: "var(--t2)" }}>
+            Upload any building document — BlockVoice gives you a personalised breakdown,
+            then lets you share a redacted summary with your neighbours so everyone benefits.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            {[
+              {
+                icon: "📄",
+                title: "Upload",
+                desc: "Service charge, lease, insurance, fire safety report, Section 20 notice, agent letter, annual accounts. Any building document.",
+              },
+              {
+                icon: "🧠",
+                title: "Understand",
+                desc: "Plain-English breakdown in 30 seconds. Spot unfair charges, missing info, or red flags — before you pay or sign.",
+              },
+              {
+                icon: "🤝",
+                title: "Share, safely",
+                desc: "Your original stays private. Only a redacted summary is shared with your building, and you stay anonymous as \"Resident A\".",
+              },
+            ].map(c => (
+              <div key={c.title} className="rounded-xl p-[18px]" style={{ background: "var(--navy-card)", border: "1px solid var(--navy-card-b)" }}>
+                <div className="text-2xl mb-2">{c.icon}</div>
+                <h3 className="text-[14px] font-bold text-white mb-1">{c.title}</h3>
+                <p className="text-[12px] leading-relaxed" style={{ color: "var(--t2)" }}>{c.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-[12px] text-center italic" style={{ color: "var(--t3)" }}>
+            Shared by residents, secured by BlockVoice.
+          </p>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <section className="px-[6%] py-10">
         <h2 className="text-xl font-bold text-white text-center mb-5">How it works</h2>
